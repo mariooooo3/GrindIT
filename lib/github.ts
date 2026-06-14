@@ -294,6 +294,42 @@ async function fetchContributionsUnauthed(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+type CalData = {
+  user: {
+    contributionsCollection: {
+      contributionCalendar: {
+        weeks: Array<{
+          contributionDays: Array<{ date: string; contributionCount: number }>;
+        }>;
+      };
+    };
+  };
+};
+
+// GitHub's contributionsCollection API only supports up to 1 year per query.
+// This helper splits a date range into ≤1-year chunks.
+function buildYearChunks(startDate: string, endDate: string): Array<{ from: string; to: string }> {
+  const chunks: Array<{ from: string; to: string }> = [];
+  let cursor = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T23:59:59Z`);
+
+  while (cursor < end) {
+    const chunkEnd = new Date(cursor);
+    chunkEnd.setFullYear(chunkEnd.getFullYear() + 1);
+    if (chunkEnd > end) chunkEnd.setTime(end.getTime());
+
+    chunks.push({
+      from: cursor.toISOString(),
+      to: chunkEnd.toISOString(),
+    });
+
+    cursor = new Date(chunkEnd);
+    cursor.setMilliseconds(cursor.getMilliseconds() + 1);
+  }
+
+  return chunks;
+}
+
 async function fetchContributions(
   username: string,
   period: Period,
@@ -301,31 +337,21 @@ async function fetchContributions(
 ): Promise<Contribution[]> {
   if (!token) return fetchContributionsUnauthed(username, period);
 
-  type CalData = {
-    user: {
-      contributionsCollection: {
-        contributionCalendar: {
-          weeks: Array<{
-            contributionDays: Array<{ date: string; contributionCount: number }>;
-          }>;
-        };
-      };
-    };
-  };
+  const chunks = buildYearChunks(period.startDate, period.endDate);
 
-  // GraphQL DateTime requires full ISO-8601 format
-  const from = period.startDate.length === 10 ? `${period.startDate}T00:00:00Z` : period.startDate;
-  const to   = period.endDate.length   === 10 ? `${period.endDate}T23:59:59Z`   : period.endDate;
-
-  const cal = await gql<CalData>(
-    CONTRIBUTIONS_QUERY,
-    { username, from, to },
-    token
+  const chunkResults = await Promise.allSettled(
+    chunks.map(({ from, to }) =>
+      gql<CalData>(CONTRIBUTIONS_QUERY, { username, from, to }, token).then((cal) =>
+        cal.user.contributionsCollection.contributionCalendar.weeks
+          .flatMap((w) => w.contributionDays)
+          .filter((d) => d.contributionCount > 0)
+      )
+    )
   );
 
-  const days = cal.user.contributionsCollection.contributionCalendar.weeks
-    .flatMap((w) => w.contributionDays)
-    .filter((d) => d.contributionCount > 0);
+  const days = chunkResults.flatMap((r) =>
+    r.status === "fulfilled" ? r.value : []
+  );
 
   const hourMap: Record<string, { hour: number; repo: string }> = {};
   try {
@@ -348,12 +374,14 @@ async function fetchContributions(
     console.error("fetchContributions: commit hours failed", e);
   }
 
-  return days.map((d) => ({
-    date: d.date,
-    count: d.contributionCount,
-    hour: hourMap[d.date]?.hour ?? 12,
-    repoName: hourMap[d.date]?.repo ?? "",
-  }));
+  return days
+    .map((d) => ({
+      date: d.date,
+      count: d.contributionCount,
+      hour: hourMap[d.date]?.hour ?? 12,
+      repoName: hourMap[d.date]?.repo ?? "",
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 async function fetchPullRequests(

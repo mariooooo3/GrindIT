@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { generateNarrative, buildCacheKey } from "@/lib/groq";
 import type { WrappedProfile, AiTone } from "@/types/wrapped";
@@ -38,7 +40,10 @@ export async function POST(request: Request) {
   try {
     const profileWithKey: WrappedProfile = { ...profile, cacheKey: buildCacheKey(profile) };
     const narrative = await generateNarrative(profileWithKey);
-    return NextResponse.json({ ...profileWithKey, narrative }, { status: 200 });
+    return NextResponse.json({ ...profileWithKey, narrative }, {
+      status: 200,
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    });
   } catch (err) {
     console.error("api/narrative POST:", err);
     return NextResponse.json({ error: "narrative_failed" }, { status: 500 });

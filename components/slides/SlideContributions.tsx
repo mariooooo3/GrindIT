@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState, useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 function CatFace({ size }: { size: number }) {
   return (
@@ -75,7 +76,7 @@ function ChaseScene({ merged }: { merged: boolean[] }) {
         ))}
       </div>
       {merged.map((isMerged, i) => {
-        const baseY = 20 + i * 50;
+        const baseY = 15 + i * 78;
         return (
           <AnimatePresence key={i}>
             {!isMerged ? (
@@ -83,14 +84,14 @@ function ChaseScene({ merged }: { merged: boolean[] }) {
                 initial={{ x: "0%", opacity: 0 }}
                 animate={{ x: ["10%", "-180%"], y: [0, -16, 14, -8, 0], rotate: [-6, 6, -4, 5, -6], opacity: 1 }}
                 exit={{ scale: 2, opacity: 0 }}
-                transition={{ x: { duration: 7 + i * 1.2, repeat: Infinity, ease: "linear", delay: i * 0.8 }, y: { duration: 1.4, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 0.9, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.5 } }}>
-                <CardboardRocket scale={0.45} label={`PR #${100 + i}`} />
+                transition={{ x: { duration: 11 + i * 1.6, repeat: Infinity, ease: "linear", delay: i * 1.1 }, y: { duration: 1.8, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 1.2, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.6 } }}>
+                <CardboardRocket scale={0.62} label={`PR #${100 + i}`} />
               </motion.div>
             ) : (
               <motion.div className="absolute" style={{ top: baseY, right: "30%" }}
                 initial={{ scale: 1, opacity: 1 }}
                 animate={{ scale: [1, 1.8, 0], opacity: [1, 1, 0] }}
-                transition={{ duration: 0.6 }}>
+                transition={{ duration: 1.1 }}>
                 <div className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-1 text-xs font-bold text-white">✓ Merged</div>
               </motion.div>
             )}
@@ -196,7 +197,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
       if (m) {
         timers.push(setTimeout(() => {
           setShowMerged((prev) => { const next = [...prev]; next[i] = true; return next; });
-        }, 2000 + i * 1200));
+        }, 3500 + i * 2000));
       }
     });
     return () => timers.forEach(clearTimeout);
@@ -205,11 +206,11 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
   return (
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <Stars />
+      <ChapterHeadingAnchor n={2} title="The Chase" />
       <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-6 py-10 lg:grid-cols-3 lg:gap-4 lg:px-12">
         {/* LEFT — chase scene */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-          className="flex flex-col items-start justify-start">
-          <div className="mb-3 text-xs uppercase tracking-widest text-white/40">Chapter 02 · The Chase</div>
+          className="flex flex-col items-start justify-center">
           <ChaseScene merged={showMerged} />
           <p className="mt-4 max-w-xs text-sm text-white/50">A cat in a cardboard rocket, chasing pull requests through the void.</p>
         </motion.div>
@@ -260,8 +261,10 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
 
         {/* RIGHT */}
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.2 }}
-          className="relative flex items-center justify-center">
-          <Planet />
+          className="relative">
+          <PlanetStage>
+            <Planet />
+          </PlanetStage>
         </motion.div>
       </div>
     </main>

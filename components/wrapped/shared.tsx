@@ -158,15 +158,21 @@ export function GlassCard({ children, className }: { children: ReactNode; classN
   );
 }
 
+export function PlanetStage({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`relative flex h-[420px] w-full items-center justify-center pt-24 lg:h-[640px] ${className ?? ""}`}>
+      {children}
+    </div>
+  );
+}
+
 // ── SlideShell ─────────────────────────────────────────────────────────────
 export function SlideShell({
-  slideNum,
   leftContent,
   center,
   right,
   overlay,
 }: {
-  slideNum: string;
   leftContent?: ReactNode;
   center: ReactNode;
   right: ReactNode;
@@ -181,21 +187,8 @@ export function SlideShell({
         className="pointer-events-none absolute -right-40 top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 60%)" }}
       />
-      {/* top bar */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-        className="relative z-10 flex items-center justify-between px-10 pt-8"
-      >
-        <div className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-white/60">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80]" />
-          GitHub Wrapped
-        </div>
-        <div className="text-xs uppercase tracking-[0.3em] text-white/40">{slideNum} / 08</div>
-      </motion.div>
       {/* 3-column grid */}
-      <div className="relative z-10 mx-auto grid h-[calc(100vh-160px)] max-w-[1500px] grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] gap-4 px-6 pt-4">
+      <div className="relative z-10 mx-auto grid h-[calc(100vh-150px)] max-w-[1500px] grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] gap-4 px-6 pt-20">
         {/* LEFT — Rocket + optional chapter title */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}

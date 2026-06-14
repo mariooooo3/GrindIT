@@ -4,7 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 function CountUp({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -127,6 +128,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
       <div className="pointer-events-none absolute -right-40 bottom-0 h-[600px] w-[600px] rounded-full opacity-50"
         style={{ background: "radial-gradient(closest-side, rgba(34,211,238,0.18), transparent)" }} />
       <Stars />
+      <ChapterHeadingAnchor n={4} title="Home Base" />
       <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-6 py-8 md:px-12">
         {/* LEFT — UFO invasion scene */}
         <div className="relative col-span-12 md:col-span-4 hidden md:block">
@@ -213,16 +215,18 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.1, ease: "easeOut" }}
           className="relative col-span-12 md:col-span-4 hidden md:block overflow-hidden">
-          <div className="relative flex h-full w-full items-center justify-center">
+          <PlanetStage>
+          <div className="relative flex h-[520px] w-[520px] items-center justify-center">
             <div className="pointer-events-none absolute inset-0 rounded-full"
               style={{ background: "radial-gradient(circle, rgba(74,222,128,0.45) 0%, rgba(74,222,128,0.12) 35%, transparent 65%)", filter: "blur(30px)" }} />
             <motion.img src="/wrapped/slide4-planet.png" alt="Alien green planet"
-              className="relative w-[140%] h-auto select-none object-contain"
+              className="relative h-full w-full select-none object-contain"
               animate={{ y: [0, -10, 0], rotate: 360 }}
               transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 240, repeat: Infinity, ease: "linear" } }}
               style={{ filter: "drop-shadow(0 0 50px rgba(74,222,128,0.6))" }}
               draggable={false} />
           </div>
+          </PlanetStage>
         </motion.div>
       </div>
     </div>

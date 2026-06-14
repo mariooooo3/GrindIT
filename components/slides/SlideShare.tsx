@@ -1,12 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import html2canvas from "html2canvas";
-import { useRouter } from "next/navigation";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 
 const LANG_PALETTES: Record<string, { a: string; b: string; glow: string }> = {
@@ -16,15 +18,6 @@ const LANG_PALETTES: Record<string, { a: string; b: string; glow: string }> = {
   Go: { a: "#22d3ee", b: "#0d9488", glow: "rgba(34,211,238,0.5)" },
   JavaScript: { a: "#facc15", b: "#a855f7", glow: "rgba(250,204,21,0.45)" },
   default: { a: "#a78bfa", b: "#f5f3ff", glow: "rgba(167,139,250,0.55)" },
-};
-
-const ARCHETYPE_POETRY: Record<string, string> = {
-  "THE NIGHT OWL": "When the world sleeps, your keyboard glows.\nYou build empires in the quiet hours.",
-  "THE SPRINTER": "Day after day, no chain unbroken.\nMomentum is your love language.",
-  "THE COLLABORATOR": "Code is conversation, and you listen well.\nEvery merge a handshake across time.",
-  "THE BUILDER": "Brick by brick, commit by commit.\nYou turn empty repos into cities.",
-  "THE CLEANER": "You leave the code lighter than you found it.\nDeletion, in your hands, is an art.",
-  "THE EXPLORER": "You wander where the docs end.\nEvery branch is a new horizon.",
 };
 
 function deriveArchetype(nightRatio: number, longestStreak: number, prsMerged: number, totalCommits: number, archetype: string): string {
@@ -107,13 +100,41 @@ function Planet({ palette, archetype, username }: { palette: { a: string; b: str
 
 export default function SlideShare({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
-  const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount guard for the portal
+  useEffect(() => { setMounted(true); }, []);
 
   const nightRatio = flat.totalCommits > 0 ? flat.nightCommits / flat.totalCommits : 0;
   const archetype = deriveArchetype(nightRatio, flat.longestStreak, flat.pullRequests.merged, flat.totalCommits, flat.archetype);
   const palette = LANG_PALETTES[flat.topLanguages[0]?.name ?? "default"] || LANG_PALETTES.default;
-  const poetry = ARCHETYPE_POETRY[archetype] || ARCHETYPE_POETRY["THE EXPLORER"];
+
+  // Profile-driven fallback, re-rolled per render — used only if the AI narrative
+  // never arrived (e.g. the narrative request failed entirely).
+  const fallback = useMemo(
+    () => buildFallbackNarrative(
+      {
+        username: flat.username,
+        archetype: flat.archetype,
+        totalCommits: flat.totalCommits,
+        longestStreak: flat.longestStreak,
+        currentStreak: flat.currentStreak,
+        peakHour: flat.peakHour,
+        topLanguage: flat.topLanguages[0]?.name ?? "code",
+        topRepo: flat.topRepos[0]?.name ?? "your repo",
+        nightRatio,
+        prsMerged: flat.pullRequests.merged,
+        totalRepos: flat.totalRepos,
+        periodLabel: flat.period.label,
+      },
+      profile.tone,
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [flat.username, profile.tone],
+  );
+
+  const roastLine = profile.narrative?.roastLine ?? fallback.roastLine;
+  const narrativeText = profile.narrative?.archetypeDescription ?? fallback.archetypeDescription;
 
   const badgesEarned: string[] = [];
   if (flat.longestStreak >= 7) badgesEarned.push("🔥 Streak");
@@ -144,23 +165,18 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
 
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (
+    <>
     <main className="relative min-h-full overflow-hidden" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: `radial-gradient(ellipse at 75% 50%, ${palette.glow}, transparent 55%), radial-gradient(ellipse at 15% 80%, rgba(120,80,200,0.18), transparent 60%)` }} />
       <Stars />
+      <ChapterHeadingAnchor n={8} title="Your Planet" />
 
-      {/* back button */}
-      <button onClick={() => router.push("/")}
-        className="absolute left-6 top-6 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-300 backdrop-blur transition hover:bg-white/10"
-        aria-label="Back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
-      </button>
-
-      <div className="relative z-10 grid min-h-screen grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-3 lg:gap-4">
+<div className="relative z-10 grid min-h-screen grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-3 lg:gap-4">
         {/* LEFT — cat rocket bobbing */}
         <motion.div className="flex h-[420px] items-center justify-center lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
           <motion.div animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
@@ -174,7 +190,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
 
         {/* CENTER — share card */}
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="flex justify-center">
-          <div ref={cardRef} className="w-full [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+          <div ref={cardRef} className="w-full [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
@@ -192,7 +208,10 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
               style={{ fontSize: 28, background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
               {archetype}
             </h1>
-            <p className="mt-3 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">{poetry}</p>
+            {roastLine && (
+              <p className="mt-2 text-sm font-semibold leading-snug" style={{ color: palette.a }}>&ldquo;{roastLine}&rdquo;</p>
+            )}
+            <p className="mt-2 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {badgesEarned.map((b) => (
                 <span key={b} className="rounded-full border px-3 py-1 text-xs text-zinc-100"
@@ -223,16 +242,22 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
         </motion.div>
 
         {/* RIGHT — planet */}
-        <motion.div className="flex justify-center lg:justify-start" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
-          <Planet palette={palette} archetype={archetype} username={flat.username} />
+        <motion.div className="relative" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
+          <PlanetStage>
+            <Planet palette={palette} archetype={archetype} username={flat.username} />
+          </PlanetStage>
         </motion.div>
       </div>
 
-      <motion.div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
+    </main>
+    {mounted && createPortal(
+      <motion.div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
         <button onClick={startOver} className="text-xs uppercase tracking-[0.3em] text-zinc-500 transition hover:text-zinc-200">
           Start over
         </button>
-      </motion.div>
-    </main>
+      </motion.div>,
+      document.body
+    )}
+    </>
   );
 }

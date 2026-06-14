@@ -4,7 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 function CountUp({ value, className }: { value: number; className?: string }) {
   const mv = useMotionValue(0);
@@ -53,6 +54,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
       <div className="pointer-events-none absolute -left-40 top-1/3 size-[600px] rounded-full bg-fuchsia-600/10 blur-[140px]" />
       <div className="pointer-events-none absolute -right-40 bottom-0 size-[700px] rounded-full bg-purple-700/15 blur-[160px]" />
       <Stars />
+      <ChapterHeadingAnchor n={6} title="Trophy Haul" />
 
       <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — cats & rockets crew */}
@@ -140,12 +142,13 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className="relative flex h-full items-center justify-center overflow-hidden">
-          <div className="relative w-full">
-            <div className="absolute inset-0 -z-10 rounded-full bg-pink-500/[0.04] blur-3xl" />
+          <PlanetStage className="lg:translate-x-8">
+          <div className="relative h-[560px] w-[560px]">
             <motion.img src="/wrapped/yarn-planet.png" alt="Yarn ball planet"
               animate={{ rotate: 360 }} transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-              className="h-auto w-[110%] -ml-[5%] max-w-none drop-shadow-[0_20px_60px_rgba(236,72,153,0.08)]" />
+              className="h-full w-full select-none object-contain drop-shadow-[0_20px_60px_rgba(236,72,153,0.08)]" />
           </div>
+          </PlanetStage>
         </motion.div>
       </div>
 

@@ -4,7 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 function GasStationCat() {
   return (
@@ -150,6 +151,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />
+      <ChapterHeadingAnchor n={5} title="Refuel Stop" />
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-center gap-6 px-8 py-12 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — gas station cat */}
         <div className="hidden h-[80vh] lg:block">
@@ -222,7 +224,11 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
         </div>
 
         {/* RIGHT */}
-        <div className="hidden h-[80vh] lg:block"><GasPlanet /></div>
+        <div className="relative hidden lg:block">
+          <PlanetStage>
+            <GasPlanet />
+          </PlanetStage>
+        </div>
       </div>
     </main>
   );

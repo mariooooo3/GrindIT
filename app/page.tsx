@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AiTone } from "@/types/wrapped";
 import AuthButton from "@/components/ui/AuthButton";
@@ -9,47 +9,16 @@ import { HeroScene } from "@/components/HeroScene";
 
 // ── constants ──────────────────────────────────────────────────────────────
 const PERIODS = [
-  { label: "Last week",  value: "week"    },
-  { label: "Last month", value: "month"   },
-  { label: "Last year",  value: "year"    },
-  { label: "All time",   value: "alltime" },
+  { label: "Last week",  value: "week",    requiresAuth: false },
+  { label: "Last month", value: "month",   requiresAuth: false },
+  { label: "Last year",  value: "year",    requiresAuth: false },
+  { label: "All time",   value: "alltime", requiresAuth: true  },
 ] as const;
 
 const TONES: { label: string; value: AiTone }[] = [
   { label: "Funny 😄",        value: "funny"        },
   { label: "Brutal 💀",       value: "brutal"       },
   { label: "Motivational 🔥", value: "motivational" },
-];
-
-const FEATURES = [
-  {
-    eyebrow: "Commit patterns",
-    title: "Streaks & Night Owl Index",
-    desc: "Your longest streak, peak hours, and whether you're a weekend warrior or 9-to-5 builder.",
-    accent: "var(--violet-glow)",
-    span: "md:col-span-2",
-  },
-  {
-    eyebrow: "Language DNA",
-    title: "Your Stack, Visualised",
-    desc: "Top 3 languages with live percentage bars.",
-    accent: "var(--commit-green)",
-    span: "",
-  },
-  {
-    eyebrow: "Archetype",
-    title: "Who are you, really?",
-    desc: "Builder, Ghost, Night Owl, or Polyglot? AI labels your developer soul.",
-    accent: "var(--violet-glow)",
-    span: "",
-  },
-  {
-    eyebrow: "AI Narrative",
-    title: "A Story Only You Could Have",
-    desc: "Groq writes your year in the tone of your choice: funny, brutal, or motivational.",
-    accent: "var(--commit-green)",
-    span: "md:col-span-2",
-  },
 ];
 
 type PeriodType = (typeof PERIODS)[number]["value"];
@@ -218,14 +187,92 @@ function TVSignal() {
   );
 }
 
+// ── pixel-star font & renderer ─────────────────────────────────────────────
+const GLYPH: Record<string, number[][]> = {
+  A: [[0,1,1,1,0],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
+  L: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
+  T: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
+  I: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[1,1,1,1,1]],
+  M: [[1,0,0,0,1],[1,1,0,1,1],[1,0,1,0,1],[1,0,0,0,1],[1,0,0,0,1]],
+  E: [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,0,0],[1,0,0,0,0],[1,1,1,1,1]],
+  W: [[1,0,0,0,1],[1,0,0,0,1],[1,0,1,0,1],[1,1,0,1,1],[1,0,0,0,1]],
+  R: [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,1,0,0],[1,0,0,1,0]],
+  P: [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0]],
+  D: [[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,0]],
+};
+const CELL = 7;
+const CHAR_GAP = 4;
+const WORD_GAP = 10;
+
+function buildStars(lines: string[]) {
+  const stars: { x: number; y: number; delay: number; dur: number }[] = [];
+  let s = 7;
+  const rnd = () => { s = (s * 1664525 + 1013904223) & 0x7fffffff; return s / 0x7fffffff; };
+  let baseY = 0;
+  for (const line of lines) {
+    let curX = 0;
+    for (const ch of line) {
+      if (ch === " ") { curX += WORD_GAP; continue; }
+      const g = GLYPH[ch];
+      if (!g) { curX += CELL * 5 + CHAR_GAP; continue; }
+      for (let row = 0; row < g.length; row++)
+        for (let col = 0; col < g[row].length; col++)
+          if (g[row][col]) stars.push({ x: curX + col * CELL, y: baseY + row * CELL, delay: rnd() * 3, dur: 1.0 + rnd() * 2.0 });
+      curX += 5 * CELL + CHAR_GAP;
+    }
+    baseY += 5 * CELL + 10;
+  }
+  return stars;
+}
+
+const PIXEL_STARS = buildStars(["ALL TIME", "WRAPPER"]);
+
+function StarPixelText({ onConnect, isLoggedIn }: { onConnect: () => void; isLoggedIn: boolean }) {
+  return (
+    <div className="flex flex-col items-start gap-4 select-none">
+      <style>{`@keyframes sf{0%,100%{opacity:.4}50%{opacity:1}}`}</style>
+      <div className="relative cursor-pointer" style={{ width: 280, height: 108 }}
+        onClick={!isLoggedIn ? onConnect : undefined}
+      >
+        {PIXEL_STARS.map((st, i) => {
+          const green = i % 7 === 0;
+          return (
+            <span key={i} className="pointer-events-none absolute"
+              style={{
+                left: st.x, top: st.y,
+                width: CELL, height: CELL,
+                fontSize: CELL + 1,
+                lineHeight: 1,
+                color: green ? "rgb(134,239,172)" : "rgb(196,181,253)",
+                textShadow: green
+                  ? "0 0 5px rgba(74,222,128,0.95), 0 0 10px rgba(74,222,128,0.6)"
+                  : "0 0 5px rgba(167,139,250,0.95), 0 0 10px rgba(139,92,246,0.6)",
+                animation: `sf ${st.dur}s ease-in-out ${st.delay}s infinite`,
+              }}
+            >✦</span>
+          );
+        })}
+      </div>
+      {isLoggedIn && (
+        <p className="text-[8px] tracking-[0.22em] uppercase" style={{ color: "rgba(74,222,128,0.6)" }}>✓ unlocked</p>
+      )}
+    </div>
+  );
+}
+
 // ── main page ──────────────────────────────────────────────────────────────
 function HomePageInner() {
   const { data: session } = useSession();
-  const [username,   setUsername]   = useState("");
+  const isLoggedIn = !!session?.user;
+  const sessionUsername = session?.login ?? "";
+
+  const [manualUsername, setManualUsername] = useState("");
   const [periodType, setPeriodType] = useState<PeriodType>("month");
   const [tone,       setTone]       = useState<AiTone>("funny");
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+
+  const username = isLoggedIn ? sessionUsername : manualUsername;
 
   const handleGenerate = useCallback(async () => {
     if (!username.trim() || loading) return;
@@ -349,6 +396,17 @@ function HomePageInner() {
           </div>
         </motion.div>
 
+        {/* ── star callout — left center ── */}
+        <motion.div
+          className="pointer-events-none absolute left-24 z-[6] hidden lg:block"
+          style={{ top: "60%", transform: "translateY(-50%)" }}
+          initial={{ opacity: 0, x: -18 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.2, delay: 1.0, ease: EASE }}
+        >
+          <StarPixelText isLoggedIn={isLoggedIn} onConnect={() => signIn("github")} />
+        </motion.div>
+
         {/* ── content overlay ── */}
         <div className="relative z-10 mx-auto w-full max-w-xl px-5">
           <motion.div initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -359,46 +417,83 @@ function HomePageInner() {
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
               Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
             </p>
-            {/* username row */}
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600">
-                  <GithubMark size={13} />
-                </span>
-                <input
-                  type="text" value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleGenerate()}
-                  placeholder="github username"
-                  className="w-full rounded-2xl border border-white/[0.1] bg-black/50 py-2 pl-9 pr-4 text-[13px] text-white placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/70 focus:outline-none transition-all duration-300"
-                  style={{ backdropFilter: "blur(16px)" }}
-                />
-              </div>
-              <button onClick={handleGenerate} disabled={loading || !username.trim()}
-                className="group flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
-                style={{
-                  background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
-                  boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
-                }}
-              >
-                {loading ? (
-                  <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                ) : <>Generate →</>}
-              </button>
-            </div>
-
-            {/* period + tone in one compact row */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5">
-              {PERIODS.map(({ label, value }) => (
-                <button key={value} onClick={() => setPeriodType(value as PeriodType)}
-                  className={`${pillBase} ${periodType === value ? pillOn : pillOff}`}>
-                  {label}
+            {/* username row — shown only when not logged in */}
+            {!isLoggedIn && (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600">
+                    <GithubMark size={13} />
+                  </span>
+                  <input
+                    type="text" value={manualUsername}
+                    onChange={e => setManualUsername(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleGenerate()}
+                    placeholder="github username"
+                    className="w-full rounded-2xl border border-white/[0.1] bg-black/50 py-2 pl-9 pr-4 text-[13px] text-white placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/70 focus:outline-none transition-all duration-300"
+                    style={{ backdropFilter: "blur(16px)" }}
+                  />
+                </div>
+                <button onClick={handleGenerate} disabled={loading || !manualUsername.trim()}
+                  className="group flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
+                  style={{
+                    background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
+                    boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
+                  }}
+                >
+                  {loading ? (
+                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                  ) : <>Generate →</>}
                 </button>
-              ))}
-              <span className="text-zinc-700 mx-0.5">·</span>
+              </div>
+            )}
+
+            {/* logged-in: show username + big generate button */}
+            {isLoggedIn && (
+              <div className="flex items-center gap-2">
+                <div className="flex flex-1 items-center gap-2 rounded-2xl border border-white/[0.1] bg-black/30 px-3 py-2">
+                  {session.user?.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={session.user.image} alt={sessionUsername} className="h-5 w-5 rounded-full" />
+                  )}
+                  <span className="text-[13px] text-white/70">@{sessionUsername}</span>
+                </div>
+                <button onClick={handleGenerate} disabled={loading || !sessionUsername}
+                  className="flex items-center gap-2 rounded-2xl px-5 py-2 text-[13px] font-semibold text-white transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap"
+                  style={{
+                    background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
+                    boxShadow: "0 6px 24px -6px color-mix(in oklab,var(--violet-glow) 55%,transparent),inset 0 1px 0 rgba(255,255,255,0.18)",
+                  }}
+                >
+                  {loading ? (
+                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                  ) : <>Generate →</>}
+                </button>
+              </div>
+            )}
+
+            {/* period row */}
+            <div className="flex items-center justify-center gap-1.5">
+              {PERIODS.map(({ label, value, requiresAuth }) => {
+                const locked = requiresAuth && !isLoggedIn;
+                return (
+                  <button key={value}
+                    onClick={() => !locked && setPeriodType(value as PeriodType)}
+                    title={locked ? "Connect GitHub to unlock All time" : undefined}
+                    className={`${pillBase} ${!locked && periodType === value ? pillOn : ""} ${locked ? "opacity-35 cursor-not-allowed" : !locked && periodType !== value ? pillOff : ""}`}>
+                    {label}{locked && " 🔒"}
+                  </button>
+                );
+              })}
+            </div>
+            {/* tone row */}
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">AI tone</span>
               {TONES.map(({ label, value }) => (
                 <button key={value} onClick={() => setTone(value)}
                   className={`${pillBase} ${tone === value ? pillOn : pillOff}`}>
@@ -419,45 +514,37 @@ function HomePageInner() {
         </div>
       </section>
 
-      {/* ══ FEATURES BENTO ════════════════════════════════════════════════ */}
+      {/* ══ HOW IT WORKS ══════════════════════════════════════════════════ */}
       <section id="features" className="relative px-5 py-32">
-        <div className="mx-auto max-w-3xl">
-          {/* eyebrow */}
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}
-            className="mb-12 text-center">
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-              What you&apos;ll discover
-            </span>
-          </motion.div>
+        <div className="mx-auto max-w-xl">
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>
+            {/* outer shell */}
+            <div className="rounded-[1.4rem] border border-white/[0.07] bg-white/[0.02] p-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              {/* inner core */}
+              <div className="relative overflow-hidden rounded-[calc(1.4rem-4px)] bg-black/40 px-7 py-8 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+                {/* accent glow spot */}
+                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20"
+                  style={{ background: "radial-gradient(circle, var(--violet-glow), transparent 70%)", filter: "blur(16px)" }} />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full opacity-[0.15]"
+                  style={{ background: "radial-gradient(circle, var(--commit-green), transparent 70%)", filter: "blur(16px)" }} />
 
-          {/* asymmetric 3-col grid */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <motion.div key={f.title}
-                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE, delay: i * 0.08 }}
-                className={`${f.span}`}
-              >
-                {/* outer shell */}
-                <div className="h-full rounded-[1.4rem] border border-white/[0.07] bg-white/[0.02] p-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                  {/* inner core */}
-                  <div className="relative h-full overflow-hidden rounded-[calc(1.4rem-4px)] bg-black/40 p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-                    {/* accent glow spot */}
-                    <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-20"
-                      style={{ background: `radial-gradient(circle, ${f.accent}, transparent 70%)`, filter: "blur(16px)" }} />
-                    <p className="mb-3 text-[9px] font-medium uppercase tracking-[0.16em]" style={{ color: f.accent }}>
-                      {f.eyebrow}
-                    </p>
-                    <h3 className="mb-2 text-[15px] font-semibold leading-snug text-white/90 tracking-[-0.01em]">
-                      {f.title}
-                    </h3>
-                    <p className="text-[12px] leading-relaxed text-zinc-500">{f.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <span className="relative inline-block rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                  How it works
+                </span>
+                <p className="relative mt-5 text-[14px] leading-relaxed text-zinc-300">
+                  Generate a cinematic recap of your GitHub year for any period. The{" "}
+                  <span className="font-semibold text-violet-300">All time</span> mode unlocks once you
+                  connect your GitHub account.
+                </p>
+                <p className="relative mt-3 text-[13px] leading-relaxed text-zinc-500">
+                  Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span> to keep
+                  things diverse — and this month&apos;s theme is{" "}
+                  <span className="font-semibold" style={{ color: "var(--commit-green)" }}>World Cup</span> ⚽
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

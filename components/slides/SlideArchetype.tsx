@@ -4,7 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 function CountUpInner({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -129,8 +130,9 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
         style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 85% 70%, rgba(34,211,238,0.15), transparent 60%), radial-gradient(40% 40% at 70% 20%, rgba(255,62,165,0.12), transparent 60%)" }} />
       <Stars />
       <Confetti />
+      <ChapterHeadingAnchor n={7} title="The Reveal" />
 
-      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-8 py-10 lg:grid-cols-[1fr_minmax(360px,420px)_1fr] lg:items-center">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — disco ball + cats + dance floor */}
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
@@ -152,7 +154,7 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
 
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className="mx-auto" style={{ width: 380 }}>
+          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className="relative w-[380px] justify-self-center lg:-translate-y-10">
           <div className="relative [&::-webkit-scrollbar]:hidden" style={{ height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.5)" }}>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -208,21 +210,20 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
         {/* RIGHT — party planet with pulsing rays */}
         <motion.div initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.35, ease: "easeOut" }}
-          className="relative flex items-center justify-center">
-          <div className="relative w-full">
-            <motion.div className="pointer-events-none absolute inset-0 -z-10"
-              animate={{ background: [
-                "radial-gradient(60% 55% at 50% 15%, rgba(34,255,120,0.85), rgba(34,255,120,0.3) 35%, transparent 70%)",
-                "radial-gradient(60% 55% at 50% 15%, rgba(255,40,60,0.85), rgba(255,40,60,0.3) 35%, transparent 70%)",
-              ], opacity: [0.55, 1, 0.55] }}
-              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "blur(40px)" }} />
+          className="relative flex h-full items-center justify-center overflow-hidden">
+          <PlanetStage>
+          <div className="relative h-[560px] w-[560px]">
             <motion.img src="/wrapped/party-planet.png" alt="Party planet bursting with neon color"
               width={1024} height={1024}
-              className="w-full select-none"
-              style={{ filter: "drop-shadow(0 20px 60px rgba(255,62,165,0.55)) drop-shadow(0 0 50px rgba(34,211,238,0.35))" }}
+              className="h-full w-full select-none object-contain"
+              style={{
+                filter: "drop-shadow(0 20px 60px rgba(255,62,165,0.55)) drop-shadow(0 0 50px rgba(34,211,238,0.35))",
+                WebkitMaskImage: "radial-gradient(ellipse 62% 48% at 50% 50%, #000 0%, #000 68%, transparent 86%)",
+                maskImage: "radial-gradient(ellipse 62% 48% at 50% 50%, #000 0%, #000 68%, transparent 86%)",
+              }}
               draggable={false} />
           </div>
+          </PlanetStage>
         </motion.div>
       </div>
 

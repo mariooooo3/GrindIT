@@ -4,7 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { SlideShell } from "@/components/wrapped/shared";
+import { PlanetStage, SlideShell } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 // ── Moon ───────────────────────────────────────────────────────────────────
 function Moon() {
@@ -118,7 +119,7 @@ function ProfileCard({ flat }: { flat: Flat }) {
       initial="hidden"
       animate="show"
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
-      className="relative w-full max-w-[380px] rounded-3xl border border-white/10 p-4 text-white h-[500px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative mt-0 w-full max-w-[380px] rounded-3xl border border-white/10 p-4 text-white h-[min(580px,84vh)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:-translate-y-6"
       style={{
         background: "linear-gradient(160deg,rgba(30,20,60,0.55),rgba(10,8,25,0.65))",
         backdropFilter: "blur(24px)",
@@ -230,27 +231,15 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
 
   return (
     <SlideShell
-      slideNum="01"
-      leftContent={
+      overlay={<ChapterHeadingAnchor n={1} title="Liftoff" />}
+      center={<ProfileCard flat={cardFlat} />}
+      right={
         <>
-          <div className="text-xs uppercase tracking-[0.3em] text-violet-300/70">Chapter One</div>
-          <h1
-            className="mt-2 text-6xl font-black leading-[0.95] tracking-tight"
-            style={{
-              background: "linear-gradient(180deg,#fff 0%,#a78bfa 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Launch
-            <br />
-            Day.
-          </h1>
-          <p className="mt-3 max-w-[260px] text-sm text-white/50">A year of commits, ready for liftoff.</p>
+          <PlanetStage className="lg:-translate-x-8">
+            <Moon />
+          </PlanetStage>
         </>
       }
-      center={<ProfileCard flat={cardFlat} />}
-      right={<Moon />}
     />
   );
 }

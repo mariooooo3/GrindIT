@@ -11,8 +11,28 @@ import SlideJourney       from "@/components/slides/SlideJourney";
 import SlideAchievements  from "@/components/slides/SlideAchievements";
 import SlideArchetype     from "@/components/slides/SlideArchetype";
 import SlideShare         from "@/components/slides/SlideShare";
-import ProgressBar        from "@/components/ui/ProgressBar";
+import PlanetProgress     from "@/components/ui/PlanetProgress";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
+
+// Each slide's planet colour — the top journey dots mirror the planet shown on
+// that slide. The last (share) slide is coloured by the user's top language,
+// matching SlideShare's LANG_PALETTES.
+const SHARE_LANG_COLORS: Record<string, string> = {
+  TypeScript: "#3178c6", Python: "#f1c40f", Rust: "#ff5a1f", Go: "#22d3ee", JavaScript: "#facc15",
+};
+function planetColors(profile: WrappedProfile): string[] {
+  const shareColor = SHARE_LANG_COLORS[profile.raw?.languages?.[0]?.language ?? ""] ?? "#a78bfa";
+  return [
+    "#cbd5e1", // intro — moon (silver)
+    "#ff8c3c", // contributions — orange gas giant
+    "#d6552a", // languages — mars red
+    "#7cff8a", // top_repo — alien green
+    "#ffb627", // journey — amber/gold gas
+    "#ec4899", // achievements — yarn pink
+    "#a855f7", // archetype — party neon
+    shareColor, // share — top language
+  ];
+}
 
 const SLIDES: SlideId[] = [
   "intro","contributions","languages","top_repo",
@@ -117,6 +137,14 @@ export default function WrappedPage() {
     });
   }, []);
 
+  const goTo = useCallback((index: number) => {
+    setSlideState(prev => {
+      if (index === prev.index || index < 0 || index > SLIDES.length - 1) return prev;
+      setDirection(index > prev.index ? 1 : -1);
+      return { current: SLIDES[index], index, total: 8, visited: [...prev.visited, prev.current] };
+    });
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
@@ -158,7 +186,7 @@ export default function WrappedPage() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
       {/* ── top bar ── */}
-      <div className="fixed inset-x-0 top-0 z-20 px-5 pt-4 pb-3">
+      <div className="fixed inset-x-0 top-0 z-40 px-5 pt-4 pb-3">
         <div className="flex items-center gap-3">
           {/* prev button */}
           <button onClick={goPrev}
@@ -166,9 +194,9 @@ export default function WrappedPage() {
             <ChevronLeft />
           </button>
 
-          {/* progress bar */}
+          {/* planet journey bar */}
           <div className="flex-1">
-            <ProgressBar total={8} current={slideState.index} />
+            <PlanetProgress total={8} current={slideState.index} colors={planetColors(profile)} onNavigate={goTo} />
           </div>
 
           {/* close button */}
@@ -200,22 +228,6 @@ export default function WrappedPage() {
             <ChevronRight />
           </span>
         </div>
-      </div>
-
-      {/* ── slide counter ── */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex items-center justify-center gap-1.5">
-        {SLIDES.map((_, i) => (
-          <span key={i}
-            className="block rounded-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-            style={{
-              width:  i === slideState.index ? 18 : 5,
-              height: 5,
-              background: i === slideState.index
-                ? "var(--violet-glow)"
-                : i < slideState.index ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)",
-            }}
-          />
-        ))}
       </div>
 
       {/* ── narrative loading indicator ── */}
