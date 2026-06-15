@@ -12,7 +12,14 @@ import SlideAchievements  from "@/components/slides/SlideAchievements";
 import SlideArchetype     from "@/components/slides/SlideArchetype";
 import SlideShare         from "@/components/slides/SlideShare";
 import PlanetProgress     from "@/components/ui/PlanetProgress";
+import ShareModal         from "@/components/ui/ShareModal";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
+
+// Short chapter title per slide — used in the share caption.
+const SLIDE_TITLES: Record<SlideId, string> = {
+  intro: "Liftoff", contributions: "The Chase", languages: "Dodging Bugs", top_repo: "Home Base",
+  journey: "Refuel Stop", achievements: "Trophy Haul", archetype: "The Reveal", share: "Your Planet",
+};
 
 // Each slide's planet colour — the top journey dots mirror the planet shown on
 // that slide. The last (share) slide is coloured by the user's top language,
@@ -81,6 +88,16 @@ function CloseIcon() {
   );
 }
 
+// ── share icon ──────────────────────────────────────────────────────────────
+function ShareIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+      <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+    </svg>
+  );
+}
+
 // ── chevron icons ──────────────────────────────────────────────────────────
 function ChevronLeft()  { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 function ChevronRight() { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
@@ -94,7 +111,9 @@ export default function WrappedPage() {
   const [loading,          setLoading]          = useState(true);
   const [error,            setError]            = useState<string | null>(null);
   const [narrativeLoading, setNarrativeLoading] = useState(false);
+  const [shareOpen,        setShareOpen]        = useState(false);
   const touchStartX = useRef(0);
+  const slideAreaRef = useRef<HTMLDivElement>(null);
 
   const fetchNarrative = useCallback(async (p: WrappedProfile) => {
     setNarrativeLoading(true);
@@ -199,6 +218,12 @@ export default function WrappedPage() {
             <PlanetProgress total={8} current={slideState.index} colors={planetColors(profile)} onNavigate={goTo} />
           </div>
 
+          {/* share button */}
+          <button onClick={() => setShareOpen(true)} aria-label="Share this slide"
+            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/15 text-violet-200 transition-all duration-200 hover:border-violet-400/60 hover:bg-violet-500/25">
+            <ShareIcon />
+          </button>
+
           {/* close button */}
           <button onClick={() => router.push("/")}
             className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-white/40 transition-all duration-200 hover:border-white/20 hover:text-white/70">
@@ -208,13 +233,15 @@ export default function WrappedPage() {
       </div>
 
       {/* ── slide ── */}
-      <AnimatePresence mode="wait" custom={direction}>
-        <motion.div key={slideState.current} custom={direction}
-          variants={slideVariants} initial="enter" animate="center" exit="exit"
-          className="absolute inset-0 z-10 overflow-hidden">
-          <CurrentSlide profile={profile} />
-        </motion.div>
-      </AnimatePresence>
+      <div ref={slideAreaRef} className="absolute inset-0 z-10">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div key={slideState.current} custom={direction}
+            variants={slideVariants} initial="enter" animate="center" exit="exit"
+            className="absolute inset-0 overflow-hidden">
+            <CurrentSlide profile={profile} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* ── tap zones with hover arrows ── */}
       <div className="absolute inset-0 z-30 flex pointer-events-none">
@@ -238,6 +265,14 @@ export default function WrappedPage() {
           <span className="text-[10px] text-zinc-500">Generating story…</span>
         </div>
       )}
+
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        slideRef={slideAreaRef}
+        username={profile.user.login}
+        slideTitle={SLIDE_TITLES[slideState.current]}
+      />
     </div>
   );
 }

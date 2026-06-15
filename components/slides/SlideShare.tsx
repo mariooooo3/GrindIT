@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import html2canvas from "html2canvas";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
+import { captureElement } from "@/lib/captureElement";
 import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
 
 
@@ -146,20 +146,21 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
   const share = async () => {
     if (!cardRef.current) return;
     try {
-      const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 });
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], "planet.png", { type: "image/png" });
-        const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void>; canShare?: (d: ShareData) => boolean };
-        if (nav.share && nav.canShare?.({ files: [file] })) {
-          await nav.share({ files: [file], title: "My Planet", text: `${archetype} — @${flat.username}` });
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url; a.download = `planet-${flat.username}.png`; a.click();
-          URL.revokeObjectURL(url);
-        }
-      });
+      const main = cardRef.current.closest("main") as HTMLElement | null;
+      const blob = main
+        ? await captureElement(main, { cropTo: cardRef.current })
+        : await captureElement(cardRef.current, {});
+      if (!blob) return;
+      const file = new File([blob], "planet.png", { type: "image/png" });
+      const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void>; canShare?: (d: ShareData) => boolean };
+      if (nav.share && nav.canShare?.({ files: [file] })) {
+        await nav.share({ files: [file], title: "My Planet", text: `${archetype} — @${flat.username}` });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `planet-${flat.username}.png`; a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -190,7 +191,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
 
         {/* CENTER — share card */}
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="flex justify-center">
-          <div ref={cardRef} className="w-full [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+          <div ref={cardRef} data-share-card className="w-full [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
@@ -234,7 +235,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
                 </div>
               ))}
             </div>
-            <button onClick={share} className="mt-3 w-full rounded-full px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98]"
+            <button onClick={share} data-share-ignore className="mt-3 w-full rounded-full px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98]"
               style={{ background: "linear-gradient(90deg, #7c3aed, #a78bfa)", boxShadow: "0 8px 30px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.2)" }}>
               Share your planet
             </button>

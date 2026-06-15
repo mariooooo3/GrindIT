@@ -223,7 +223,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
 
         {/* CENTER */}
         <div className="order-1 lg:order-2 flex justify-center">
-          <motion.div variants={stagger} initial="hidden" animate="show" className="[&::-webkit-scrollbar]:hidden"
+          <motion.div data-share-card variants={stagger} initial="hidden" animate="show" className="[&::-webkit-scrollbar]:hidden"
             style={{ width: 380, height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <motion.div variants={item} className="flex items-center gap-3">
               <div className="rounded-full flex-shrink-0 overflow-hidden"

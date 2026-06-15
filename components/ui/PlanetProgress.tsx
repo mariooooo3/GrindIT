@@ -15,8 +15,11 @@ export default function PlanetProgress({
   colors: string[];
   onNavigate: (i: number) => void;
 }) {
-  const progress = (current / Math.max(1, total - 1)) * 100;
-  const catX = current >= total - 1 ? -72 : 18;
+  const lastIdx = Math.max(1, total - 1);
+  const progress = (current / lastIdx) * 100;
+  // uniform leftward nudge on every slide — keeps the rocket a consistent
+  // distance from each dot and off the right edge on the final slide
+  const biasPx = -16;
 
   return (
     <nav aria-label="Wrapped journey" className="relative flex h-10 w-full items-center">
@@ -46,13 +49,14 @@ export default function PlanetProgress({
           </button>
         ))}
 
-        <div className="pointer-events-none absolute inset-x-[72px] top-0">
-          {/* gliding cat rocket */}
+        {/* rocket track — inset by 88px (72px padding + 16px half-dot) so 0%..100%
+            maps exactly onto the first and last dot centres */}
+        <div className="pointer-events-none absolute left-[88px] right-[88px] top-0">
           <motion.div
             className="absolute -top-5 z-20"
             animate={{ left: `${progress}%`, rotate: current % 2 ? 6 : -6 }}
-            transition={{ type: "spring", stiffness: 180, damping: 18 }}
-            style={{ x: catX }}
+            transition={{ type: "tween", duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+            style={{ x: "-50%", marginLeft: biasPx, width: 54, height: 54 }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -61,7 +65,8 @@ export default function PlanetProgress({
               width={54}
               height={54}
               draggable={false}
-              className="select-none object-contain drop-shadow-[0_0_12px_rgba(167,139,250,0.75)]"
+              style={{ width: 54, height: 54 }}
+              className="block shrink-0 select-none object-contain drop-shadow-[0_0_12px_rgba(167,139,250,0.75)]"
             />
           </motion.div>
         </div>

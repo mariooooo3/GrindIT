@@ -153,7 +153,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
 
         {/* CENTER */}
         <div className="col-span-12 md:col-span-4 flex items-center justify-center">
-          <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 380 }}>
+          <motion.div data-share-card {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 380 }}>
             <div className="relative w-full p-4 text-white [&::-webkit-scrollbar]:hidden"
               style={{ height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px -20px rgba(0,0,0,0.6)" }}>
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">

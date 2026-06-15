@@ -217,7 +217,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
 
         {/* CENTER */}
         <div className="flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
+          <motion.div data-share-card initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
             className="relative w-full max-w-[380px] rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-2xl h-[500px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{ boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">

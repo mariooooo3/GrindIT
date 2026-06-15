@@ -160,7 +160,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
 
         {/* CENTER */}
         <div className="flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
+          <motion.div data-share-card initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="relative [&::-webkit-scrollbar]:hidden"
             style={{ width: 380, height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-3">

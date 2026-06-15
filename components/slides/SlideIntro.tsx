@@ -116,6 +116,7 @@ function ProfileCard({ flat }: { flat: Flat }) {
   const maxRepo = Math.max(...flat.topRepos.map((r) => r.commits), 1);
   return (
     <motion.div
+      data-share-card
       initial="hidden"
       animate="show"
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
