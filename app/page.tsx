@@ -80,6 +80,65 @@ function GithubMark({ size = 15 }: { size?: number }) {
   );
 }
 
+function TrophyMark() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className="h-7 w-7">
+      <defs>
+        <linearGradient id="trophyGold" x1="18" x2="46" y1="8" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fff2a8" />
+          <stop offset="0.42" stopColor="#d7a83d" />
+          <stop offset="1" stopColor="#7a5119" />
+        </linearGradient>
+      </defs>
+      <path d="M18 12h28v10c0 10.8-5.9 19.5-14 19.5S18 32.8 18 22V12Z" fill="url(#trophyGold)" />
+      <path d="M20 16h-8v5.4c0 6.7 4.3 11.3 10.4 11.9" fill="none" stroke="#d7a83d" strokeWidth="4" strokeLinecap="round" />
+      <path d="M44 16h8v5.4c0 6.7-4.3 11.3-10.4 11.9" fill="none" stroke="#d7a83d" strokeWidth="4" strokeLinecap="round" />
+      <path d="M28 41h8v8h-8z" fill="#b7842d" />
+      <path d="M22 51h20l3 6H19l3-6Z" fill="url(#trophyGold)" />
+      <path d="M25 17h14" stroke="#fff7c8" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+    </svg>
+  );
+}
+
+function SoccerBallMark() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className="h-7 w-7">
+      <circle cx="32" cy="32" r="28" fill="#f8fafc" />
+      <path d="M32 17 44 26l-4.5 14h-15L20 26l12-9Z" fill="#151515" />
+      <path d="m32 17 2.4-9.2M44 26l9.2-2.6M39.5 40l5.7 7.8M24.5 40l-5.7 7.8M20 26l-9.2-2.6" stroke="#151515" strokeWidth="4" strokeLinecap="round" />
+      <path d="M32 5.5a26.5 26.5 0 1 1 0 53 26.5 26.5 0 0 1 0-53Z" fill="none" stroke="#d4d4d8" strokeWidth="3" />
+      <path d="M21 12.5c-5.2 2.7-9.1 7.1-11.1 12.4M43 12.5c5.2 2.7 9.1 7.1 11.1 12.4M13.6 46.5c4.3 6.5 11 10 18.4 10s14.1-3.5 18.4-10" fill="none" stroke="#151515" strokeWidth="2.5" strokeLinecap="round" opacity="0.22" />
+    </svg>
+  );
+}
+
+function WorldCupAccent() {
+  return (
+    <div className="pointer-events-none absolute right-12 bottom-2 hidden flex-col items-center gap-1 sm:flex">
+      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200/10 bg-amber-300/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="pointer-events-none absolute inset-1 rounded-full bg-amber-300/10 blur-md" />
+        <div className="relative">
+          <TrophyMark />
+        </div>
+      </div>
+        <button
+          type="button"
+          aria-label="World Cup theme preview"
+          className="pointer-events-auto group relative grid h-9 w-9 place-items-center rounded-full border border-white/[0.12] bg-zinc-950/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/35 hover:bg-zinc-900 active:scale-[0.95]"
+        >
+          <motion.span
+            className="block"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+          >
+            <SoccerBallMark />
+          </motion.span>
+          <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
+        </button>
+    </div>
+  );
+}
+
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
@@ -102,13 +161,26 @@ function Nav() {
           </a>
           {/* center: tagline — absolutely positioned so it's truly centered */}
           <div className="pointer-events-none absolute inset-x-0 flex justify-center">
-            <span className="hidden text-[17px] font-bold tracking-[-0.03em] text-white/90 sm:block">
-              Your GitHub story,{" "}
-              <span className="bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 55%,var(--commit-green))" }}>
-                unwrapped.
+            <div className="hidden flex-col items-center gap-1 md:flex">
+              <span className="text-[17px] font-bold tracking-[-0.03em] text-white/90">
+                Your GitHub story,{" "}
+                <span className="bg-clip-text text-transparent"
+                  style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 55%,var(--commit-green))" }}>
+                  unwrapped.
+                </span>
               </span>
-            </span>
+              <a
+                href="#features"
+                onClick={(event) => {
+                  event.preventDefault();
+                  document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  window.history.pushState(null, "", "#features");
+                }}
+                className="pointer-events-auto rounded-full border border-violet-300/20 bg-white/[0.075] px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-300 shadow-[0_6px_18px_-12px_rgba(167,139,250,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/50 hover:bg-violet-400/[0.16] hover:text-white hover:shadow-[0_10px_24px_-14px_rgba(167,139,250,1),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.96]"
+              >
+                How it works
+              </a>
+            </div>
           </div>
           {/* right: auth + eyebrow sub-label */}
           <div className="relative z-10 flex flex-col items-center gap-1">
@@ -411,13 +483,14 @@ function HomePageInner() {
         <div className="relative z-10 mx-auto w-full max-w-xl px-5">
           <motion.div initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.2 }}
-            className="rounded-2xl border border-white/[0.08] bg-black/50 px-5 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] flex flex-col gap-2"
+            className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-5 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
               Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
             </p>
             {/* username row — shown only when not logged in */}
+            <WorldCupAccent />
             {!isLoggedIn && (
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -515,33 +588,58 @@ function HomePageInner() {
       </section>
 
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════ */}
-      <section id="features" className="relative px-5 py-32">
-        <div className="mx-auto max-w-xl">
+      <section id="features" className="relative scroll-mt-28 px-5 py-32">
+        <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>
             {/* outer shell */}
-            <div className="rounded-[1.4rem] border border-white/[0.07] bg-white/[0.02] p-[4px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <div className="rounded-[1.7rem] border border-white/[0.08] bg-white/[0.025] p-[5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
               {/* inner core */}
-              <div className="relative overflow-hidden rounded-[calc(1.4rem-4px)] bg-black/40 px-7 py-8 text-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+              <div className="relative overflow-hidden rounded-[calc(1.7rem-5px)] bg-black/45 px-5 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.07)] md:px-7 md:py-7">
                 {/* accent glow spot */}
                 <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20"
                   style={{ background: "radial-gradient(circle, var(--violet-glow), transparent 70%)", filter: "blur(16px)" }} />
                 <div className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full opacity-[0.15]"
                   style={{ background: "radial-gradient(circle, var(--commit-green), transparent 70%)", filter: "blur(16px)" }} />
 
+                <div className="relative grid items-center gap-7 md:grid-cols-[1fr_0.9fr]">
+                  <div className="text-center md:text-left">
                 <span className="relative inline-block rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
                   How it works
                 </span>
+                <h2 className="relative mt-4 text-[22px] font-bold leading-tight tracking-[-0.03em] text-white md:text-[28px]">
+                  Your GitHub activity, decoded into a cinematic recap.
+                </h2>
                 <p className="relative mt-5 text-[14px] leading-relaxed text-zinc-300">
-                  Generate a cinematic recap of your GitHub year for any period. The{" "}
+                  Generate a cinematic recap of your GitHub year for any period. For the most complete
+                  experience, authentication is recommended: the{" "}
                   <span className="font-semibold text-violet-300">All time</span> mode unlocks once you
                   connect your GitHub account.
                 </p>
                 <p className="relative mt-3 text-[13px] leading-relaxed text-zinc-500">
-                  Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span> to keep
+                  Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span>{" "}to keep
                   things diverse — and this month&apos;s theme is{" "}
                   <span className="font-semibold" style={{ color: "var(--commit-green)" }}>World Cup</span> ⚽
                 </p>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -inset-3 rounded-[1.4rem] bg-[radial-gradient(circle_at_50%_75%,rgba(139,92,246,0.28),transparent_58%)]" />
+                    <div className="relative rounded-[1.35rem] border border-white/[0.08] bg-white/[0.035] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                      <div className="overflow-hidden rounded-[calc(1.35rem-0.5rem)] border border-white/[0.08] bg-black shadow-[0_20px_70px_-35px_rgba(139,92,246,0.85),inset_0_1px_1px_rgba(255,255,255,0.08)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/logo2.png"
+                          alt="Terminal cat illustration"
+                          width={520}
+                          height={325}
+                          className="aspect-[16/10] w-full object-cover object-center opacity-95"
+                          draggable={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
