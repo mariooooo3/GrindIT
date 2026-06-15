@@ -78,34 +78,14 @@ function CommitStream({ ufoX }: { ufoX: number }) {
   );
 }
 
-function WeekdayBars({ data }: { data: Record<string, number> }) {
-  const entries = Object.entries(data);
-  const max = Math.max(...entries.map(([, v]) => v));
-  return (
-    <div className="flex items-end justify-between gap-1.5 h-16">
-      {entries.map(([day, v], i) => {
-        const h = (v / max) * 100;
-        const isTop = v === max;
-        return (
-          <div key={day} className="flex flex-1 flex-col items-center gap-1">
-            <motion.div initial={{ height: 0 }} animate={{ height: `${h}%` }}
-              transition={{ duration: 0.8, delay: 0.6 + i * 0.06, ease: "easeOut" }}
-              className="w-full rounded-sm"
-              style={{ background: isTop ? "linear-gradient(180deg,#7cff8a,#22d3ee)" : "rgba(255,255,255,0.18)", boxShadow: isTop ? "0 0 12px rgba(124,255,138,0.55)" : "none", minHeight: 4 }} />
-            <span className="text-[9px] uppercase tracking-wider text-white/45">{day.slice(0, 1)}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
-  const bars = flat.commitsByWeekday;
-  const mostActiveDay = Object.entries(bars).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "Monday";
-  const peakHourFmt = `${flat.peakHour}:00`;
-  const topLangs = flat.topLanguages.map((l) => l.name);
+  const top = flat.topRepoCard;
+  const ageStr = top && top.ageDays > 0
+    ? (top.ageDays >= 365 ? `${Math.floor(top.ageDays / 365)}y` : `${Math.max(1, Math.round(top.ageDays / 30))}mo`)
+    : "—";
+  const starred = flat.mostStarredRepo;
+  const showStarred = !!starred && starred.name !== top?.name;
   const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
 
   const [ufoX, setUfoX] = useState(0);
@@ -153,9 +133,9 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
 
         {/* CENTER */}
         <div className="col-span-12 md:col-span-4 flex items-center justify-center">
-          <motion.div data-share-card {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 380 }}>
+          <motion.div data-share-card {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 400 }}>
             <div className="relative w-full p-4 text-white [&::-webkit-scrollbar]:hidden"
-              style={{ height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px -20px rgba(0,0,0,0.6)" }}>
+              style={{ height: 580, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px -20px rgba(0,0,0,0.6)" }}>
               <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={flat.avatarUrl} alt={flat.username} className="h-10 w-10 rounded-full border border-white/15 bg-white/5 object-cover" />
@@ -167,46 +147,88 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
               <motion.div {...fadeUp} transition={{ delay: 0.35 }} className="mt-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-white/80">
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#7cff8a", boxShadow: "0 0 8px #7cff8a" }} />
-                  Commits fired
+                  Home base
                 </span>
               </motion.div>
+
               <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mt-2 leading-none">
-                <div style={{ fontSize: 44, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+                <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(120deg,#7cff8a 0%,#22d3ee 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
                   <CountUp value={flat.totalCommits} />
                 </div>
+                <div className="mt-1 text-[11px] uppercase tracking-wider text-white/45">commits fired</div>
               </motion.div>
-              <motion.div {...fadeUp} transition={{ delay: 0.5 }} className="mt-3">
-                <div className="mb-2 flex items-baseline justify-between">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/45">Most active day</div>
-                  <div className="text-xs font-semibold text-white">{mostActiveDay}</div>
-                </div>
-                <WeekdayBars data={bars} />
-              </motion.div>
-              <motion.div {...fadeUp} transition={{ delay: 0.6 }}
-                className="mt-3 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5"
-                style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                <div className="text-[11px] uppercase tracking-[0.16em] text-white/45">Longest streak</div>
-                <div className="text-sm font-bold text-white"><span style={{ color: "#7cff8a" }}>{flat.longestStreak}</span> days</div>
-              </motion.div>
-              <motion.div {...fadeUp} transition={{ delay: 0.7 }} className="mt-3 grid grid-cols-3 divide-x text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+
+              {top ? (
+                <>
+                  <motion.div {...fadeUp} transition={{ delay: 0.55 }} className="mt-3">
+                    <div className="mb-1 text-[10px] uppercase tracking-wider text-white/40">Top repository</div>
+                    <span className="truncate font-mono text-[20px] font-bold" style={{ background: "linear-gradient(120deg,#7cff8a,#22d3ee)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{top.name}</span>
+                  </motion.div>
+                  {top.description && (
+                    <motion.p {...fadeUp} transition={{ delay: 0.45 }} className="mt-1 line-clamp-2 text-[12px] leading-snug text-white/55">{top.description}</motion.p>
+                  )}
+                  <motion.div {...fadeUp} transition={{ delay: 0.5 }} className="mt-3 grid grid-cols-2 gap-2">
+                    {[
+                      { l: "Commits", v: top.commits.toLocaleString() },
+                      { l: "Stars", v: top.stars.toLocaleString() },
+                      { l: "Forks", v: top.forks.toLocaleString() },
+                      { l: "Age", v: ageStr },
+                    ].map((s) => (
+                      <div key={s.l} className="rounded-xl border bg-white/[0.03] px-3 py-2" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                        <div className="text-sm font-bold tabular-nums text-white">{s.v}</div>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/45">{s.l}</div>
+                      </div>
+                    ))}
+                  </motion.div>
+                  {top.language && (
+                    <motion.div {...fadeUp} transition={{ delay: 0.55 }} className="mt-2 flex items-center gap-1.5 text-[11px] text-white/60">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: flat.topLanguages.find(l => l.name === top.language)?.color ?? "#7cff8a" }} />
+                      {top.language}
+                    </motion.div>
+                  )}
+                  {top.topics.length > 0 && (
+                    <motion.div {...fadeUp} transition={{ delay: 0.6 }} className="mt-2 flex flex-wrap gap-1.5">
+                      {top.topics.slice(0, 5).map(t => (<span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-2 py-0.5 text-[10px] text-emerald-200">{t}</span>))}
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-white/55">
+                  No public repositories yet — but {flat.totalCommits.toLocaleString()} commits prove the work is happening.
+                </motion.div>
+              )}
+
+              {showStarred && starred && (
+                <motion.div {...fadeUp} transition={{ delay: 0.65 }} className="mt-3 flex items-center justify-between rounded-xl border bg-white/[0.03] px-3 py-2.5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                  <div className="min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider text-white/45">Most starred</div>
+                    <div className="truncate font-mono text-sm text-white/85">{starred.name}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm font-bold text-amber-300">★ {starred.stars.toLocaleString()}</div>
+                </motion.div>
+              )}
+
+              <motion.div {...fadeUp} transition={{ delay: 0.75 }} className="mt-3 grid grid-cols-3 divide-x text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 {[
-                  { l: "Commits", v: flat.totalCommits.toLocaleString() },
-                  { l: "Peak hour", v: peakHourFmt },
-                  { l: "Languages", v: String(topLangs.length) },
-                ].map((s, i) => (
-                  <div key={i} className="px-2" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                  { l: "Repos", v: (flat.ownedRepoCount || flat.totalRepos).toLocaleString() },
+                  { l: "Languages", v: String(flat.languageCount) },
+                  { l: "Pinned", v: String(flat.pinnedRepos.length) },
+                ].map((s) => (
+                  <div key={s.l} className="px-2" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                     <div className="text-sm font-bold">{s.v}</div>
                     <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/45">{s.l}</div>
                   </div>
                 ))}
               </motion.div>
-              <motion.div {...fadeUp} transition={{ delay: 0.85 }} className="mt-3 flex justify-center">
-                <span className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
-                  style={{ background: "linear-gradient(120deg, rgba(124,255,138,0.18), rgba(34,211,238,0.18))", border: "1px solid rgba(124,255,138,0.35)", color: "#d6ffe0", boxShadow: "0 0 24px rgba(124,255,138,0.25)" }}>
-                  <span className="text-[10px] uppercase tracking-[0.18em] opacity-70">Top lang</span>
-                  {topLangs[0] ?? "—"}
-                </span>
-              </motion.div>
+
+              {flat.pinnedRepos.length > 0 && (
+                <motion.div {...fadeUp} transition={{ delay: 0.85 }} className="mt-3">
+                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-white/45">Pinned</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {flat.pinnedRepos.slice(0, 4).map(r => (<span key={r} className="rounded-full border border-cyan-300/20 bg-cyan-300/[0.07] px-2 py-0.5 font-mono text-[10px] text-cyan-200">{r}</span>))}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         </div>

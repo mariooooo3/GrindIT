@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
@@ -173,16 +173,6 @@ function LeftScene() {
   );
 }
 
-function CountUp({ to, duration = 1.6 }: { to: number; duration?: number }) {
-  const mv = useMotionValue(0);
-  const rounded = useTransform(mv, (v) => Math.floor(v).toLocaleString());
-  useEffect(() => {
-    const c = animate(mv, to, { duration, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] });
-    return c.stop;
-  }, [to, duration, mv]);
-  return <motion.span>{rounded}</motion.span>;
-}
-
 function Planet() {
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -202,10 +192,10 @@ function Planet() {
 
 export default function SlideLanguages({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
-  const fixCommits = flat.fixCommits;
-  const fixRatio = flat.totalCommits > 0 ? (fixCommits / flat.totalCommits) * 100 : 0;
-  const cleanCommits = flat.totalCommits - fixCommits;
-  const maxRepo = Math.max(...flat.topRepos.map((r) => r.commits), 1);
+  const langs = flat.topLanguages.slice(0, 5);
+  const topLang = langs[0];
+  const hasLangs = langs.length > 0;
+  const ct = flat.commitTypes;
   const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.09, delayChildren: 0.2 } } };
   const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } } };
 
@@ -239,55 +229,90 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider"
                 style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)", color: "#86efac" }}>
                 <motion.span className="w-1.5 h-1.5 rounded-full bg-green-400" animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                Meteors neutralized
+                Tech arsenal
               </span>
             </motion.div>
-            <motion.div variants={item} className="mt-2">
-              <div style={{ fontSize: 44, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.04em", background: "linear-gradient(135deg, #e5e7eb 0%, #cbd5e1 30%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                <CountUp to={fixCommits} />
-              </div>
-              <div className="text-white/40 text-[11px] uppercase tracking-wider mt-1">fix commits</div>
-            </motion.div>
-            <motion.div variants={item} className="mt-3">
-              <div className="flex items-center justify-between text-[11px] mb-1.5">
-                <span className="text-white/60">Fix ratio</span>
-                <span className="text-red-300 font-mono">{fixRatio.toFixed(1)}%</span>
-              </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                <motion.div className="h-full rounded-full" initial={{ width: 0 }} animate={{ width: `${fixRatio}%` }}
-                  transition={{ duration: 1.6, delay: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-                  style={{ background: "linear-gradient(90deg, #dc2626, #f87171)", boxShadow: "0 0 8px rgba(248,113,113,0.5)" }} />
-              </div>
-              <div className="mt-1.5 text-[11px] text-white/45"><span className="text-white/70 font-mono">{cleanCommits}</span> clean commits</div>
-            </motion.div>
+
+            {hasLangs ? (
+              <>
+                <motion.div variants={item} className="mt-2 flex items-baseline gap-2">
+                  <span style={{ fontSize: 34, fontWeight: 900, lineHeight: 1, letterSpacing: "-0.03em", color: topLang.color }}>{topLang.name}</span>
+                  <span className="font-mono text-sm text-white/50">{topLang.percentage}%</span>
+                </motion.div>
+                <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">primary language</div>
+
+                <motion.div variants={item} className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  {langs.map((l) => (
+                    <motion.div key={l.name} initial={{ width: 0 }} animate={{ width: `${l.percentage}%` }}
+                      transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+                      style={{ background: l.color }} title={`${l.name} ${l.percentage}%`} />
+                  ))}
+                </motion.div>
+
+                <motion.div variants={item} className="mt-3 space-y-1.5">
+                  {langs.map((l) => (
+                    <div key={l.name} className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-sm" style={{ background: l.color }} />
+                      <span className="flex-1 truncate text-xs text-white/85">{l.name}</span>
+                      <span className="font-mono text-[10px] text-white/45">{l.percentage}%</span>
+                    </div>
+                  ))}
+                </motion.div>
+              </>
+            ) : (
+              <motion.div variants={item} className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-white/55">
+                Language data is sparse for this period — your code still flies under the radar.
+              </motion.div>
+            )}
+
             <motion.div variants={item} className="mt-3 grid grid-cols-3 gap-2 py-3"
               style={{ borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               {[
-                { label: "Total", value: flat.totalCommits.toLocaleString() },
-                { label: "Top repo", value: flat.topRepos[0]?.name ?? "—" },
-                { label: "PRs merged", value: flat.pullRequests.merged },
+                { label: "Languages", value: String(flat.languageCount) },
+                { label: "Lines", value: flat.totalLinesOfCode > 0 ? flat.totalLinesOfCode.toLocaleString() : "—" },
+                { label: "Diversity", value: `${flat.languageEntropyPct}%` },
               ].map((s, i) => (
-                <div key={i} className="text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined }}>
-                  <div className="text-white font-semibold text-sm truncate">{s.value}</div>
-                  <div className="text-white/40 text-[9px] uppercase tracking-wider mt-0.5">{s.label}</div>
+                <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined }}>
+                  <div className="truncate text-sm font-semibold text-white">{s.value}</div>
+                  <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/40">{s.label}</div>
                 </div>
               ))}
             </motion.div>
-            <motion.div variants={item} className="mt-3 space-y-2">
-              <div className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Top repositories</div>
-              {flat.topRepos.slice(0, 3).map((r, i) => (
-                <div key={r.name} className="flex items-center gap-2">
-                  <div className="text-white/80 text-xs w-24 truncate">{r.name}</div>
-                  <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                    <motion.div className="h-full rounded-full" initial={{ width: 0 }}
-                      animate={{ width: `${(r.commits / maxRepo) * 100}%` }}
-                      transition={{ duration: 1.2, delay: 0.8 + i * 0.15, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-                      style={{ background: "linear-gradient(90deg, #22c55e, #4ade80)", boxShadow: "0 0 6px rgba(74,222,128,0.5)" }} />
-                  </div>
-                  <div className="text-white/50 text-[10px] font-mono w-8 text-right">{r.commits}</div>
+
+            {flat.topics.length > 0 && (
+              <motion.div variants={item} className="mt-3">
+                <div className="mb-1.5 text-[10px] uppercase tracking-wider text-white/40">Tech &amp; topics</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {flat.topics.slice(0, 6).map((t) => (
+                    <span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-2 py-0.5 text-[10px] text-emerald-200">{t}</span>
+                  ))}
                 </div>
-              ))}
-            </motion.div>
+              </motion.div>
+            )}
+
+            {ct && ct.sampleSize > 0 && (
+              <motion.div variants={item} className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-[11px]">
+                  <span className="text-white/60">Commit mix</span>
+                  <span className="font-mono text-red-300">{flat.fixRatioPct}% fixes</span>
+                </div>
+                <div className="flex h-1.5 w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  {[
+                    { v: ct.feat, c: "#22c55e" },
+                    { v: ct.fix, c: "#ef4444" },
+                    { v: ct.refactor, c: "#a78bfa" },
+                    { v: ct.docs + ct.test + ct.chore + ct.other, c: "#64748b" },
+                  ].map((seg, i) => (
+                    <div key={i} style={{ width: `${(seg.v / ct.sampleSize) * 100}%`, background: seg.c }} />
+                  ))}
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] text-white/45">
+                  <span><span style={{ color: "#22c55e" }}>●</span> feat {ct.feat}</span>
+                  <span><span style={{ color: "#ef4444" }}>●</span> fix {ct.fix}</span>
+                  <span><span style={{ color: "#a78bfa" }}>●</span> refactor {ct.refactor}</span>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
 

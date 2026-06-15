@@ -156,7 +156,7 @@ function findTopRepo(repos: GitHubRepo[], contributions: Contribution[]): GitHub
     repos.find((r) => r.name === top) ??
     repos.slice().sort((a, b) => b.stargazersCount - a.stargazersCount)[0] ?? {
       name: "", description: null, language: null, stargazersCount: 0,
-      forksCount: 0, isPrivate: false, createdAt: "", pushedAt: "", isFork: false,
+      forksCount: 0, isPrivate: false, createdAt: "", pushedAt: "", isFork: false, topics: [],
     }
   );
 }
@@ -219,76 +219,172 @@ function calcScores(
 
 // --- Achievements ---
 
+type Rarity = "common" | "uncommon" | "rare" | "legendary";
+
+const RARITY: Record<Rarity, { color: string; imp: number }> = {
+  common:    { color: "#9aa4b2", imp: 20 },
+  uncommon:  { color: "#34d399", imp: 45 },
+  rare:      { color: "#a78bfa", imp: 70 },
+  legendary: { color: "#fbbf24", imp: 95 },
+};
+
 type AchievementDef = {
   id: AchievementId;
-  emoji: string;
+  icon: string;
+  rarity: Rarity;
+  boost?: number; // tie-breaker / within-tier importance nudge
   label: string;
   description: string;
   check: (data: GitHubRawData, metrics: CalculatedMetrics) => string | null;
 };
 
+function nightCommitsOf(data: GitHubRawData): number {
+  return data.contributions.filter((c) => c.hour >= 0 && c.hour <= 5).reduce((s, c) => s + c.count, 0);
+}
+function busiestDay(data: GitHubRawData): [string, number] {
+  const totals: Record<string, number> = {};
+  for (const c of data.contributions) totals[c.date] = (totals[c.date] ?? 0) + c.count;
+  return Object.entries(totals).sort((a, b) => b[1] - a[1])[0] ?? ["", 0];
+}
+
 const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
+  // ── volume ──
   {
-    id: "night_owl", emoji: "N", label: "Night Owl", description: "50+ commits after midnight",
-    check: (data) => {
-      const n = data.contributions.filter((c) => c.hour >= 0 && c.hour <= 5).reduce((s, c) => s + c.count, 0);
-      return n >= 50 ? `${n} commits after midnight` : null;
-    },
+    id: "centurion", icon: "medal", rarity: "uncommon", label: "Centurion", description: "100+ commits",
+    check: (_, m) => m.totalCommits >= 100 ? `${m.totalCommits.toLocaleString()} commits` : null,
   },
   {
-    id: "on_fire", emoji: "F", label: "On Fire", description: "7+ day contribution streak",
+    id: "grandmaster", icon: "crown", rarity: "rare", boost: 6, label: "Grandmaster", description: "1,000+ commits",
+    check: (_, m) => m.totalCommits >= 1000 ? `${m.totalCommits.toLocaleString()} commits` : null,
+  },
+  {
+    id: "machine", icon: "gauge", rarity: "legendary", boost: 5, label: "Machine", description: "5,000+ commits",
+    check: (_, m) => m.totalCommits >= 5000 ? `${m.totalCommits.toLocaleString()} commits` : null,
+  },
+  {
+    id: "speed_demon", icon: "bolt", rarity: "uncommon", boost: 3, label: "Speed Demon", description: "20+ commits in a single day",
+    check: (data) => { const [d, c] = busiestDay(data); return c >= 20 ? `${c} commits on ${d}` : null; },
+  },
+  // ── streaks ──
+  {
+    id: "on_fire", icon: "flame", rarity: "uncommon", label: "On Fire", description: "7+ day streak",
     check: (_, m) => m.streak.currentStreak >= 7 ? `${m.streak.currentStreak} day streak` : null,
   },
   {
-    id: "polyglot", emoji: "P", label: "Polyglot", description: "Used 3+ programming languages",
-    check: (data) => data.languages.length >= 3 ? `${data.languages.length} languages used` : null,
+    id: "marathoner", icon: "flame", rarity: "rare", label: "Marathoner", description: "30+ day streak",
+    check: (_, m) => m.streak.longestStreak >= 30 ? `${m.streak.longestStreak} day streak` : null,
   },
   {
-    id: "weekend_warrior", emoji: "W", label: "Weekend Warrior", description: "Committed every weekend",
-    check: (_, m) => m.activeDays.weekendWarrior ? "Committed every weekend" : null,
+    id: "unstoppable", icon: "flame", rarity: "legendary", boost: 3, label: "Unstoppable", description: "100+ day streak",
+    check: (_, m) => m.streak.longestStreak >= 100 ? `${m.streak.longestStreak} day streak` : null,
   },
   {
-    id: "speed_demon", emoji: "S", label: "Speed Demon", description: "20+ commits in a single day",
-    check: (data) => {
-      const totals: Record<string, number> = {};
-      for (const c of data.contributions) totals[c.date] = (totals[c.date] ?? 0) + c.count;
-      const [date, count] = Object.entries(totals).sort((a, b) => b[1] - a[1])[0] ?? ["", 0];
-      return count >= 20 ? `${count} commits in one day on ${date}` : null;
-    },
-  },
-  {
-    id: "architect", emoji: "A", label: "Architect", description: "Active in 5+ repos simultaneously",
-    check: (data) => {
-      const n = new Set(data.contributions.filter((c) => c.count > 0).map((c) => c.repoName)).size;
-      return n >= 5 ? `${n} repos active simultaneously` : null;
-    },
-  },
-  {
-    id: "consistent", emoji: "C", label: "Consistent", description: "Contributions every week",
+    id: "consistent", icon: "calendar", rarity: "rare", label: "Consistent", description: "Contributions every week",
     check: (data) => {
       const weeks = Math.max(1, Math.ceil(daysBetween(data.period.startDate, data.period.endDate) / 7));
       const active = new Set(data.contributions.filter((c) => c.count > 0).map((c) => getWeekNumber(c.date)));
-      return active.size >= weeks ? "Contributions every week" : null;
+      return active.size >= weeks ? "Active every week" : null;
+    },
+  },
+  // ── time of day ──
+  {
+    id: "night_owl", icon: "owl", rarity: "uncommon", label: "Night Owl", description: "50+ commits after midnight",
+    check: (data) => { const n = nightCommitsOf(data); return n >= 50 ? `${n} late-night commits` : null; },
+  },
+  {
+    id: "midnight_coder", icon: "moon", rarity: "common", label: "Midnight Coder", description: "Coded between 0–4 AM",
+    check: (data) => data.contributions.some((c) => c.count > 0 && c.hour >= 0 && c.hour <= 4) ? "Shipped after midnight" : null,
+  },
+  {
+    id: "early_bird", icon: "sunrise", rarity: "uncommon", label: "Early Bird", description: "Productive at dawn",
+    check: (data) => {
+      const n = data.contributions.filter((c) => c.hour >= 5 && c.hour <= 8).reduce((s, c) => s + c.count, 0);
+      return n >= 20 ? `${n} dawn commits` : null;
     },
   },
   {
-    id: "midnight_coder", emoji: "M", label: "Midnight Coder", description: "Coded between midnight and 4 AM",
-    check: (data) =>
-      data.contributions.some((c) => c.count > 0 && c.hour >= 0 && c.hour <= 4)
-        ? "Coded between midnight and 4 AM"
-        : null,
+    id: "weekend_warrior", icon: "swords", rarity: "rare", label: "Weekend Warrior", description: "Committed every weekend",
+    check: (_, m) => m.activeDays.weekendWarrior ? "Every weekend covered" : null,
+  },
+  // ── languages / tech ──
+  {
+    id: "polyglot", icon: "globe", rarity: "common", label: "Polyglot", description: "3+ languages",
+    check: (data) => data.languages.length >= 3 ? `${data.languages.length} languages` : null,
   },
   {
-    id: "open_source_hero", emoji: "O", label: "Open Source Hero", description: "10+ stars received",
-    check: (data) => data.totalStarsReceived >= 10 ? `${data.totalStarsReceived} stars received` : null,
+    id: "polyglot_master", icon: "globe", rarity: "rare", boost: 2, label: "Polyglot Master", description: "6+ languages",
+    check: (data) => data.languages.length >= 6 ? `${data.languages.length} languages` : null,
   },
   {
-    id: "graveyard_keeper", emoji: "G", label: "Graveyard Keeper", description: "Maintaining a forgotten repo",
+    id: "specialist", icon: "diamond", rarity: "uncommon", label: "Specialist", description: "One language, 80%+",
+    check: (data) => data.languages[0] && data.languages[0].percentage >= 80 ? `${data.languages[0].language} ${data.languages[0].percentage}%` : null,
+  },
+  {
+    id: "architect", icon: "columns", rarity: "uncommon", label: "Architect", description: "Active in 5+ repos",
+    check: (data) => {
+      const n = new Set(data.contributions.filter((c) => c.count > 0 && c.repoName).map((c) => c.repoName)).size;
+      return n >= 5 ? `${n} repos at once` : null;
+    },
+  },
+  {
+    id: "repo_baron", icon: "layers", rarity: "rare", label: "Repo Baron", description: "15+ public repos",
+    check: (data) => { const n = data.repos.filter((r) => !r.isFork).length; return n >= 15 ? `${n} repositories` : null; },
+  },
+  // ── impact / open source ──
+  {
+    id: "open_source_hero", icon: "star", rarity: "uncommon", label: "Open Source Hero", description: "10+ stars received",
+    check: (data) => data.totalStarsReceived >= 10 ? `${data.totalStarsReceived} stars` : null,
+  },
+  {
+    id: "star_collector", icon: "star", rarity: "rare", boost: 2, label: "Star Collector", description: "50+ stars received",
+    check: (data) => data.totalStarsReceived >= 50 ? `${data.totalStarsReceived} stars` : null,
+  },
+  {
+    id: "star_magnate", icon: "crown", rarity: "legendary", label: "Star Magnate", description: "250+ stars received",
+    check: (data) => data.totalStarsReceived >= 250 ? `${data.totalStarsReceived} stars` : null,
+  },
+  {
+    id: "forked", icon: "fork", rarity: "rare", label: "Forked", description: "10+ forks received",
+    check: (data) => data.totalForksReceived >= 10 ? `${data.totalForksReceived} forks` : null,
+  },
+  {
+    id: "influencer", icon: "users", rarity: "rare", boost: 1, label: "Influencer", description: "100+ followers",
+    check: (data) => data.user.followersCount >= 100 ? `${data.user.followersCount} followers` : null,
+  },
+  // ── tenure ──
+  {
+    id: "veteran", icon: "shield", rarity: "uncommon", boost: 2, label: "Veteran", description: "5+ years on GitHub",
+    check: (_, m) => m.githubAge >= 5 * 365 ? `${Math.floor(m.githubAge / 365)} years in` : null,
+  },
+  {
+    id: "decade_dev", icon: "shield", rarity: "legendary", label: "Decade Dev", description: "10+ years on GitHub",
+    check: (_, m) => m.githubAge >= 10 * 365 ? `${Math.floor(m.githubAge / 365)} years in` : null,
+  },
+  // ── commit craft (best-effort, needs commitStats) ──
+  {
+    id: "fixer", icon: "wrench", rarity: "uncommon", label: "Fixer", description: "Heavy on bug fixes",
+    check: (data) => { const c = data.commitStats; return c && c.sampleSize >= 10 && c.fix / c.sampleSize >= 0.25 ? `${Math.round((c.fix / c.sampleSize) * 100)}% fixes` : null; },
+  },
+  {
+    id: "feature_factory", icon: "sparkles", rarity: "uncommon", boost: 1, label: "Feature Factory", description: "Mostly new features",
+    check: (data) => { const c = data.commitStats; return c && c.sampleSize >= 10 && c.feat / c.sampleSize >= 0.4 ? `${Math.round((c.feat / c.sampleSize) * 100)}% features` : null; },
+  },
+  {
+    id: "documenter", icon: "book", rarity: "common", label: "Documenter", description: "Writes the docs",
+    check: (data) => { const c = data.commitStats; return c && c.docs >= 5 ? `${c.docs} docs commits` : null; },
+  },
+  // ── momentum / legacy ──
+  {
+    id: "rising_star", icon: "trending", rarity: "uncommon", label: "Rising Star", description: "Activity trending up",
+    check: (_, m) => m.growthDelta.trend === "up" && m.growthDelta.deltaPercent >= 50 ? `+${m.growthDelta.deltaPercent}% momentum` : null,
+  },
+  {
+    id: "graveyard_keeper", icon: "skull", rarity: "common", label: "Graveyard Keeper", description: "Maintaining a forgotten repo",
     check: (data) => {
       const cutoff = new Date(data.period.endDate);
       cutoff.setFullYear(cutoff.getFullYear() - 1);
-      const repo = data.repos.find((r) => !r.isFork && r.stargazersCount === 0 && new Date(r.pushedAt) < cutoff);
-      return repo ? `Keeping ${repo.name} alive since ${new Date(repo.pushedAt).getFullYear()}` : null;
+      const repo = data.repos.find((r) => !r.isFork && r.stargazersCount === 0 && r.pushedAt && new Date(r.pushedAt) < cutoff);
+      return repo ? `${repo.name} since ${new Date(repo.pushedAt).getFullYear()}` : null;
     },
   },
 ];
@@ -334,9 +430,13 @@ export function calculateAchievements(
 ): Achievement[] {
   return ACHIEVEMENT_DEFINITIONS.map((def) => {
     const reason = def.check(data, metrics);
+    const tier = RARITY[def.rarity];
     return {
       id: def.id,
-      emoji: def.emoji,
+      icon: def.icon,
+      color: tier.color,
+      rarity: def.rarity,
+      importance: tier.imp + (def.boost ?? 0),
       label: def.label,
       description: def.description,
       unlocked: reason !== null,

@@ -9,6 +9,7 @@ import { PlanetStage, Stars } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { captureElement } from "@/lib/captureElement";
 import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 
 
 const LANG_PALETTES: Record<string, { a: string; b: string; glow: string }> = {
@@ -136,12 +137,7 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
   const roastLine = profile.narrative?.roastLine ?? fallback.roastLine;
   const narrativeText = profile.narrative?.archetypeDescription ?? fallback.archetypeDescription;
 
-  const badgesEarned: string[] = [];
-  if (flat.longestStreak >= 7) badgesEarned.push("🔥 Streak");
-  if (flat.totalCommits >= 200) badgesEarned.push("⚡ Speed");
-  if (nightRatio >= 0.3) badgesEarned.push("🌙 Night Owl");
-  if (flat.pullRequests.merged >= 10) badgesEarned.push("🤝 Collab");
-  if (flat.totalCommits >= 100) badgesEarned.push("🛠️ Builder");
+  const badgesEarned = flat.traitBadges.slice(0, 5);
 
   const share = async () => {
     if (!cardRef.current) return;
@@ -215,16 +211,17 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
             <p className="mt-2 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {badgesEarned.map((b) => (
-                <span key={b} className="rounded-full border px-3 py-1 text-xs text-zinc-100"
-                  style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)", boxShadow: `0 0 12px ${palette.glow}` }}>
-                  {b}
+                <span key={b.id} className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-zinc-100"
+                  style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44` }}>
+                  <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
+                  {b.label}
                 </span>
               ))}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
                 { n: formatNum(flat.totalCommits), l: "commits" },
-                { n: formatNum(flat.linesAdded), l: "lines added" },
+                { n: formatNum(flat.totalLinesOfCode), l: "lines of code" },
                 { n: formatNum(flat.pullRequests.merged), l: "PRs merged" },
                 { n: formatNum(flat.totalRepos), l: "repos" },
               ].map((s) => (

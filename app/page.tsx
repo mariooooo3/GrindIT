@@ -81,61 +81,138 @@ function GithubMark({ size = 15 }: { size?: number }) {
 }
 
 function TrophyMark() {
+  // FIFA World Cup trophy: two figures spiralling up to a green globe with gold
+  // continents, on a green base band
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className="h-7 w-7">
+    <svg viewBox="0 0 64 64" aria-hidden className="h-8 w-8">
       <defs>
-        <linearGradient id="trophyGold" x1="18" x2="46" y1="8" y2="56" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#fff2a8" />
-          <stop offset="0.42" stopColor="#d7a83d" />
-          <stop offset="1" stopColor="#7a5119" />
+        <linearGradient id="wcGold" x1="18" y1="6" x2="46" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#fff4ad" />
+          <stop offset="0.32" stopColor="#f3c64a" />
+          <stop offset="0.66" stopColor="#cf9a1e" />
+          <stop offset="1" stopColor="#946312" />
         </linearGradient>
+        <radialGradient id="wcGlobe" cx="42%" cy="35%" r="68%">
+          <stop offset="0" stopColor="#3fae5a" />
+          <stop offset="100%" stopColor="#0f5e2a" />
+        </radialGradient>
+        <linearGradient id="wcBase" x1="0" y1="52" x2="0" y2="61" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#2f9b52" />
+          <stop offset="1" stopColor="#176233" />
+        </linearGradient>
+        <linearGradient id="wcSheen" x1="22" y1="16" x2="30" y2="52" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#fffbe6" stopOpacity="0.8" />
+          <stop offset="1" stopColor="#fffbe6" stopOpacity="0" />
+        </linearGradient>
+        <clipPath id="wcGlobeClip"><circle cx="32" cy="13" r="7.2" /></clipPath>
       </defs>
-      <path d="M18 12h28v10c0 10.8-5.9 19.5-14 19.5S18 32.8 18 22V12Z" fill="url(#trophyGold)" />
-      <path d="M20 16h-8v5.4c0 6.7 4.3 11.3 10.4 11.9" fill="none" stroke="#d7a83d" strokeWidth="4" strokeLinecap="round" />
-      <path d="M44 16h8v5.4c0 6.7-4.3 11.3-10.4 11.9" fill="none" stroke="#d7a83d" strokeWidth="4" strokeLinecap="round" />
-      <path d="M28 41h8v8h-8z" fill="#b7842d" />
-      <path d="M22 51h20l3 6H19l3-6Z" fill="url(#trophyGold)" />
-      <path d="M25 17h14" stroke="#fff7c8" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+
+      {/* base — green band with gold trim */}
+      <path d="M21 52 H43 L45 58 Q45 60.5 42.5 60.5 H21.5 Q19 60.5 19 58 Z" fill="url(#wcBase)" />
+      <rect x="20" y="52" width="24" height="1.5" rx="0.7" fill="url(#wcGold)" />
+      <rect x="20.5" y="58.6" width="23" height="1.1" rx="0.55" fill="#0e4f25" opacity="0.7" />
+
+      {/* body — slim twisted waist flaring to a wide base */}
+      <path d="M32 20 C 27 20 23 22 24 26 C 25 30 27 32 27 35 C 27 40 23 46 22 52 L 42 52 C 41 46 37 40 37 35 C 37 32 39 30 40 26 C 41 22 37 20 32 20 Z"
+            fill="url(#wcGold)" />
+      <path d="M32 20 C 27 20 23 22 24 26 C 25 30 27 32 27 35 C 27 40 23 46 22 52 L 27 52 C 26.5 46 27 40 29 35 C 27 31 27 26 29 22 C 29.8 21 30.8 20.3 32 20 Z"
+            fill="url(#wcSheen)" />
+      {/* spiral seams of the two figures */}
+      <g fill="none" stroke="#946312" strokeWidth="0.9" strokeLinecap="round" opacity="0.5">
+        <path d="M31 22 C 27 27 28 33 31 36 C 28 40 26 45 27 50" />
+        <path d="M34 22 C 38 27 37 33 33.5 36 C 37 40 39 45 38 50" />
+      </g>
+
+      {/* globe — green water + gold continents */}
+      <circle cx="32" cy="13" r="7.2" fill="url(#wcGlobe)" />
+      <g clipPath="url(#wcGlobeClip)" fill="url(#wcGold)">
+        <path d="M26.5 7.5 C 30 6.5 33 8 34 11 C 31.5 12 29.5 11 27.5 12 C 25.5 11 25.5 8.5 26.5 7.5 Z" />
+        <path d="M33 12.5 C 36.5 12.5 38.5 15 37 18.5 C 35 18.5 33 17 32.5 14.5 C 32.3 13.3 32.3 12.5 33 12.5 Z" />
+        <path d="M25 15 C 27.5 15 28.5 17 27.5 18.5 C 25.5 18.5 24.5 17 24.5 16 Z" />
+      </g>
+      <circle cx="32" cy="13" r="7.2" fill="none" stroke="#946312" strokeWidth="0.7" opacity="0.4" />
+      <ellipse cx="29.5" cy="10.3" rx="1.6" ry="1" fill="#eafff0" opacity="0.5" transform="rotate(-25 29.5 10.3)" />
     </svg>
   );
 }
 
 function SoccerBallMark() {
+  // FIFA "Trionda" 2026 ball — three colour waves (red / green / blue)
+  // pinwheeling around a central emblem on a white sphere
+  // wavy S-curve spine, stroked thick → reads as a flowing Trionda colour wave
+  const wave = "M31 33 C 35 25 24 21 25 13 C 25.5 8.5 21 6.5 15 8";
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className="h-7 w-7">
-      <circle cx="32" cy="32" r="28" fill="#f8fafc" />
-      <path d="M32 17 44 26l-4.5 14h-15L20 26l12-9Z" fill="#151515" />
-      <path d="m32 17 2.4-9.2M44 26l9.2-2.6M39.5 40l5.7 7.8M24.5 40l-5.7 7.8M20 26l-9.2-2.6" stroke="#151515" strokeWidth="4" strokeLinecap="round" />
-      <path d="M32 5.5a26.5 26.5 0 1 1 0 53 26.5 26.5 0 0 1 0-53Z" fill="none" stroke="#d4d4d8" strokeWidth="3" />
-      <path d="M21 12.5c-5.2 2.7-9.1 7.1-11.1 12.4M43 12.5c5.2 2.7 9.1 7.1 11.1 12.4M13.6 46.5c4.3 6.5 11 10 18.4 10s14.1-3.5 18.4-10" fill="none" stroke="#151515" strokeWidth="2.5" strokeLinecap="round" opacity="0.22" />
+    <svg viewBox="0 0 64 64" aria-hidden className="h-8 w-8">
+      <defs>
+        <radialGradient id="ballSphere" cx="38%" cy="30%" r="72%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="62%" stopColor="#eef1f5" />
+          <stop offset="100%" stopColor="#bcc2cc" />
+        </radialGradient>
+        <radialGradient id="ballGloss" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <clipPath id="ballClip"><circle cx="32" cy="32" r="28" /></clipPath>
+      </defs>
+
+      <circle cx="32" cy="32" r="28" fill="url(#ballSphere)" />
+
+      {/* three wavy colour ribbons */}
+      <g clipPath="url(#ballClip)" fill="none" strokeLinecap="round">
+        <path d={wave} stroke="#c8163d" strokeWidth="9" />
+        <path d={wave} stroke="#1f9d4d" strokeWidth="9" transform="rotate(120 32 32)" />
+        <path d={wave} stroke="#1d7fe0" strokeWidth="9" transform="rotate(240 32 32)" />
+      </g>
+
+      {/* curved panel seams — prominent so it clearly reads as a ball */}
+      <g clipPath="url(#ballClip)" fill="none" stroke="#2a2e38" strokeLinecap="round" opacity="0.7">
+        <path d="M5 25 Q 32 15 59 25" strokeWidth="1.8" />
+        <path d="M5 39 Q 32 49 59 39" strokeWidth="1.8" />
+        <path d="M23 4 Q 13 32 23 60" strokeWidth="1.6" />
+        <path d="M41 4 Q 51 32 41 60" strokeWidth="1.6" />
+      </g>
+
+      {/* central emblem */}
+      <g clipPath="url(#ballClip)">
+        <circle cx="32" cy="32" r="6.8" fill="#1d7fe0" />
+        <circle cx="32" cy="32" r="6.8" fill="none" stroke="#ffffff" strokeWidth="1.6" />
+        <circle cx="32" cy="32" r="2.7" fill="#ffffff" opacity="0.9" />
+      </g>
+
+      {/* glossy highlight + rim shading */}
+      <ellipse cx="23" cy="20" rx="12" ry="8" fill="url(#ballGloss)" transform="rotate(-28 23 20)" clipPath="url(#ballClip)" />
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#000000" strokeOpacity="0.16" strokeWidth="1.2" />
     </svg>
   );
 }
 
-function WorldCupAccent() {
+// Theme switcher (nav): trophy = active theme emblem, spinning ball = toggle
+function ThemeSwitch() {
   return (
-    <div className="pointer-events-none absolute right-12 bottom-2 hidden flex-col items-center gap-1 sm:flex">
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200/10 bg-amber-300/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-        <div className="pointer-events-none absolute inset-1 rounded-full bg-amber-300/10 blur-md" />
-        <div className="relative">
-          <TrophyMark />
-        </div>
-      </div>
-        <button
-          type="button"
-          aria-label="World Cup theme preview"
-          className="pointer-events-auto group relative grid h-9 w-9 place-items-center rounded-full border border-white/[0.12] bg-zinc-950/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/35 hover:bg-zinc-900 active:scale-[0.95]"
-        >
-          <motion.span
-            className="block"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-          >
-            <SoccerBallMark />
-          </motion.span>
-          <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
-        </button>
-    </div>
+    <button
+      type="button"
+      aria-label="Active theme: World Cup — switch theme"
+      title="Monthly theme · World Cup"
+      className="group relative hidden items-center gap-1.5 rounded-full border border-white/[0.12] bg-black/40 py-1 pl-2 pr-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-zinc-900/70 active:scale-[0.97] sm:flex"
+      style={{ backdropFilter: "blur(12px)" }}
+    >
+      <span className="grid place-items-center">
+        <TrophyMark />
+      </span>
+      <motion.span
+        className="grid place-items-center"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+      >
+        <SoccerBallMark />
+      </motion.span>
+      <span className="flex flex-col items-start leading-none">
+        <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500 transition-colors group-hover:text-emerald-300/70">Theme</span>
+        <span className="text-[11px] font-semibold tracking-[-0.01em] text-white/90">World Cup</span>
+      </span>
+      <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
+    </button>
   );
 }
 
@@ -182,12 +259,15 @@ function Nav() {
               </a>
             </div>
           </div>
-          {/* right: auth + eyebrow sub-label */}
-          <div className="relative z-10 flex flex-col items-center gap-1">
-            <AuthButton />
-            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
-              Developer Recap · Any Period
+          {/* right: theme switch + auth + eyebrow sub-label */}
+          <div className="relative z-10 flex items-center gap-2.5">
+            <ThemeSwitch />
+            <div className="flex flex-col items-center gap-1">
+              <AuthButton />
+              <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
+                Developer Recap · Any Period
+              </div>
             </div>
           </div>
         </div>
@@ -490,7 +570,6 @@ function HomePageInner() {
               Pick any period — week, month, year or all time. Get a cinematic recap of your commits, repos, languages and streaks.
             </p>
             {/* username row — shown only when not logged in */}
-            <WorldCupAccent />
             {!isLoggedIn && (
               <div className="flex gap-2">
                 <div className="relative flex-1">

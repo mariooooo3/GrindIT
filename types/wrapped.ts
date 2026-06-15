@@ -26,6 +26,21 @@ export type GitHubRepo = {
   createdAt: string;
   pushedAt: string;
   isFork: boolean;
+  topics: string[];
+};
+
+// Best-effort breakdown of commit messages by conventional-commit type.
+// Sampled (not exhaustive) and only populated when commit messages are reachable.
+export type CommitStats = {
+  sampleSize: number;
+  fix: number;
+  feat: number;
+  refactor: number;
+  docs: number;
+  test: number;
+  chore: number;
+  other: number;
+  hourHistogram: number[]; // 24 buckets, from real commit timestamps in the sample
 };
 
 export type Contribution = {
@@ -58,6 +73,7 @@ export type GitHubRawData = {
   pullRequests: PullRequest[];
   totalStarsReceived: number;
   totalForksReceived: number;
+  commitStats: CommitStats | null;
   period: Period;
 };
 
@@ -122,11 +138,35 @@ export type AchievementId =
   | "consistent"
   | "midnight_coder"
   | "open_source_hero"
-  | "graveyard_keeper";
+  | "graveyard_keeper"
+  | "centurion"
+  | "grandmaster"
+  | "machine"
+  | "marathoner"
+  | "unstoppable"
+  | "early_bird"
+  | "polyglot_master"
+  | "specialist"
+  | "repo_baron"
+  | "star_collector"
+  | "star_magnate"
+  | "forked"
+  | "influencer"
+  | "veteran"
+  | "decade_dev"
+  | "fixer"
+  | "feature_factory"
+  | "documenter"
+  | "rising_star";
+
+export type Rarity = "common" | "uncommon" | "rare" | "legendary";
 
 export type Achievement = {
   id: AchievementId;
-  emoji: string;
+  icon: string; // GlyphName from components/wrapped/TrophyIcons
+  color: string;
+  rarity: Rarity;
+  importance: number;
   label: string;
   description: string;
   unlocked: boolean;

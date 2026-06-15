@@ -6,6 +6,7 @@ import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 
 function CountUpInner({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -18,11 +19,14 @@ function CountUpInner({ value }: { value: number }) {
 }
 
 function Confetti() {
-  const pieces = useMemo(() => Array.from({ length: 60 }, () => ({
-    x: Math.random() * 100, delay: Math.random() * 6, dur: Math.random() * 6 + 6, rot: Math.random() * 360,
-    color: ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6"][Math.floor(Math.random() * 5)],
-    w: Math.random() * 6 + 4, h: Math.random() * 10 + 6,
-  })), []);
+  const pieces = useMemo(() => Array.from({ length: 60 }, (_, i) => {
+    const r = (k: number) => { const v = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); };
+    return {
+      x: r(1) * 100, delay: r(2) * 6, dur: r(3) * 6 + 6, rot: r(4) * 360,
+      color: ["#ff3ea5", "#a855f7", "#22d3ee", "#facc15", "#f472b6"][Math.floor(r(5) * 5)],
+      w: r(6) * 6 + 4, h: r(7) * 10 + 6,
+    };
+  }), []);
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {pieces.map((p, i) => (
@@ -87,26 +91,6 @@ function DanceFloor() {
   );
 }
 
-const BADGES = [
-  { id: "streak", icon: "🔥", name: "Streak" },
-  { id: "speed", icon: "⚡", name: "Speed" },
-  { id: "night", icon: "🌙", name: "Night Owl" },
-  { id: "collab", icon: "🤝", name: "Collab" },
-  { id: "builder", icon: "🛠️", name: "Builder" },
-  { id: "cleaner", icon: "🧹", name: "Cleaner" },
-];
-
-function deriveBadges(totalCommits: number, longestStreak: number, nightCommits: number, prsMerged: number, fixCommits: number): string[] {
-  const earned: string[] = [];
-  if (longestStreak >= 7) earned.push("streak");
-  if (totalCommits >= 200) earned.push("speed");
-  if (nightCommits > totalCommits * 0.3) earned.push("night");
-  if (prsMerged >= 10) earned.push("collab");
-  if (totalCommits >= 100) earned.push("builder");
-  if (fixCommits > 0 || totalCommits > 50) earned.push("cleaner");
-  return earned;
-}
-
 function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-2">
@@ -118,8 +102,8 @@ function StatItem({ label, value }: { label: string; value: number }) {
 
 export default function SlideArchetype({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
-  const earnedIds = deriveBadges(flat.totalCommits, flat.longestStreak, flat.nightCommits, flat.pullRequests.merged, flat.fixCommits);
-  const rarest = earnedIds.includes("night") ? "night" : earnedIds.includes("streak") ? "streak" : earnedIds[0] ?? "builder";
+  const badges = flat.traitBadges.slice(0, 6);
+  const topBadgeId = badges[0]?.id;
   const archetypeDisplay = flat.archetype
     ? flat.archetype.toUpperCase().startsWith("THE ") ? flat.archetype.toUpperCase() : `THE ${flat.archetype.toUpperCase()}`
     : "THE BUILDER";
@@ -168,30 +152,35 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
             <div className="mt-3 flex">
               <span className="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
                 style={{ background: "linear-gradient(90deg,#ff3ea5,#a855f7,#22d3ee,#facc15)", color: "#080612", boxShadow: "0 4px 18px rgba(168,85,247,0.45)" }}>
-                Achievements unlocked
+                Trait badges
               </span>
             </div>
             <div className="mt-3">
               <div className="leading-none" style={{ fontSize: 44, fontWeight: 900, background: "linear-gradient(90deg,#ff3ea5,#a855f7,#22d3ee,#facc15,#ff3ea5)", backgroundSize: "300% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7 6s linear infinite", letterSpacing: "-0.03em" }}>
-                <CountUpInner value={earnedIds.length} />
+                <CountUpInner value={flat.traitBadges.length} />
               </div>
-              <div className="text-xs text-white/55">badges earned</div>
+              <div className="text-xs text-white/55">trait badges</div>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {BADGES.map((b, i) => {
-                const isEarned = earnedIds.includes(b.id);
-                const isRare = b.id === rarest;
-                return (
-                  <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 + i * 0.08 }}
-                    className="flex flex-col items-center gap-1 rounded-xl p-2"
-                    style={{ background: isEarned ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.01)", border: isRare ? "1px solid rgba(250,204,21,0.7)" : "1px solid rgba(255,255,255,0.06)", boxShadow: isRare ? "0 0 0 1px rgba(250,204,21,0.35), 0 0 24px rgba(250,204,21,0.55), inset 0 0 18px rgba(250,204,21,0.18)" : undefined, opacity: isEarned ? 1 : 0.35 }}>
-                    <div className="text-2xl">{b.icon}</div>
-                    <div className="text-[10px] font-medium" style={{ color: isRare ? "#facc15" : "rgba(255,255,255,0.7)" }}>{b.name}</div>
-                  </motion.div>
-                );
-              })}
-            </div>
+            {badges.length > 0 ? (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {badges.map((b, i) => {
+                  const isTop = b.id === topBadgeId;
+                  return (
+                    <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9 + i * 0.08 }}
+                      className="flex flex-col items-center gap-1.5 rounded-xl p-2.5"
+                      style={{ background: `${b.color}12`, border: `1px solid ${b.color}${isTop ? "" : "33"}`, boxShadow: isTop ? `0 0 0 1px ${b.color}55, 0 0 22px ${b.color}66, inset 0 0 16px ${b.color}22` : undefined }}>
+                      <span style={{ color: b.color, filter: `drop-shadow(0 0 5px ${b.color}88)` }}><Glyph name={b.icon as GlyphName} size={24} /></span>
+                      <div className="text-center text-[10px] font-medium leading-tight" style={{ color: isTop ? b.color : "rgba(255,255,255,0.75)" }}>{b.label}</div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-xs text-white/50">
+                Still warming up — your vibe is taking shape.
+              </div>
+            )}
             <div className="mt-3 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/5 bg-white/[0.02] py-3 text-center">
               <StatItem label="commits" value={flat.totalCommits} />
               <StatItem label="PRs merged" value={flat.pullRequests.merged} />

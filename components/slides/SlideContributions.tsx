@@ -179,9 +179,13 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
   const flat = mapToFlat(profile);
   const prsOpened = flat.pullRequests.opened;
   const prsMerged = flat.pullRequests.merged;
-  const prsReviewed = flat.pullRequests.reviewed;
-  const topRepo = flat.topRepos[0]?.name ?? "—";
-  const pct = prsOpened > 0 ? Math.round((prsMerged / prsOpened) * 100) : 0;
+  const pct = flat.prMergeRatePct;
+  const hasPRs = prsOpened > 0;
+  const topRepo = flat.topRepoCard?.name ?? flat.topRepos[0]?.name ?? "—";
+  const impactZero = flat.totalStars + flat.totalForks + flat.followers === 0;
+  const impactItems = impactZero
+    ? [{ label: "Commits", value: flat.totalCommits }, { label: "Repos", value: flat.ownedRepoCount }, { label: "Active days", value: flat.activeDayCount }]
+    : [{ label: "Stars", value: flat.totalStars }, { label: "Forks", value: flat.totalForks }, { label: "Followers", value: flat.followers }];
 
   const mergedSlots = useMemo(() => {
     const total = 3;
@@ -218,7 +222,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
         {/* CENTER */}
         <div className="flex items-center justify-center">
           <motion.div data-share-card initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative w-full max-w-[380px] rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-2xl h-[500px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="relative w-full max-w-[400px] rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-2xl h-[580px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{ boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -229,32 +233,83 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
               </div>
             </motion.div>
             <div className="mt-4 space-y-3">
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="flex items-baseline justify-between">
-                <span className="text-sm text-white/60">Pull Requests Opened</span>
-                <span className="text-xl font-bold text-white">{prsOpened}</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm text-white/60">Pull Requests Merged</span>
-                  <span className="text-xl font-bold text-white">{prsMerged}<span className="ml-1 text-sm font-normal text-white/40">/ {prsOpened}</span></span>
+              {hasPRs ? (
+                <>
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-white/60">Pull requests merged</span>
+                      <span className="text-xl font-bold text-white">{prsMerged}<span className="ml-1 text-sm font-normal text-white/40">/ {prsOpened}</span></span>
+                    </div>
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                        transition={{ duration: 1.2, delay: 0.9, ease: "easeOut" }}
+                        className="h-full rounded-full"
+                        style={{ background: "linear-gradient(90deg, #34d399 0%, #10b981 60%, #059669 100%)", boxShadow: "0 0 12px rgba(52,211,153,0.6)" }} />
+                    </div>
+                    <div className="mt-1 text-right text-xs text-emerald-300/80">{pct}% merge rate</div>
+                  </motion.div>
+                  {flat.prRepos.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+                      <div className="mb-1.5 text-xs uppercase tracking-wider text-white/50">Landed in {flat.prRepos.length} repo{flat.prRepos.length > 1 ? "s" : ""}</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {flat.prRepos.slice(0, 4).map(r => (
+                          <span key={r} className="rounded-full border border-orange-300/25 bg-orange-300/[0.08] px-2 py-0.5 text-[11px] font-mono text-orange-200">{r}</span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                  {flat.prTitles.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}
+                      className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                      <div className="text-[10px] uppercase tracking-wider text-white/45">Notable PR</div>
+                      <div className="mt-0.5 line-clamp-2 text-sm text-white/85">&ldquo;{flat.prTitles[0]}&rdquo;</div>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-xs uppercase tracking-wider text-white/50">Most active repository</div>
+                  <div className="mt-1 font-mono text-base text-orange-300">{topRepo}</div>
+                  <div className="mt-2 text-[11px] leading-relaxed text-white/45">No pull requests this period — but the work still shipped. Here&apos;s the footprint.</div>
+                </motion.div>
+              )}
+
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.92 }}>
+                <div className="mb-1.5 text-[10px] uppercase tracking-wider text-white/45">Activity reach</div>
+                <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-white/[0.03] py-3">
+                  {[
+                    { label: "Commits", value: flat.totalCommits },
+                    { label: "Repos touched", value: flat.reposTouched },
+                    { label: "Active days", value: flat.activeDayCount },
+                  ].map((s, i) => (
+                    <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.08)" : undefined }}>
+                      <div className="text-base font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                      <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/45">{s.label}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                    transition={{ duration: 1.2, delay: 0.9, ease: "easeOut" }}
-                    className="h-full rounded-full"
-                    style={{ background: "linear-gradient(90deg, #34d399 0%, #10b981 60%, #059669 100%)", boxShadow: "0 0 12px rgba(52,211,153,0.6)" }} />
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
+                <div className="mb-1.5 text-[10px] uppercase tracking-wider text-white/45">Open-source impact</div>
+                <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-white/[0.03] py-3">
+                  {impactItems.map((s, i) => (
+                    <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.08)" : undefined }}>
+                      <div className="text-base font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                      <div className="mt-0.5 text-[9px] uppercase tracking-wider text-white/45">{s.label}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-1 text-right text-xs text-emerald-300/80">{pct}% merge rate</div>
               </motion.div>
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="flex items-baseline justify-between">
-                <span className="text-sm text-white/60">Pull Requests Reviewed</span>
-                <span className="text-xl font-bold text-white">{prsReviewed}</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs uppercase tracking-wider text-white/50">Most Active Repository</div>
-                <div className="mt-1 font-mono text-base text-orange-300">{topRepo}</div>
-              </motion.div>
+
+              {hasPRs && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="text-xs uppercase tracking-wider text-white/50">Most active repository</div>
+                  <div className="mt-1 font-mono text-base text-orange-300">{topRepo}</div>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         </div>

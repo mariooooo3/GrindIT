@@ -5,6 +5,7 @@ import type {
   LanguageStats,
   PullRequest,
   GitHubRawData,
+  CommitStats,
   Period,
 } from "@/types/wrapped";
 
@@ -176,6 +177,7 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
     created_at: string;
     pushed_at: string;
     fork: boolean;
+    topics?: string[];
   };
 
   const all: GitHubRepo[] = [];
@@ -197,6 +199,7 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
         createdAt: r.created_at,
         pushedAt: r.pushed_at,
         isFork: r.fork,
+        topics: r.topics ?? [],
       }))
     );
     if (batch.length < 100) break;
@@ -204,6 +207,56 @@ async function fetchGitHubRepos(username: string, token?: string): Promise<GitHu
   }
 
   return all;
+}
+
+// Classify a commit message by conventional-commit type (with keyword fallback).
+type CommitType = "fix" | "feat" | "refactor" | "docs" | "test" | "chore" | "other";
+function classifyCommit(message: string): CommitType {
+  const m = message.trim().toLowerCase();
+  const conv = m.match(/^(\w+)(?:\([^)]*\))?!?:/)?.[1];
+  if (conv) {
+    if (["fix", "bugfix", "hotfix"].includes(conv)) return "fix";
+    if (conv === "feat") return "feat";
+    if (["refactor", "perf"].includes(conv)) return "refactor";
+    if (["docs", "doc"].includes(conv)) return "docs";
+    if (["test", "tests"].includes(conv)) return "test";
+    if (["chore", "build", "ci", "style"].includes(conv)) return "chore";
+  }
+  if (/\b(fix|fixes|fixed|bug|bugfix|patch|hotfix)\b/.test(m)) return "fix";
+  if (/\b(add|added|feat|feature|implement|introduce|create)\b/.test(m)) return "feat";
+  if (/\b(refactor|cleanup|simplif|optimi|perf)\b/.test(m)) return "refactor";
+  if (/\b(docs?|readme|comment)\b/.test(m)) return "docs";
+  if (/\b(tests?|spec)\b/.test(m)) return "test";
+  if (/\b(chore|bump|release|merge|ci|build|lint|format)\b/.test(m)) return "chore";
+  return "other";
+}
+
+// Best-effort: sample the user's recent commits and break them down by type.
+// search/commits effectively requires auth, so this returns null when unauthenticated.
+async function fetchCommitStats(username: string, token?: string): Promise<CommitStats | null> {
+  if (!token) return null;
+  try {
+    type SearchResult = { items: Array<{ commit: { message: string; author: { date: string } } }> };
+    const { items } = await apiFetch<SearchResult>(
+      `${GH_API}/search/commits?q=author:${username}&sort=author-date&per_page=100`,
+      token
+    );
+    if (!items.length) return null;
+    const stats: CommitStats = {
+      sampleSize: items.length,
+      fix: 0, feat: 0, refactor: 0, docs: 0, test: 0, chore: 0, other: 0,
+      hourHistogram: Array(24).fill(0),
+    };
+    for (const it of items) {
+      stats[classifyCommit(it.commit.message)]++;
+      const h = new Date(it.commit.author.date).getUTCHours();
+      if (h >= 0 && h <= 23) stats.hourHistogram[h]++;
+    }
+    return stats;
+  } catch (e) {
+    console.error("fetchCommitStats failed", e);
+    return null;
+  }
 }
 
 async function fetchLanguageStats(
@@ -443,10 +496,11 @@ export async function fetchGitHubRawData(
     fetchGitHubRepos(username, token),
   ]);
 
-  const [languages, contributions, pullRequests] = await Promise.all([
+  const [languages, contributions, pullRequests, commitStats] = await Promise.all([
     fetchLanguageStats(repos, username, token),
     fetchContributions(username, period, token),
     fetchPullRequests(repos, username, token),
+    fetchCommitStats(username, token),
   ]);
 
   return {
@@ -457,6 +511,7 @@ export async function fetchGitHubRawData(
     pullRequests,
     totalStarsReceived: repos.reduce((s, r) => s + r.stargazersCount, 0),
     totalForksReceived: repos.reduce((s, r) => s + r.forksCount, 0),
+    commitStats,
     period,
   };
 }

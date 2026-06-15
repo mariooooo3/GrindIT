@@ -141,10 +141,10 @@ function Heatmap({ values, hotMonth }: { values: number[]; hotMonth: string }) {
 export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
   const heatmap = flat.commitsByMonth;
-  const linesAdded = flat.linesAdded;
-  const linesDeleted = flat.linesDeleted;
-  const addedPct = linesAdded + linesDeleted > 0 ? Math.max(8, Math.min(100, (linesAdded / (linesAdded + linesDeleted)) * 100)) : 50;
-  const net = linesAdded - linesDeleted;
+  const loc = flat.totalLinesOfCode;
+  const totalDayCommits = flat.weekdayCommits + flat.weekendCommits;
+  const weekendPct = totalDayCommits > 0 ? Math.round((flat.weekendCommits / totalDayCommits) * 100) : 0;
+  const trendLabel = flat.growth.trend === "up" ? `▲ +${flat.growth.deltaPercent}%` : flat.growth.trend === "down" ? `▼ ${flat.growth.deltaPercent}%` : "▬ steady";
 
   return (
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
@@ -177,36 +177,54 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-300 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-300" />
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-white/70">Energy consumed</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-white/70">Coding rhythm</span>
             </div>
             <div className="mt-3">
               <style>{`.s5h span { font-size: 44px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }`}</style>
               <div className="s5h">
-                <CountUp value={linesAdded} className="block bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-400 bg-clip-text text-transparent tabular-nums" />
+                <CountUp value={loc > 0 ? loc : flat.totalCommits} className="block bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-400 bg-clip-text text-transparent tabular-nums" />
               </div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">Lines added</div>
-              <div className="mt-1 text-sm font-semibold text-red-400 tabular-nums">
-                − {linesDeleted.toLocaleString()} <span className="text-[10px] font-normal text-white/40">lines deleted</span>
+              <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">{loc > 0 ? "lines of code" : "commits"}</div>
+              <div className="mt-1 text-sm font-semibold tabular-nums" style={{ color: flat.growth.trend === "down" ? "#f87171" : "#34d399" }}>
+                {trendLabel} <span className="text-[10px] font-normal text-white/40">vs first half</span>
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="mb-1 flex items-baseline justify-between text-[11px]">
+                <span className="uppercase tracking-wider text-white/45">Active hours</span>
+                <span className="font-semibold text-yellow-200">Peak {flat.peakHourLabel}</span>
+              </div>
+              <div className="flex h-10 items-end gap-[2px]">
+                {flat.hourDistribution.map((v, h) => {
+                  const max = Math.max(...flat.hourDistribution, 1);
+                  const isPeak = h === flat.peakHour;
+                  return (
+                    <motion.div key={h} initial={{ height: 0 }} animate={{ height: `${Math.max(6, (v / max) * 100)}%` }}
+                      transition={{ delay: 0.8 + h * 0.015, duration: 0.5 }}
+                      className="flex-1 rounded-sm"
+                      style={{ background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : "rgba(255,200,80,0.22)", boxShadow: isPeak ? "0 0 8px rgba(255,180,30,0.6)" : "none" }} />
+                  );
+                })}
               </div>
             </div>
             <div className="mt-3">
               <div className="flex justify-between text-[10px] text-white/40">
-                <span>Net +{net.toLocaleString()}</span>
-                <span>{Math.round(addedPct)}% added</span>
+                <span>Weekdays {flat.weekdayCommits.toLocaleString()}</span>
+                <span>Weekends {flat.weekendCommits.toLocaleString()}</span>
               </div>
-              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-red-500/30">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${addedPct}%` }} transition={{ delay: 1, duration: 1.6, ease: "easeOut" }}
-                  className="h-full rounded-full" style={{ background: "linear-gradient(90deg,#34d399,#10b981)", boxShadow: "0 0 12px rgba(16,185,129,0.6)" }} />
+              <div className="mt-1 flex h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <motion.div initial={{ width: 0 }} animate={{ width: `${100 - weekendPct}%` }} transition={{ delay: 1, duration: 1.2, ease: "easeOut" }} className="h-full" style={{ background: "linear-gradient(90deg,#ffd84d,#ff9a1f)" }} />
+                <motion.div initial={{ width: 0 }} animate={{ width: `${weekendPct}%` }} transition={{ delay: 1.1, duration: 1.2, ease: "easeOut" }} className="h-full" style={{ background: "rgba(255,255,255,0.22)" }} />
               </div>
             </div>
             <div className="mt-3 flex items-stretch rounded-xl border border-white/5 bg-white/[0.02] py-3">
               {[
-                { label: "Files", value: flat.filesChanged.toLocaleString() },
-                { label: "Commits", value: flat.totalCommits.toLocaleString() },
-                { label: "Peak hr", value: `${flat.peakHour}:00` },
+                { label: "Streak", value: `${flat.longestStreak}d` },
+                { label: "Active days", value: flat.activeDayCount.toLocaleString() },
+                { label: "Most active", value: flat.mostActiveDayOfWeek.slice(0, 3) },
               ].map((s, i) => (
                 <div key={s.label} className="flex flex-1 flex-col items-center justify-center px-2 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.1)" : undefined }}>
-                  <div className="text-base font-bold text-white tabular-nums">{s.value}</div>
+                  <div className="text-base font-bold tabular-nums text-white">{s.value}</div>
                   <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/50">{s.label}</div>
                 </div>
               ))}
@@ -214,7 +232,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
             <div className="mt-3 rounded-xl border border-yellow-400/20 bg-yellow-400/[0.04] p-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase tracking-wider text-yellow-200/70">Most productive</span>
-                <span className="text-sm font-bold text-yellow-200">{flat.mostActiveMonth}</span>
+                <span className="text-sm font-bold text-yellow-200">{flat.mostActiveMonth || "—"}</span>
               </div>
               <div className="mt-2">
                 <Heatmap values={heatmap} hotMonth={flat.mostActiveMonth} />
