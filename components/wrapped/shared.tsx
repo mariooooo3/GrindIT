@@ -158,6 +158,28 @@ export function GlassCard({ children, className }: { children: ReactNode; classN
   );
 }
 
+// Compact themed planet shown above the card on mobile (lg:hidden). Keeps the
+// cosmic flavour without the heavy desktop scenes that overflow small screens.
+export function MobilePlanet({ color = "#a78bfa", size = 104 }: { color?: string; size?: number }) {
+  return (
+    <div className="relative mx-auto mb-4 lg:hidden" style={{ width: size, height: size }}>
+      <div className="absolute inset-0 rounded-full opacity-60 blur-2xl"
+        style={{ background: `radial-gradient(circle, ${color}, transparent 70%)` }} />
+      <motion.div className="relative h-full w-full overflow-hidden rounded-full"
+        style={{
+          background: `radial-gradient(circle at 34% 28%, color-mix(in oklab, ${color} 65%, white), ${color} 46%, color-mix(in oklab, ${color} 55%, black) 100%)`,
+          boxShadow: `inset -7px -9px 22px rgba(0,0,0,0.55), inset 6px 6px 16px rgba(255,255,255,0.18), 0 0 28px ${color}66`,
+        }}
+        animate={{ rotate: 360 }} transition={{ duration: 90, repeat: Infinity, ease: "linear" }}>
+        <div className="absolute inset-0 rounded-full"
+          style={{ background: "radial-gradient(circle at 72% 76%, rgba(0,0,0,0.45), transparent 52%)" }} />
+        <div className="absolute left-[22%] top-[30%] h-[14%] w-[28%] rounded-full" style={{ background: "rgba(0,0,0,0.18)" }} />
+        <div className="absolute left-[55%] top-[58%] h-[12%] w-[22%] rounded-full" style={{ background: "rgba(0,0,0,0.16)" }} />
+      </motion.div>
+    </div>
+  );
+}
+
 export function PlanetStage({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={`relative flex h-[420px] w-full items-center justify-center pt-24 lg:h-[640px] ${className ?? ""}`}>
@@ -172,11 +194,15 @@ export function SlideShell({
   center,
   right,
   overlay,
+  mobileHeader,
+  mobileFooter,
 }: {
   leftContent?: ReactNode;
   center: ReactNode;
   right: ReactNode;
   overlay?: ReactNode;
+  mobileHeader?: ReactNode;
+  mobileFooter?: ReactNode;
 }) {
   return (
     <div className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
@@ -187,14 +213,14 @@ export function SlideShell({
         className="pointer-events-none absolute -right-40 top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 60%)" }}
       />
-      {/* 3-column grid */}
-      <div className="relative z-10 mx-auto grid h-[calc(100vh-150px)] max-w-[1500px] grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] gap-4 px-6 pt-20">
-        {/* LEFT — Rocket + optional chapter title */}
+      {/* responsive grid — single column on mobile, 3 columns on desktop */}
+      <div className="relative z-10 mx-auto grid min-h-[calc(100dvh-90px)] max-w-[1500px] grid-cols-1 items-start gap-4 px-4 pb-10 pt-16 lg:h-[calc(100vh-150px)] lg:min-h-0 lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:px-6 lg:pt-20">
+        {/* LEFT — Rocket + optional chapter title (desktop only) */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.4 }}
-          className="relative block"
+          className="relative hidden lg:block"
         >
           <div className="absolute inset-0">
             <Rocket />
@@ -211,13 +237,17 @@ export function SlideShell({
           )}
         </motion.div>
         {/* CENTER */}
-        <div className="flex min-h-0 items-center justify-center">{center}</div>
-        {/* RIGHT — planet */}
+        <div className="flex min-h-0 flex-col items-center justify-center">
+          {mobileHeader && <div className="lg:hidden">{mobileHeader}</div>}
+          {center}
+          {mobileFooter && <div className="lg:hidden">{mobileFooter}</div>}
+        </div>
+        {/* RIGHT — planet (desktop only) */}
         <motion.div
           initial={{ opacity: 0, x: 40, scale: 0.9 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.5 }}
-          className="relative block"
+          className="relative hidden lg:block"
         >
           {right}
         </motion.div>

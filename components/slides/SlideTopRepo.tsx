@@ -4,8 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 
 function CountUp({ value }: { value: number }) {
   const mv = useMotionValue(0);
@@ -109,9 +109,9 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(closest-side, rgba(34,211,238,0.18), transparent)" }} />
       <Stars />
       <ChapterHeadingAnchor n={4} title="Home Base" />
-      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-6 py-8 md:px-12">
+      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-16 lg:px-12 lg:py-8">
         {/* LEFT — UFO invasion scene */}
-        <div className="relative col-span-12 md:col-span-4 hidden md:block">
+        <div className="relative col-span-12 hidden lg:col-span-4 lg:block">
           <div className="relative h-full w-full">
             {/* UFO drifting left-right at top */}
             <motion.img src="/wrapped/slide4-ufo.png" alt="UFO"
@@ -132,7 +132,11 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         </div>
 
         {/* CENTER */}
-        <div className="col-span-12 md:col-span-4 flex items-center justify-center">
+        <div className="col-span-12 flex flex-col items-center justify-center lg:col-span-4">
+          <div className="w-[min(400px,92vw)] lg:hidden">
+            <ChapterHeadingMobile n={4} title="Home Base" />
+            <MobilePlanet color="#7cff8a" />
+          </div>
           <motion.div data-share-card {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full" style={{ maxWidth: 400 }}>
             <div className="relative w-full p-4 text-white [&::-webkit-scrollbar]:hidden"
               style={{ height: 580, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px -20px rgba(0,0,0,0.6)" }}>
@@ -231,12 +235,26 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
               )}
             </div>
           </motion.div>
+
+          {/* mobile: animated UFO scene below the card (scroll to reveal) */}
+          <div className="relative mt-6 h-[340px] w-[min(400px,92vw)] lg:hidden">
+            <motion.img src="/wrapped/slide4-ufo.png" alt="UFO"
+              className="absolute left-1/2 top-[4%] w-[70%] -translate-x-1/2 select-none"
+              style={{ x: ufoX, filter: "drop-shadow(0 20px 40px rgba(74,222,128,0.5))" }}
+              animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+              draggable={false} />
+            <motion.img src="/cat-rocket.png" alt="Cat astronaut"
+              className="absolute bottom-[2%] left-1/2 w-[52%] -translate-x-1/2 select-none object-contain"
+              animate={{ x: [-50, 50, -50] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))" }} draggable={false} />
+            <CommitStream ufoX={ufoX} />
+          </div>
         </div>
 
         {/* RIGHT — full round planet */}
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.1, ease: "easeOut" }}
-          className="relative col-span-12 md:col-span-4 hidden md:block overflow-hidden">
+          className="relative col-span-12 hidden overflow-hidden lg:col-span-4 lg:block">
           <PlanetStage>
           <div className="relative flex h-[520px] w-[520px] items-center justify-center">
             <div className="pointer-events-none absolute inset-0 rounded-full"

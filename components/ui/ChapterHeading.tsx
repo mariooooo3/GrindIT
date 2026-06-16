@@ -70,8 +70,19 @@ export default function ChapterHeading({ n, title }: { n: number; title: string 
 
 export function ChapterHeadingAnchor({ n, title }: { n: number; title: string }) {
   return (
-    <div className="pointer-events-none absolute left-1/2 top-[88px] z-30 -translate-x-1/2 lg:left-[calc(50%+min(31vw,520px))]">
+    <div className="pointer-events-none absolute left-1/2 top-[88px] z-30 hidden -translate-x-1/2 lg:block lg:left-[calc(50%+min(31vw,520px))]">
       <ChapterHeading n={n} title={title} />
+    </div>
+  );
+}
+
+// Compact in-flow chapter heading for mobile (small star title), shown above the
+// card. Desktop uses ChapterHeadingAnchor instead.
+export function ChapterHeadingMobile({ n, title }: { n: number; title: string }) {
+  return (
+    <div className="pointer-events-none mb-3 flex flex-col items-center gap-1.5 lg:hidden">
+      <StarText text={`CHAPTER ${n}`} cell={4} />
+      <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-white/55">{title}</span>
     </div>
   );
 }

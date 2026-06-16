@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 
 // Asteroids fly in TOWARD the shield, then shatter on contact. Kept sparse so
 // each impact reads clearly without crowding the scene.
@@ -63,7 +63,7 @@ function Shatter({ x, y, size }: { x: number; y: number; size: number }) {
 
 function IncomingAsteroid({ angle, size, dur, delay, label }: { angle: number; size: number; dur: number; delay: number; label?: string }) {
   const [cycle, setCycle] = useState(0);
-  const [phase, setPhase] = useState<"incoming" | "shatter">("incoming");
+  const [phase, setPhase] = useState<"idle" | "incoming" | "shatter">("idle");
 
   useEffect(() => {
     let alive = true;
@@ -94,7 +94,7 @@ function IncomingAsteroid({ angle, size, dur, delay, label }: { angle: number; s
 
   return (
     <div className="pointer-events-none absolute left-1/2 top-1/2" style={{ transform: "translate(-50%,-50%)" }}>
-      {phase === "incoming" ? (
+      {phase === "idle" ? null : phase === "incoming" ? (
         <motion.div key={cycle} className="absolute"
           style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}
           initial={{ x: start.x, y: start.y, opacity: 0 }}
@@ -203,18 +203,22 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
     <main className="relative min-h-full w-full overflow-hidden" style={{ background: "#080612", color: "white" }}>
       <Stars />
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 lg:gap-10 items-center min-h-screen px-6 lg:px-12 py-12">
+      <div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-6 px-4 pb-10 pt-16 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
         {/* LEFT — meteors + cat rocket */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative h-[420px] lg:h-[640px] order-2 lg:order-1">
+          className="relative hidden h-[640px] lg:order-1 lg:block">
           <LeftScene />
         </motion.div>
 
         {/* CENTER */}
-        <div className="order-1 lg:order-2 flex justify-center">
+        <div className="order-1 flex flex-col items-center justify-center lg:order-2">
+          <div className="w-[min(380px,92vw)] lg:hidden">
+            <ChapterHeadingMobile n={3} title="Dodging Bugs" />
+            <MobilePlanet color="#d6552a" />
+          </div>
           <motion.div data-share-card variants={stagger} initial="hidden" animate="show" className="[&::-webkit-scrollbar]:hidden"
-            style={{ width: 380, height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+            style={{ width: "min(380px, 92vw)", height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <motion.div variants={item} className="flex items-center gap-3">
               <div className="rounded-full flex-shrink-0 overflow-hidden"
                 style={{ width: 40, height: 40, background: flat.avatarUrl ? `url(${flat.avatarUrl}) center/cover` : "linear-gradient(135deg, #6366f1, #a855f7)", border: "1px solid rgba(255,255,255,0.15)" }}>
@@ -314,12 +318,17 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
               </motion.div>
             )}
           </motion.div>
+
+          {/* mobile: animated scene below the card (scroll to reveal) */}
+          <div className="mt-6 h-[380px] w-[min(380px,92vw)] lg:hidden">
+            <LeftScene />
+          </div>
         </div>
 
         {/* RIGHT */}
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative order-3">
+          className="relative hidden order-3 lg:block">
           <PlanetStage>
             <Planet />
           </PlanetStage>

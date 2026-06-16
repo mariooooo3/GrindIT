@@ -194,7 +194,7 @@ function ThemeSwitch() {
       type="button"
       aria-label="Active theme: World Cup — switch theme"
       title="Monthly theme · World Cup"
-      className="group relative hidden items-center gap-1.5 rounded-full border border-white/[0.12] bg-black/40 py-1 pl-2 pr-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-zinc-900/70 active:scale-[0.97] sm:flex"
+      className="group relative flex items-center gap-1.5 rounded-full border border-white/[0.12] bg-black/40 py-1 pl-2 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-zinc-900/70 active:scale-[0.97] sm:pr-3"
       style={{ backdropFilter: "blur(12px)" }}
     >
       <span className="grid place-items-center">
@@ -207,7 +207,7 @@ function ThemeSwitch() {
       >
         <SoccerBallMark />
       </motion.span>
-      <span className="flex flex-col items-start leading-none">
+      <span className="hidden flex-col items-start leading-none sm:flex">
         <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500 transition-colors group-hover:text-emerald-300/70">Theme</span>
         <span className="text-[11px] font-semibold tracking-[-0.01em] text-white/90">World Cup</span>
       </span>
@@ -219,18 +219,20 @@ function ThemeSwitch() {
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
-      <div className="mx-auto max-w-5xl px-5 pt-5 pointer-events-auto">
+      <div className="mx-auto max-w-5xl px-3 pt-4 pointer-events-auto sm:px-5 sm:pt-5">
         {/* floating glass pill */}
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-3 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
-          <a href="/" className="relative z-10 flex items-center gap-2">
-            <div className="relative h-[72px] w-[72px] shrink-0">
+          <a href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+            <div className="relative h-11 w-11 shrink-0 sm:h-[72px] sm:w-[72px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
-                className="h-[72px] w-[72px] rounded-2xl object-cover select-none"
+                className="h-11 w-11 rounded-xl object-cover select-none sm:h-[72px] sm:w-[72px] sm:rounded-2xl"
                 draggable={false} />
-              <CommitNodes />
+              <div className="hidden sm:block">
+                <CommitNodes />
+              </div>
             </div>
             <span className="text-[13px] font-semibold tracking-[-0.01em] text-white/90">
               wrapped<span style={{ color: "var(--violet-glow)" }}>.dev</span>
@@ -260,11 +262,11 @@ function Nav() {
             </div>
           </div>
           {/* right: theme switch + auth + eyebrow sub-label */}
-          <div className="relative z-10 flex items-center gap-2.5">
+          <div className="relative z-10 flex items-center gap-1.5 sm:gap-2.5">
             <ThemeSwitch />
             <div className="flex flex-col items-center gap-1">
               <AuthButton />
-              <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300">
+              <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
                 Developer Recap · Any Period
               </div>

@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState, useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 
 function CatFace({ size }: { size: number }) {
   return (
@@ -211,16 +211,20 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
     <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <Stars />
       <ChapterHeadingAnchor n={2} title="The Chase" />
-      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-6 py-10 lg:grid-cols-3 lg:gap-4 lg:px-12">
+      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-4 pb-10 pt-16 lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
         {/* LEFT — chase scene */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-          className="flex flex-col items-start justify-center">
+          className="hidden flex-col items-start justify-center lg:flex">
           <ChaseScene merged={showMerged} />
           <p className="mt-4 max-w-xs text-sm text-white/50">A cat in a cardboard rocket, chasing pull requests through the void.</p>
         </motion.div>
 
         {/* CENTER */}
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-[min(400px,92vw)] lg:hidden">
+            <ChapterHeadingMobile n={2} title="The Chase" />
+            <MobilePlanet color="#ff8c3c" />
+          </div>
           <motion.div data-share-card initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
             className="relative w-full max-w-[400px] rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-2xl h-[580px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{ boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
@@ -312,11 +316,17 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
               )}
             </div>
           </motion.div>
+
+          {/* mobile: animated scene below the card (scroll to reveal) */}
+          <div className="mt-6 w-[min(400px,92vw)] lg:hidden">
+            <ChaseScene merged={showMerged} />
+            <p className="mt-3 text-center text-xs text-white/45">A cat in a cardboard rocket, chasing pull requests through the void.</p>
+          </div>
         </div>
 
         {/* RIGHT */}
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.2 }}
-          className="relative">
+          className="relative hidden lg:block">
           <PlanetStage>
             <Planet />
           </PlanetStage>

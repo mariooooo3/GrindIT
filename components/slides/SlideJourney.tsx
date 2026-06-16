@@ -4,8 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 
 function GasStationCat() {
   return (
@@ -152,17 +152,21 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />
       <ChapterHeadingAnchor n={5} title="Refuel Stop" />
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-center gap-6 px-8 py-12 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — gas station cat */}
         <div className="hidden h-[80vh] lg:block">
           <GasStationCat />
         </div>
 
         {/* CENTER */}
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="w-[min(380px,92vw)] lg:hidden">
+            <ChapterHeadingMobile n={5} title="Refuel Stop" />
+            <MobilePlanet color="#ffb627" />
+          </div>
           <motion.div data-share-card initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="relative [&::-webkit-scrollbar]:hidden"
-            style={{ width: 380, height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+            style={{ width: "min(380px, 92vw)", height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={flat.avatarUrl || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(flat.username)}`}
@@ -239,6 +243,11 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
               </div>
             </div>
           </motion.div>
+
+          {/* mobile: animated scene below the card (scroll to reveal) */}
+          <div className="mt-6 h-[380px] w-[min(380px,92vw)] lg:hidden">
+            <GasStationCat />
+          </div>
         </div>
 
         {/* RIGHT */}

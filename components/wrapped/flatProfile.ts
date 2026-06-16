@@ -1,5 +1,5 @@
 import type { WrappedProfile } from "@/types/wrapped";
-import { deriveTraitBadges, type TraitBadge } from "@/lib/badges";
+import { deriveTraitBadges, BADGE_COUNT, type TraitBadge } from "@/lib/badges";
 
 export type TrophyEntry = { icon: string; color: string; rarity: string; importance: number; label: string; reason: string; description: string };
 
@@ -85,6 +85,7 @@ export type FlatProfile = {
   achievementsTotal: number;
   // trait badges for the archetype slide (sorted by importance, desc)
   traitBadges: TraitBadge[];
+  traitBadgesTotal: number;
 };
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -225,6 +226,24 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     longestStreak: p.metrics.streak.longestStreak,
     growthTrend: p.metrics.growthDelta.trend,
     growthDelta: p.metrics.growthDelta.deltaPercent,
+    // commit craft
+    fixRatioPct: cs && cs.sampleSize >= 10 ? Math.round((cs.fix / cs.sampleSize) * 100) : undefined,
+    refactorRatioPct: cs && cs.sampleSize >= 10 ? Math.round((cs.refactor / cs.sampleSize) * 100) : undefined,
+    testRatioPct: cs && cs.sampleSize >= 10 ? Math.round((cs.test / cs.sampleSize) * 100) : undefined,
+    docsCount: cs?.docs,
+    choreRatioPct: cs && cs.sampleSize >= 10 ? Math.round((cs.chore / cs.sampleSize) * 100) : undefined,
+    featRatioPct: cs && cs.sampleSize >= 10 ? Math.round((cs.feat / cs.sampleSize) * 100) : undefined,
+    // collaboration & impact
+    mergedPRs: merged,
+    totalForks: p.raw.totalForksReceived,
+    totalStars: p.raw.totalStarsReceived,
+    followersCount: p.user.followersCount,
+    ownedRepoCount: ownRepos.length,
+    // activity patterns
+    peakHour,
+    commitsByMonth: byMonth,
+    // language
+    topLanguage: p.raw.languages[0]?.language,
   });
 
   return {
@@ -291,5 +310,6 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     achievementsLocked,
     achievementsTotal: p.achievements.length,
     traitBadges,
+    traitBadgesTotal: BADGE_COUNT,
   };
 }

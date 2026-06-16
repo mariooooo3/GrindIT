@@ -4,8 +4,8 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, SlideShell } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, SlideShell, MobilePlanet, Rocket } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 
 // ── Moon ───────────────────────────────────────────────────────────────────
 function Moon() {
@@ -233,6 +233,17 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   return (
     <SlideShell
       overlay={<ChapterHeadingAnchor n={1} title="Liftoff" />}
+      mobileHeader={
+        <>
+          <ChapterHeadingMobile n={1} title="Liftoff" />
+          <MobilePlanet color="#cbd5e1" />
+        </>
+      }
+      mobileFooter={
+        <div className="relative mt-2 h-[300px] w-[min(380px,92vw)]">
+          <Rocket />
+        </div>
+      }
       center={<ProfileCard flat={cardFlat} />}
       right={
         <>

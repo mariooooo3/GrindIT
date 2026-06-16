@@ -1,11 +1,11 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 
 function CountUpInner({ value }: { value: number }) {
@@ -104,6 +104,8 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
   const flat = mapToFlat(profile);
   const badges = flat.traitBadges.slice(0, 6);
   const topBadgeId = badges[0]?.id;
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
+  const selectedBadge = badges.find((b) => b.id === selectedBadgeId) ?? null;
   const archetypeDisplay = flat.archetype
     ? flat.archetype.toUpperCase().startsWith("THE ") ? flat.archetype.toUpperCase() : `THE ${flat.archetype.toUpperCase()}`
     : "THE BUILDER";
@@ -116,11 +118,11 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
       <Confetti />
       <ChapterHeadingAnchor n={7} title="The Reveal" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — disco ball + cats + dance floor */}
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          className="relative flex items-center justify-center">
+          className="relative hidden items-center justify-center lg:flex">
           <div className="relative flex w-[88%] max-w-[360px] flex-col items-center">
             <DiscoBall />
             <motion.div animate={{ y: [0, -10, 0] }}
@@ -138,7 +140,11 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
 
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className="relative w-[380px] justify-self-center lg:-translate-y-10">
+          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className="relative w-[min(380px,92vw)] justify-self-center lg:-translate-y-10">
+          <div className="lg:hidden">
+            <ChapterHeadingMobile n={7} title="The Reveal" />
+            <MobilePlanet color="#a855f7" />
+          </div>
           <div data-share-card className="relative [&::-webkit-scrollbar]:hidden" style={{ height: 500, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", WebkitBackdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.5)" }}>
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -155,27 +161,98 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
                 Trait badges
               </span>
             </div>
-            <div className="mt-3">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, type: "spring", stiffness: 180, damping: 18 }}
+              className="mt-3 flex items-baseline gap-2">
               <div className="leading-none" style={{ fontSize: 44, fontWeight: 900, background: "linear-gradient(90deg,#ff3ea5,#a855f7,#22d3ee,#facc15,#ff3ea5)", backgroundSize: "300% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7 6s linear infinite", letterSpacing: "-0.03em" }}>
                 <CountUpInner value={flat.traitBadges.length} />
               </div>
-              <div className="text-xs text-white/55">trait badges</div>
-            </div>
+              <span className="text-[13px] text-white/55">of {flat.traitBadgesTotal} badges</span>
+            </motion.div>
+
+            {/* rarity breakdown — same pattern as slide 6 */}
+            {flat.traitBadges.length > 0 && (() => {
+              const BADGE_RARITY_HEX: Record<string, string> = {
+                legendary: "#fbbf24", epic: "#38bdf8", rare: "#a78bfa", uncommon: "#34d399", common: "#9aa4b2",
+              };
+              const counts = (["legendary", "epic", "rare", "uncommon", "common"] as const)
+                .map((r) => ({ rarity: r, n: flat.traitBadges.filter((b) => b.rarity === r).length }))
+                .filter((x) => x.n > 0);
+              return (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
+                  className="mt-2 flex flex-wrap gap-1.5">
+                  {counts.map((rc) => (
+                    <span key={rc.rarity} className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider"
+                      style={{ color: BADGE_RARITY_HEX[rc.rarity], border: `1px solid ${BADGE_RARITY_HEX[rc.rarity]}55`, background: `${BADGE_RARITY_HEX[rc.rarity]}14` }}>
+                      {rc.n} {rc.rarity}
+                    </span>
+                  ))}
+                </motion.div>
+              );
+            })()}
+
             {badges.length > 0 ? (
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                {badges.map((b, i) => {
-                  const isTop = b.id === topBadgeId;
-                  return (
-                    <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.9 + i * 0.08 }}
-                      className="flex flex-col items-center gap-1.5 rounded-xl p-2.5"
-                      style={{ background: `${b.color}12`, border: `1px solid ${b.color}${isTop ? "" : "33"}`, boxShadow: isTop ? `0 0 0 1px ${b.color}55, 0 0 22px ${b.color}66, inset 0 0 16px ${b.color}22` : undefined }}>
-                      <span style={{ color: b.color, filter: `drop-shadow(0 0 5px ${b.color}88)` }}><Glyph name={b.icon as GlyphName} size={24} /></span>
-                      <div className="text-center text-[10px] font-medium leading-tight" style={{ color: isTop ? b.color : "rgba(255,255,255,0.75)" }}>{b.label}</div>
+              <>
+                <div className="mt-3 grid grid-cols-3 gap-1.5">
+                  {badges.map((b, i) => {
+                    const isTop = b.id === topBadgeId;
+                    const isSelected = b.id === selectedBadgeId;
+                    return (
+                      <motion.button
+                        key={b.id}
+                        type="button"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9 + i * 0.08 }}
+                        onClick={() => setSelectedBadgeId(isSelected ? null : b.id)}
+                        className="flex flex-col items-center gap-1.5 rounded-xl p-2 text-left transition-all"
+                        style={{
+                          background: isSelected ? `${b.color}22` : `${b.color}10`,
+                          border: `1px solid ${b.color}${isSelected ? "88" : isTop ? "55" : "28"}`,
+                          boxShadow: isTop && !isSelected ? `0 0 18px ${b.color}44, inset 0 0 12px ${b.color}18` : isSelected ? `0 0 0 1px ${b.color}66, 0 0 20px ${b.color}55` : undefined,
+                          cursor: "pointer",
+                        }}>
+                        <span style={{ color: b.color, filter: `drop-shadow(0 0 5px ${b.color}88)` }}>
+                          <Glyph name={b.icon as GlyphName} size={22} />
+                        </span>
+                        <div className="text-center text-[9.5px] font-semibold leading-tight"
+                          style={{ color: isSelected || isTop ? b.color : "rgba(255,255,255,0.72)" }}>
+                          {b.label}
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* tap-to-reveal explanation panel */}
+                <AnimatePresence mode="wait">
+                  {selectedBadge && (
+                    <motion.div
+                      key={selectedBadge.id}
+                      initial={{ opacity: 0, y: -6, height: 0 }}
+                      animate={{ opacity: 1, y: 0, height: "auto" }}
+                      exit={{ opacity: 0, y: -4, height: 0 }}
+                      transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5"
+                        style={{ background: `${selectedBadge.color}14`, border: `1px solid ${selectedBadge.color}38` }}>
+                        <span className="shrink-0" style={{ color: selectedBadge.color, filter: `drop-shadow(0 0 6px ${selectedBadge.color}99)` }}>
+                          <Glyph name={selectedBadge.icon as GlyphName} size={26} />
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-[12px] font-bold leading-tight" style={{ color: selectedBadge.color }}>
+                            {selectedBadge.label}
+                          </div>
+                          <div className="mt-0.5 text-[10.5px] leading-snug text-white/65">
+                            {selectedBadge.explanation}
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
-                  );
-                })}
-              </div>
+                  )}
+                </AnimatePresence>
+              </>
             ) : (
               <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 text-xs text-white/50">
                 Still warming up — your vibe is taking shape.
@@ -194,12 +271,23 @@ export default function SlideArchetype({ profile }: { profile: WrappedProfile })
               </div>
             </div>
           </div>
+
+          {/* mobile: animated disco scene below the card (scroll to reveal) */}
+          <div className="mt-8 flex flex-col items-center lg:hidden">
+            <DiscoBall />
+            <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="relative -mt-2 w-[min(320px,82vw)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/wrapped/cats-only.png" alt="Cat astronauts celebrating" className="w-full select-none"
+                style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5))" }} draggable={false} />
+            </motion.div>
+            <DanceFloor />
+          </div>
         </motion.div>
 
         {/* RIGHT — party planet with pulsing rays */}
         <motion.div initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.35, ease: "easeOut" }}
-          className="relative flex h-full items-center justify-center overflow-hidden">
+          className="relative hidden h-full items-center justify-center overflow-hidden lg:flex">
           <PlanetStage>
           <div className="relative h-[560px] w-[560px]">
             <motion.img src="/wrapped/party-planet.png" alt="Party planet bursting with neon color"

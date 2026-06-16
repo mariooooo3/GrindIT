@@ -5,10 +5,10 @@ import { useRef, useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { captureElement } from "@/lib/captureElement";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 
 
@@ -173,9 +173,9 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
       <Stars />
       <ChapterHeadingAnchor n={8} title="Your Planet" />
 
-<div className="relative z-10 grid min-h-screen grid-cols-1 items-center gap-8 px-8 py-16 lg:grid-cols-3 lg:gap-4">
+<div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-8 px-4 pb-16 pt-16 lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
         {/* LEFT — cat rocket bobbing */}
-        <motion.div className="flex h-[420px] items-center justify-center lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
+        <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
           <motion.div animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -186,8 +186,12 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
         </motion.div>
 
         {/* CENTER — share card */}
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="flex justify-center">
-          <div ref={cardRef} data-share-card className="w-full [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="flex flex-col items-center justify-center">
+          <div className="w-[min(380px,92vw)] lg:hidden">
+            <ChapterHeadingMobile n={8} title="Your Planet" />
+            <MobilePlanet color={palette.a} />
+          </div>
+          <div ref={cardRef} data-share-card className="w-full max-w-[380px] [&::-webkit-scrollbar]:hidden" style={{ maxWidth: 380, height: "min(580px, 84vh)", overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
@@ -237,10 +241,18 @@ export default function SlideShare({ profile }: { profile: WrappedProfile }) {
               Share your planet
             </button>
           </div>
+
+          {/* mobile: animated scene below the card (scroll to reveal) */}
+          <div className="mt-6 flex justify-center lg:hidden">
+            <motion.img src="/cat-rocket.png" alt="Cat astronaut" width={220} height={220}
+              className="w-[min(220px,60vw)] select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
+              animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              draggable={false} />
+          </div>
         </motion.div>
 
         {/* RIGHT — planet */}
-        <motion.div className="relative" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
+        <motion.div className="relative hidden lg:block" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
           <PlanetStage>
             <Planet palette={palette} archetype={archetype} username={flat.username} />
           </PlanetStage>

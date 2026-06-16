@@ -8,7 +8,9 @@ export type GlyphName =
   | "crown" | "rocket" | "compass" | "columns" | "calendar" | "skull" | "swords"
   | "medal" | "sparkles" | "gauge" | "book" | "wrench" | "diamond" | "users"
   | "shield" | "fork" | "sunrise" | "trending" | "target" | "layers" | "trophy"
-  | "heart" | "feather" | "telescope";
+  | "heart" | "feather" | "telescope"
+  | "infinity" | "mountain" | "atom" | "satellite" | "hourglass" | "bug"
+  | "snowflake" | "flask" | "merge" | "coffee";
 
 function inner(name: GlyphName): ReactNode {
   switch (name) {
@@ -211,6 +213,125 @@ function inner(name: GlyphName): ReactNode {
         <>
           <path d="m3.5 14 11-4 1.5 4-11 4-1.5-4Z" fill="currentColor" fillOpacity="0.12" />
           <path d="m14.5 10 3-1.2 1.3 3.4-3 1.2M9 16l2 5M6.5 17l2 4" />
+        </>
+      );
+    case "infinity":
+      return (
+        <>
+          <path d="M12 12C10 9.2 7.5 8 5.5 8A3.5 3.5 0 0 0 5.5 15C7.5 15 10 13.8 12 12Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M12 12C14 9.2 16.5 8 18.5 8A3.5 3.5 0 0 1 18.5 15C16.5 15 14 13.8 12 12Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M12 12C10 9.2 7.5 8 5.5 8A3.5 3.5 0 0 0 5.5 15C7.5 15 10 13.8 12 12C14 9.2 16.5 8 18.5 8A3.5 3.5 0 0 1 18.5 15C16.5 15 14 13.8 12 12Z" />
+        </>
+      );
+    case "mountain":
+      return (
+        <>
+          <path d="M2 21L9 8l4 6.5 3.5-8L22 21Z" fill="currentColor" fillOpacity="0.10" />
+          <path d="M2 21L9 8l4 6.5 3.5-8L22 21H2Z" />
+          <path d="M15.5 7.5l-1.2 3.5-2-2Z" fill="currentColor" fillOpacity="0.45" />
+        </>
+      );
+    case "atom":
+      return (
+        <>
+          <circle cx="12" cy="12" r="2" fill="currentColor" fillOpacity="0.55" />
+          <circle cx="12" cy="12" r="2" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" fill="currentColor" fillOpacity="0.06" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)" fill="currentColor" fillOpacity="0.06" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(-60 12 12)" fill="currentColor" fillOpacity="0.06" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(-60 12 12)" />
+        </>
+      );
+    case "satellite":
+      return (
+        <>
+          <rect x="2" y="10.5" width="7" height="3" rx="0.7" fill="currentColor" fillOpacity="0.14" />
+          <rect x="15" y="10.5" width="7" height="3" rx="0.7" fill="currentColor" fillOpacity="0.14" />
+          <rect x="2" y="10.5" width="7" height="3" rx="0.7" />
+          <rect x="15" y="10.5" width="7" height="3" rx="0.7" />
+          <rect x="9" y="9" width="6" height="6" rx="1.2" fill="currentColor" fillOpacity="0.22" />
+          <rect x="9" y="9" width="6" height="6" rx="1.2" />
+          <line x1="12" y1="9" x2="16.5" y2="4.5" />
+          <circle cx="17" cy="4" r="1" fill="currentColor" />
+          <line x1="5" y1="10.5" x2="5" y2="13.5" strokeOpacity="0.35" />
+          <line x1="18.5" y1="10.5" x2="18.5" y2="13.5" strokeOpacity="0.35" />
+        </>
+      );
+    case "hourglass":
+      return (
+        <>
+          <path d="M7 3l5 8.5 5-8.5H7Z" fill="currentColor" fillOpacity="0.10" />
+          <path d="M7 21l5-8.5 5 8.5H7Z" fill="currentColor" fillOpacity="0.32" />
+          <path d="M5 3h14M5 21h14" />
+          <path d="M7 3l5 8.5 5-8.5" />
+          <path d="M7 21l5-8.5 5 8.5" />
+          <line x1="12" y1="11.5" x2="12" y2="12.5" strokeWidth="1.8" />
+        </>
+      );
+    case "bug":
+      return (
+        <>
+          <ellipse cx="12" cy="13.5" rx="3.8" ry="5" fill="currentColor" fillOpacity="0.12" />
+          <circle cx="12" cy="7.5" r="2.5" fill="currentColor" fillOpacity="0.12" />
+          <ellipse cx="12" cy="13.5" rx="3.8" ry="5" />
+          <circle cx="12" cy="7.5" r="2.5" />
+          <line x1="12" y1="8.5" x2="12" y2="18.5" strokeOpacity="0.38" />
+          <path d="M8.2 11L4 9.5M8.2 13.5H3.5M8.2 16.5L4 18" />
+          <path d="M15.8 11L20 9.5M15.8 13.5H20.5M15.8 16.5L20 18" />
+          <path d="M10.2 5.5L8 3M13.8 5.5L16 3" />
+          <circle cx="10.7" cy="7.5" r="0.8" fill="currentColor" />
+          <circle cx="13.3" cy="7.5" r="0.8" fill="currentColor" />
+        </>
+      );
+    case "snowflake":
+      return (
+        <>
+          <line x1="12" y1="2" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+          <path d="M12 6.5L10.2 8.3M12 6.5L13.8 8.3" />
+          <path d="M12 17.5L10.2 15.7M12 17.5L13.8 15.7" />
+          <path d="M6.5 12L8.3 10.2M6.5 12L8.3 13.8" />
+          <path d="M17.5 12L15.7 10.2M17.5 12L15.7 13.8" />
+          <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+        </>
+      );
+    case "flask":
+      return (
+        <>
+          <path d="M9 3v6L4.5 16.5A2 2 0 0 0 6.4 19.5h11.2A2 2 0 0 0 19.5 16.5L15 9V3" fill="currentColor" fillOpacity="0.08" />
+          <path d="M9 3v6L4.5 16.5A2 2 0 0 0 6.4 19.5h11.2A2 2 0 0 0 19.5 16.5L15 9V3" />
+          <line x1="9" y1="3" x2="15" y2="3" />
+          <path d="M7.2 17.5C8.5 16.2 10.2 15.5 12 15.5s3.5.7 4.8 2" fill="currentColor" fillOpacity="0.32" />
+          <circle cx="9.5" cy="18" r="0.7" fill="currentColor" fillOpacity="0.5" />
+          <circle cx="13.2" cy="17.2" r="0.55" fill="currentColor" fillOpacity="0.5" />
+        </>
+      );
+    case "merge":
+      return (
+        <>
+          <circle cx="6" cy="5" r="2.5" fill="currentColor" fillOpacity="0.20" />
+          <circle cx="18" cy="5" r="2.5" fill="currentColor" fillOpacity="0.20" />
+          <circle cx="12" cy="19" r="2.5" fill="currentColor" fillOpacity="0.20" />
+          <circle cx="6" cy="5" r="2.5" />
+          <circle cx="18" cy="5" r="2.5" />
+          <circle cx="12" cy="19" r="2.5" />
+          <path d="M6 7.5C6 11.5 9 15 12 16.5" />
+          <path d="M18 7.5C18 11.5 15 15 12 16.5" />
+        </>
+      );
+    case "coffee":
+      return (
+        <>
+          <path d="M6 8h12l-1.2 9.5a1.5 1.5 0 0 1-1.5 1.3H8.7a1.5 1.5 0 0 1-1.5-1.3L6 8Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M6 8h12l-1.2 9.5a1.5 1.5 0 0 1-1.5 1.3H8.7a1.5 1.5 0 0 1-1.5-1.3L6 8Z" />
+          <path d="M17.5 9.5h1.8a2.2 2.2 0 0 1 0 4.4H17" />
+          <path d="M4.5 19.8h15" />
+          <path d="M5.5 10.5h13" strokeOpacity="0.3" />
+          <path d="M9 6.2c0 0-.7-1.4 0-2.7M12 5.8c0 0-.7-1.4 0-2.7M15 6.2c0 0-.7-1.4 0-2.7" />
         </>
       );
   }

@@ -205,8 +205,8 @@ export default function WrappedPage() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
       {/* ── top bar ── */}
-      <div className="fixed inset-x-0 top-0 z-40 px-5 pt-4 pb-3">
-        <div className="flex items-center gap-3">
+      <div className="fixed inset-x-0 top-0 z-40 px-3 pt-3 pb-2 sm:px-5 sm:pt-4 sm:pb-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {/* prev button */}
           <button onClick={goPrev}
             className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-white/40 transition-all duration-200 hover:border-white/20 hover:text-white/70 ${slideState.index === 0 ? "invisible" : ""}`}>
@@ -237,14 +237,14 @@ export default function WrappedPage() {
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={slideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
-            className="absolute inset-0 overflow-hidden">
+            className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
             <CurrentSlide profile={profile} />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── tap zones with hover arrows ── */}
-      <div className="absolute inset-0 z-30 flex pointer-events-none">
+      {/* ── tap zones with hover arrows (desktop only; mobile uses swipe + vertical scroll) ── */}
+      <div className="absolute inset-0 z-30 hidden pointer-events-none lg:flex">
         <div className="w-2/5 h-full pointer-events-auto group flex items-center cursor-pointer" onClick={goPrev}>
           <span className="ml-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/0 bg-white/0 text-white/0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:border-white/10 group-hover:bg-white/5 group-hover:text-white/50">
             <ChevronLeft />
@@ -255,6 +255,20 @@ export default function WrappedPage() {
             <ChevronRight />
           </span>
         </div>
+      </div>
+
+      {/* ── mobile nav arrows (small floating buttons; don't block vertical scroll) ── */}
+      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 lg:hidden">
+        <button onClick={goPrev} aria-label="Previous slide"
+          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${slideState.index === 0 ? "invisible" : ""}`}
+          style={{ backdropFilter: "blur(8px)" }}>
+          <ChevronLeft />
+        </button>
+        <button onClick={goNext} aria-label="Next slide"
+          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${slideState.index >= slideState.total - 1 ? "invisible" : ""}`}
+          style={{ backdropFilter: "blur(8px)" }}>
+          <ChevronRight />
+        </button>
       </div>
 
       {/* ── narrative loading indicator ── */}

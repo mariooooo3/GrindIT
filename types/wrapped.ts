@@ -157,9 +157,22 @@ export type AchievementId =
   | "fixer"
   | "feature_factory"
   | "documenter"
-  | "rising_star";
+  | "rising_star"
+  | "christmas_dev"
+  | "refactorer"
+  | "tester"
+  | "pr_champion"
+  | "solo_artist"
+  | "prolific_creator"
+  | "all_nighter"
+  | "dedicated"
+  | "god_mode"
+  | "galaxy_impact"
+  | "social_butterfly"
+  | "sprint_king"
+  | "language_wizard";
 
-export type Rarity = "common" | "uncommon" | "rare" | "legendary";
+export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 export type Achievement = {
   id: AchievementId;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { captureElement } from "@/lib/captureElement";
+import { captureElement, captureDesktopElement } from "@/lib/captureElement";
 
 type Scope = "card" | "slide";
 
@@ -51,6 +51,11 @@ export default function ShareModal({
   const capture = useCallback(async (): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
+    // On viewports below the desktop breakpoint, render the slide in an off-screen
+    // desktop-width iframe so the share image matches the desktop layout.
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      return await captureDesktopElement(slide, { cropToSelector: scope === "card" ? "[data-share-card]" : null });
+    }
     if (scope === "card") {
       // Render the (pixel-accurate) full slide and crop to the card, so the card
       // image is identical to what's on screen.

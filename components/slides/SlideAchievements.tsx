@@ -4,12 +4,12 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars } from "@/components/wrapped/shared";
-import { ChapterHeadingAnchor } from "@/components/ui/ChapterHeading";
+import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 
 const RARITY_HEX: Record<string, string> = {
-  legendary: "#fbbf24", rare: "#a78bfa", uncommon: "#34d399", common: "#9aa4b2",
+  legendary: "#fbbf24", epic: "#38bdf8", rare: "#a78bfa", uncommon: "#34d399", common: "#9aa4b2",
 };
 
 function CountUp({ value, className }: { value: number; className?: string }) {
@@ -51,7 +51,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
   const locked = flat.achievementsLocked;
   const hasUnlocked = unlocked.length > 0;
   const topTrophies = unlocked.slice(0, 5);
-  const rarityCounts = (["legendary", "rare", "uncommon", "common"] as const)
+  const rarityCounts = (["legendary", "epic", "rare", "uncommon", "common"] as const)
     .map((r) => ({ rarity: r, n: unlocked.filter((t) => t.rarity === r).length }))
     .filter((x) => x.n > 0);
   const collectorLevel = [1, 3, 6, 10, 16].filter((t) => unlocked.length >= t).length;
@@ -64,11 +64,11 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
       <Stars />
       <ChapterHeadingAnchor n={6} title="Trophy Haul" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-center gap-8 px-8 py-8 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-8 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — cats & rockets crew */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative flex h-full items-center justify-center">
+          className="relative hidden h-full items-center justify-center lg:flex">
           <motion.div animate={{ y: [0, -14, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
             <motion.div animate={{ rotate: [-1, 1, -1] }}
@@ -85,7 +85,11 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative w-[400px] max-w-full justify-self-center lg:-translate-y-6">
+          className="relative w-[400px] max-w-full justify-self-center lg:translate-y-6">
+          <div className="lg:hidden">
+            <ChapterHeadingMobile n={6} title="Trophy Haul" />
+            <MobilePlanet color="#ec4899" />
+          </div>
           <div data-share-card className="relative [&::-webkit-scrollbar]:hidden" style={{ height: 564, overflowY: "auto", scrollbarWidth: "none", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(24px) saturate(1.6)", borderRadius: 24, padding: 16, boxShadow: "0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.5)" }}>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -121,8 +125,8 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
               {hasUnlocked ? (
                 <div className="flex flex-col gap-2">
                   {topTrophies.map((t, i) => (
-                    <motion.div key={t.label} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.08 }}
-                      className="flex items-center gap-3 rounded-xl border px-3 py-2"
+                    <motion.div key={t.label} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.06 }}
+                      className="flex items-center gap-3 rounded-xl border px-3 py-1.5"
                       style={{ borderColor: `${t.color}40`, background: `${t.color}10` }}>
                       <span style={{ color: t.color, filter: `drop-shadow(0 0 6px ${t.color}88)` }}>
                         <Glyph name={t.icon as GlyphName} size={26} />
@@ -161,12 +165,20 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
               <StarRating count={collectorLevel} />
             </motion.div>
           </div>
+
+          {/* mobile: animated scene below the card (scroll to reveal) */}
+          <div className="mt-6 flex justify-center lg:hidden">
+            <motion.img src="/wrapped/cats-rockets.png" alt="Cat astronauts crew"
+              width={300} height={300} className="w-[min(300px,80vw)] select-none drop-shadow-[0_20px_50px_rgba(168,85,247,0.25)]"
+              animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              draggable={false} />
+          </div>
         </motion.div>
 
         {/* RIGHT — yarn planet */}
         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative flex h-full items-center justify-center overflow-hidden">
+          className="relative hidden h-full items-center justify-center overflow-hidden lg:flex">
           <PlanetStage className="lg:translate-x-8">
           <div className="relative h-[560px] w-[560px]">
             <motion.img src="/wrapped/yarn-planet.png" alt="Yarn ball planet"

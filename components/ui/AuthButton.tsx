@@ -38,7 +38,7 @@ export default function AuthButton() {
   return (
     <button
       onClick={() => signIn("github")}
-      className="rounded-full px-5 py-2 text-[12px] font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+      className="whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] sm:px-5"
       style={{
         background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
         boxShadow: "0 4px 18px -4px color-mix(in oklab,var(--violet-glow) 60%,transparent), inset 0 1px 0 rgba(255,255,255,0.18)",

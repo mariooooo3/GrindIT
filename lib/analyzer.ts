@@ -219,12 +219,13 @@ function calcScores(
 
 // --- Achievements ---
 
-type Rarity = "common" | "uncommon" | "rare" | "legendary";
+type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
 const RARITY: Record<Rarity, { color: string; imp: number }> = {
   common:    { color: "#9aa4b2", imp: 20 },
   uncommon:  { color: "#34d399", imp: 45 },
   rare:      { color: "#a78bfa", imp: 70 },
+  epic:      { color: "#38bdf8", imp: 85 },
   legendary: { color: "#fbbf24", imp: 95 },
 };
 
@@ -254,12 +255,16 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (_, m) => m.totalCommits >= 100 ? `${m.totalCommits.toLocaleString()} commits` : null,
   },
   {
-    id: "grandmaster", icon: "crown", rarity: "rare", boost: 6, label: "Grandmaster", description: "1,000+ commits",
+    id: "grandmaster", icon: "rocket", rarity: "rare", boost: 6, label: "Grandmaster", description: "1,000+ commits",
     check: (_, m) => m.totalCommits >= 1000 ? `${m.totalCommits.toLocaleString()} commits` : null,
   },
   {
-    id: "machine", icon: "gauge", rarity: "legendary", boost: 5, label: "Machine", description: "5,000+ commits",
+    id: "machine", icon: "gauge", rarity: "epic", boost: 5, label: "Machine", description: "5,000+ commits",
     check: (_, m) => m.totalCommits >= 5000 ? `${m.totalCommits.toLocaleString()} commits` : null,
+  },
+  {
+    id: "god_mode", icon: "crown", rarity: "legendary", boost: 8, label: "God Mode", description: "10,000+ commits",
+    check: (_, m) => m.totalCommits >= 10000 ? `${m.totalCommits.toLocaleString()} commits` : null,
   },
   {
     id: "speed_demon", icon: "bolt", rarity: "uncommon", boost: 3, label: "Speed Demon", description: "20+ commits in a single day",
@@ -271,15 +276,15 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (_, m) => m.streak.currentStreak >= 7 ? `${m.streak.currentStreak} day streak` : null,
   },
   {
-    id: "marathoner", icon: "flame", rarity: "rare", label: "Marathoner", description: "30+ day streak",
+    id: "marathoner", icon: "infinity", rarity: "rare", label: "Marathoner", description: "30+ day streak",
     check: (_, m) => m.streak.longestStreak >= 30 ? `${m.streak.longestStreak} day streak` : null,
   },
   {
-    id: "unstoppable", icon: "flame", rarity: "legendary", boost: 3, label: "Unstoppable", description: "100+ day streak",
+    id: "unstoppable", icon: "mountain", rarity: "legendary", boost: 3, label: "Unstoppable", description: "100+ day streak",
     check: (_, m) => m.streak.longestStreak >= 100 ? `${m.streak.longestStreak} day streak` : null,
   },
   {
-    id: "consistent", icon: "calendar", rarity: "rare", label: "Consistent", description: "Contributions every week",
+    id: "consistent", icon: "calendar", rarity: "epic", label: "Iron Consistent", description: "Contributions every single week",
     check: (data) => {
       const weeks = Math.max(1, Math.ceil(daysBetween(data.period.startDate, data.period.endDate) / 7));
       const active = new Set(data.contributions.filter((c) => c.count > 0).map((c) => getWeekNumber(c.date)));
@@ -303,7 +308,7 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     },
   },
   {
-    id: "weekend_warrior", icon: "swords", rarity: "rare", label: "Weekend Warrior", description: "Committed every weekend",
+    id: "weekend_warrior", icon: "swords", rarity: "epic", label: "Weekend Warrior", description: "Committed every single weekend",
     check: (_, m) => m.activeDays.weekendWarrior ? "Every weekend covered" : null,
   },
   // ── languages / tech ──
@@ -312,7 +317,7 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (data) => data.languages.length >= 3 ? `${data.languages.length} languages` : null,
   },
   {
-    id: "polyglot_master", icon: "globe", rarity: "rare", boost: 2, label: "Polyglot Master", description: "6+ languages",
+    id: "polyglot_master", icon: "atom", rarity: "rare", boost: 2, label: "Polyglot Master", description: "6+ languages",
     check: (data) => data.languages.length >= 6 ? `${data.languages.length} languages` : null,
   },
   {
@@ -336,11 +341,11 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (data) => data.totalStarsReceived >= 10 ? `${data.totalStarsReceived} stars` : null,
   },
   {
-    id: "star_collector", icon: "star", rarity: "rare", boost: 2, label: "Star Collector", description: "50+ stars received",
+    id: "star_collector", icon: "telescope", rarity: "rare", boost: 2, label: "Star Collector", description: "50+ stars received",
     check: (data) => data.totalStarsReceived >= 50 ? `${data.totalStarsReceived} stars` : null,
   },
   {
-    id: "star_magnate", icon: "crown", rarity: "legendary", label: "Star Magnate", description: "250+ stars received",
+    id: "star_magnate", icon: "satellite", rarity: "epic", label: "Star Magnate", description: "250+ stars received",
     check: (data) => data.totalStarsReceived >= 250 ? `${data.totalStarsReceived} stars` : null,
   },
   {
@@ -357,12 +362,12 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
     check: (_, m) => m.githubAge >= 5 * 365 ? `${Math.floor(m.githubAge / 365)} years in` : null,
   },
   {
-    id: "decade_dev", icon: "shield", rarity: "legendary", label: "Decade Dev", description: "10+ years on GitHub",
+    id: "decade_dev", icon: "hourglass", rarity: "legendary", label: "Decade Dev", description: "10+ years on GitHub",
     check: (_, m) => m.githubAge >= 10 * 365 ? `${Math.floor(m.githubAge / 365)} years in` : null,
   },
   // ── commit craft (best-effort, needs commitStats) ──
   {
-    id: "fixer", icon: "wrench", rarity: "uncommon", label: "Fixer", description: "Heavy on bug fixes",
+    id: "fixer", icon: "bug", rarity: "uncommon", label: "Fixer", description: "Heavy on bug fixes",
     check: (data) => { const c = data.commitStats; return c && c.sampleSize >= 10 && c.fix / c.sampleSize >= 0.25 ? `${Math.round((c.fix / c.sampleSize) * 100)}% fixes` : null; },
   },
   {
@@ -386,6 +391,68 @@ const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
       const repo = data.repos.find((r) => !r.isFork && r.stargazersCount === 0 && r.pushedAt && new Date(r.pushedAt) < cutoff);
       return repo ? `${repo.name} since ${new Date(repo.pushedAt).getFullYear()}` : null;
     },
+  },
+  // ── new diverse achievements ──
+  {
+    id: "christmas_dev", icon: "snowflake", rarity: "rare", boost: 4, label: "Christmas Dev", description: "Committed on Dec 25th",
+    check: (data) => data.contributions.some((c) => c.count > 0 && c.date.slice(5) === "12-25") ? "Shipped on Christmas Day" : null,
+  },
+  {
+    id: "refactorer", icon: "wrench", rarity: "uncommon", label: "Refactorer", description: "20%+ of commits are refactors",
+    check: (data) => { const c = data.commitStats; return c && c.sampleSize >= 10 && c.refactor / c.sampleSize >= 0.2 ? `${Math.round((c.refactor / c.sampleSize) * 100)}% refactors` : null; },
+  },
+  {
+    id: "tester", icon: "flask", rarity: "common", label: "Test Driven", description: "10+ test commits",
+    check: (data) => { const c = data.commitStats; return c && c.test >= 10 ? `${c.test} test commits` : null; },
+  },
+  {
+    id: "pr_champion", icon: "merge", rarity: "uncommon", boost: 2, label: "PR Champion", description: "20+ pull requests merged",
+    check: (data) => {
+      const merged = data.pullRequests.filter((pr) => pr.state === "merged").length;
+      return merged >= 20 ? `${merged} PRs merged` : null;
+    },
+  },
+  {
+    id: "solo_artist", icon: "feather", rarity: "uncommon", label: "Solo Artist", description: "300+ commits, fewer than 5 PRs",
+    check: (data, m) => {
+      const prs = data.pullRequests.length;
+      return m.totalCommits >= 300 && prs < 5 ? `${m.totalCommits.toLocaleString()} commits solo` : null;
+    },
+  },
+  {
+    id: "prolific_creator", icon: "compass", rarity: "uncommon", boost: 1, label: "Prolific Creator", description: "25+ original repos created",
+    check: (data) => { const n = data.repos.filter((r) => !r.isFork).length; return n >= 25 ? `${n} repositories` : null; },
+  },
+  {
+    id: "all_nighter", icon: "coffee", rarity: "uncommon", boost: 2, label: "All-Nighter", description: "Committed past 2 AM on 5+ nights",
+    check: (data) => {
+      const nights = new Set(data.contributions.filter((c) => c.count > 0 && c.hour >= 0 && c.hour <= 2).map((c) => c.date));
+      return nights.size >= 5 ? `${nights.size} late nights` : null;
+    },
+  },
+  {
+    id: "dedicated", icon: "trophy", rarity: "epic", boost: 2, label: "Dedicated", description: "Active on 200+ unique days",
+    check: (data) => {
+      const days = new Set(data.contributions.filter((c) => c.count > 0).map((c) => c.date));
+      return days.size >= 200 ? `${days.size} active days` : null;
+    },
+  },
+  // ── ultra-tier achievements ──
+  {
+    id: "galaxy_impact", icon: "heart", rarity: "legendary", boost: 6, label: "Galaxy Impact", description: "1,000+ stars received",
+    check: (data) => data.totalStarsReceived >= 1000 ? `${data.totalStarsReceived.toLocaleString()} stars` : null,
+  },
+  {
+    id: "social_butterfly", icon: "target", rarity: "epic", boost: 3, label: "Social Butterfly", description: "500+ GitHub followers",
+    check: (data) => data.user.followersCount >= 500 ? `${data.user.followersCount} followers` : null,
+  },
+  {
+    id: "sprint_king", icon: "hammer", rarity: "epic", boost: 4, label: "Sprint King", description: "50+ commits in a single day",
+    check: (data) => { const [d, c] = busiestDay(data); return c >= 50 ? `${c} commits on ${d}` : null; },
+  },
+  {
+    id: "language_wizard", icon: "broom", rarity: "epic", boost: 3, label: "Language Wizard", description: "8+ programming languages",
+    check: (data) => data.languages.length >= 8 ? `${data.languages.length} languages` : null,
   },
 ];
 
