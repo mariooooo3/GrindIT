@@ -11,43 +11,84 @@ import { SlideCard } from "@/components/wrapped/SlideCard";
 const ACCENT = "#8b5cf6";
 
 // ── Moon ───────────────────────────────────────────────────────────────────
+const MOON_CRATERS = [
+  { top: 20, left: 30, size: 50 },
+  { top: 55, left: 20, size: 35 },
+  { top: 65, left: 60, size: 45 },
+  { top: 30, left: 65, size: 28 },
+  { top: 45, left: 45, size: 22 },
+  { top: 15, left: 70, size: 18 },
+  { top: 75, left: 40, size: 30 },
+  { top: 40, left: 15, size: 16 },
+];
+
+const MOON_FRECKLES = [
+  { top: 12, left: 48, size: 7 }, { top: 25, left: 12, size: 5 }, { top: 58, left: 78, size: 8 },
+  { top: 70, left: 55, size: 6 }, { top: 38, left: 80, size: 5 }, { top: 82, left: 22, size: 6 },
+  { top: 8, left: 60, size: 4 }, { top: 50, left: 32, size: 5 }, { top: 88, left: 65, size: 5 },
+  { top: 33, left: 38, size: 4 }, { top: 62, left: 15, size: 6 }, { top: 18, left: 85, size: 5 },
+];
+
 function Moon() {
   return (
     <div className="relative flex h-full w-full items-center justify-center">
+      {/* distant sparkle dust around the moon */}
+      {[
+        { top: "8%", left: "18%", size: 3 }, { top: "82%", left: "78%", size: 2 },
+        { top: "15%", left: "85%", size: 2 }, { top: "78%", left: "12%", size: 3 },
+        { top: "45%", left: "5%", size: 2 }, { top: "5%", left: "55%", size: 2 },
+      ].map((s, i) => (
+        <motion.div key={i} className="absolute rounded-full bg-white"
+          style={{ top: s.top, left: s.left, width: s.size, height: s.size, boxShadow: "0 0 6px rgba(255,255,255,0.8)" }}
+          animate={{ opacity: [0.2, 0.9, 0.2] }}
+          transition={{ duration: 2.5 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
+        />
+      ))}
+
       <div
-        className="absolute h-[520px] w-[520px] rounded-full"
+        className="absolute h-[560px] w-[560px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.45) 0%, rgba(139,92,246,0.15) 40%, transparent 70%)",
-          filter: "blur(20px)",
+          background: "radial-gradient(circle, rgba(139,92,246,0.5) 0%, rgba(139,92,246,0.16) 40%, transparent 70%)",
+          filter: "blur(24px)",
         }}
       />
       <div
-        className="absolute h-[420px] w-[420px] rounded-full"
+        className="absolute h-[440px] w-[440px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(167,139,250,0.38) 0%, transparent 65%)",
           filter: "blur(10px)",
         }}
       />
+
+      {/* thin atmospheric rim */}
+      <div className="absolute h-[364px] w-[364px] rounded-full"
+        style={{ boxShadow: "0 0 0 1px rgba(196,181,253,0.25), 0 0 24px 2px rgba(167,139,250,0.35)" }} />
+
       <motion.div
         animate={{ rotate: 360 }}
-        transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
         className="relative h-[360px] w-[360px] overflow-hidden rounded-full"
         style={{
-          background: "radial-gradient(circle at 30% 30%, #d6d3d1 0%, #a8a29e 35%, #57534e 75%, #292524 100%)",
+          background: "radial-gradient(circle at 32% 28%, #e7e5e4 0%, #c8c4bf 28%, #8d8881 55%, #4f4b46 80%, #211f1c 100%)",
           boxShadow:
-            "inset -40px -40px 80px rgba(0,0,0,0.7), inset 30px 30px 60px rgba(255,255,255,0.08), 0 0 100px rgba(139,92,246,0.4)",
+            "inset -50px -50px 90px rgba(0,0,0,0.75), inset 34px 30px 60px rgba(255,255,255,0.12), 0 0 110px rgba(139,92,246,0.45)",
         }}
       >
-        {[
-          { top: 20, left: 30, size: 50 },
-          { top: 55, left: 20, size: 35 },
-          { top: 65, left: 60, size: 45 },
-          { top: 30, left: 65, size: 28 },
-          { top: 45, left: 45, size: 22 },
-          { top: 15, left: 70, size: 18 },
-          { top: 75, left: 40, size: 30 },
-          { top: 40, left: 15, size: 16 },
-        ].map((c, i) => (
+        {/* maria — large soft dark plains for surface variety */}
+        <div className="absolute rounded-full" style={{ top: "8%", left: "38%", width: "46%", height: "34%",
+          background: "radial-gradient(ellipse at 50% 50%, rgba(30,28,30,0.4) 0%, transparent 75%)", filter: "blur(6px)" }} />
+        <div className="absolute rounded-full" style={{ top: "52%", left: "8%", width: "38%", height: "30%",
+          background: "radial-gradient(ellipse at 50% 50%, rgba(30,28,30,0.32) 0%, transparent 75%)", filter: "blur(6px)" }} />
+
+        {/* fine surface freckles for texture richness */}
+        {MOON_FRECKLES.map((f, i) => (
+          <div key={`f-${i}`} className="absolute rounded-full"
+            style={{ top: `${f.top}%`, left: `${f.left}%`, width: f.size, height: f.size,
+              background: "rgba(20,18,17,0.35)" }} />
+        ))}
+
+        {/* craters with real two-tone depth (highlight rim + inner shadow) */}
+        {MOON_CRATERS.map((c, i) => (
           <div
             key={i}
             className="absolute rounded-full"
@@ -57,11 +98,16 @@ function Moon() {
               width: `${c.size}px`,
               height: `${c.size}px`,
               background:
-                "radial-gradient(circle at 35% 35%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.6) 100%)",
-              boxShadow: "inset 2px 2px 4px rgba(255,255,255,0.1)",
+                "radial-gradient(circle at 38% 38%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.65) 100%)",
+              boxShadow:
+                "inset 3px 3px 5px rgba(255,255,255,0.16), inset -3px -3px 6px rgba(0,0,0,0.55), 0 1px 1px rgba(255,255,255,0.05)",
             }}
           />
         ))}
+
+        {/* terminator — soft day/night gradient for sphere depth */}
+        <div className="absolute inset-0 rounded-full"
+          style={{ background: "linear-gradient(115deg, transparent 35%, rgba(10,8,12,0.35) 70%, rgba(5,4,8,0.6) 100%)" }} />
       </motion.div>
     </div>
   );

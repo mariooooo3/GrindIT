@@ -139,6 +139,15 @@ function Planet() {
         style={{ background: "radial-gradient(circle, rgba(255,140,60,0.45) 0%, rgba(232,107,42,0.18) 40%, transparent 70%)" }} />
       <div className="absolute h-[24rem] w-[24rem] rounded-full"
         style={{ background: "radial-gradient(circle, transparent 62%, rgba(255,170,90,0.35) 70%, rgba(255,120,50,0.15) 80%, transparent 90%)", filter: "blur(6px)" }} />
+
+      {/* distant tiny moon, slowly orbiting */}
+      <motion.div className="absolute h-[360px] w-[360px]"
+        animate={{ rotate: 360 }} transition={{ duration: 70, repeat: Infinity, ease: "linear" }}>
+        <div className="absolute rounded-full" style={{ top: "-6%", left: "78%", width: 14, height: 14,
+          background: "radial-gradient(circle at 35% 35%, #fff0d6, #d99a52 60%, #6b3f16 100%)",
+          boxShadow: "0 0 10px rgba(255,200,140,0.6)" }} />
+      </motion.div>
+
       <div className="relative h-[360px] w-[360px]">
         <div className="absolute inset-0 rounded-full"
           style={{ background: "radial-gradient(circle at 50% 50%, #E86B2A 0%, #c4521a 60%, #6b2509 100%)" }} />
@@ -174,6 +183,10 @@ function Planet() {
               <path d="M30 95 Q55 88 78 96 T130 88 T182 100" />
               <path d="M45 130 Q72 122 96 138 T158 128" />
               <path d="M62 55 Q82 72 74 100 T88 142" />
+            </g>
+            <g stroke="#ff8a3d" strokeWidth="0.5" fill="none" filter="url(#lg2)" opacity="0.6">
+              <path d="M20 70 Q60 64 100 72 T180 66" />
+              <path d="M25 110 Q66 104 112 114 T175 108" />
             </g>
             <g>
               <circle cx="72" cy="62" r="5.5" fill="url(#cs2)" />

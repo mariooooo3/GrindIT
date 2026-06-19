@@ -91,27 +91,41 @@ function GasPlanet() {
     <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.5, duration: 1.2, ease: "easeOut" }}
       className="relative flex h-full w-full items-center justify-center">
-      <div className="absolute h-[440px] w-[440px] rounded-full"
+      <div className="absolute h-[460px] w-[460px] rounded-full"
         style={{ background: "radial-gradient(circle, rgba(255,200,60,0.35), rgba(255,140,0,0.1) 45%, transparent 70%)", filter: "blur(20px)" }} />
+
       <motion.div className="relative h-[360px] w-[360px] rounded-full overflow-hidden"
         style={{ boxShadow: "0 0 80px rgba(255,180,30,0.5), inset -30px -40px 80px rgba(0,0,0,0.6), inset 30px 30px 60px rgba(255,220,120,0.3)", background: "radial-gradient(circle at 35% 30%, #ffe27a, #ff9a1f 35%, #c25a0a 70%, #4a1d05 100%)" }}
         animate={{ rotate: 360 }} transition={{ duration: 90, repeat: Infinity, ease: "linear" }}>
-        <svg viewBox="0 0 380 380" className="absolute inset-0 h-full w-full opacity-80">
+        <svg viewBox="0 0 380 380" className="absolute inset-0 h-full w-full opacity-85">
           <defs>
             <radialGradient id="sw5" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#fff5c8" stopOpacity="0.5" />
               <stop offset="100%" stopColor="#000" stopOpacity="0" />
             </radialGradient>
+            <filter id="band-blur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
           </defs>
+
+          {/* filled colour bands for an actual gas-giant banded look */}
+          <g filter="url(#band-blur)" opacity="0.55">
+            <rect x="0" y="10" width="380" height="26" fill="#fff3c4" />
+            <rect x="0" y="55" width="380" height="18" fill="#c9590f" />
+            <rect x="0" y="95" width="380" height="34" fill="#ffce7a" />
+            <rect x="0" y="150" width="380" height="22" fill="#a8430c" />
+            <rect x="0" y="195" width="380" height="30" fill="#ffdf9e" />
+            <rect x="0" y="250" width="380" height="20" fill="#b84e10" />
+            <rect x="0" y="290" width="380" height="28" fill="#ffe9b8" />
+            <rect x="0" y="335" width="380" height="20" fill="#8f3a0c" />
+          </g>
+
+          {/* flowing band contours */}
           {Array.from({ length: 8 }).map((_, i) => (
             <ellipse key={i} cx="190" cy={40 + i * 40} rx={170 - Math.abs(4 - i) * 12} ry={6 + (i % 3) * 2}
               fill="none" stroke="rgba(255,220,140,0.35)" strokeWidth={1.5 + (i % 2)} />
           ))}
-          <g fill="#1a0d04" opacity="0.75">
-            <rect x="120" y="150" width="6" height="30" /><rect x="116" y="146" width="14" height="6" />
-            <rect x="240" y="180" width="6" height="36" /><rect x="236" y="176" width="14" height="6" />
-            <rect x="180" y="220" width="6" height="26" /><rect x="176" y="216" width="14" height="6" />
-          </g>
+
           <ellipse cx="140" cy="120" rx="50" ry="10" fill="url(#sw5)" />
           <ellipse cx="240" cy="260" rx="60" ry="12" fill="url(#sw5)" />
         </svg>
