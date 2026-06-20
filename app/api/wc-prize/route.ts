@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { isRateLimited } from "@/lib/rate-limit";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 
 type WcPrizeRequest = {
   username: string;
@@ -291,13 +291,11 @@ function isWcPrizeRequest(body: unknown): body is WcPrizeRequest {
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // Cost-bearing (Groq) endpoint: require auth and rate-limit per identity,
-  // not a spoofable IP header (RT-04).
+  // Cost-bearing (Groq) endpoint: rate-limit per authenticated identity, or per
+  // IP for anonymous callers (RT-04). Inputs are sanitized via clean() below.
   const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  if (!jwt) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (isRateLimited(`wc-prize:${jwt.sub ?? "unknown"}`, 24, 60_000)) {
+  const rlKey = jwt ? `wc-prize:user:${jwt.sub ?? "unknown"}` : `wc-prize:ip:${getClientIp(request)}`;
+  if (isRateLimited(rlKey, 24, 60_000)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 

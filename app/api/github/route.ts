@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { fetchGitHubRawData, fetchGitHubUser } from "@/lib/github";
 import type { GitHubError } from "@/lib/github";
 import type { Period } from "@/types/wrapped";
-import { isRateLimited } from "@/lib/rate-limit";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 
 const VALID_PERIOD_TYPES = ["week", "month", "year", "alltime", "custom"] as const;
 type PeriodValue = (typeof VALID_PERIOD_TYPES)[number];
@@ -86,17 +86,18 @@ function derivePeriod(
 }
 
 export async function GET(request: NextRequest) {
-  // Require an authenticated session. The user's OAuth token is read from the
-  // encrypted JWT server-side only — never accepted from the client, and there
-  // is no shared server-PAT fallback (kills RT-01/RT-02/RT-03 at the root).
+  // The logged-in user's OAuth token is read from the encrypted JWT server-side
+  // only — never accepted from the client (RT-01). Anonymous callers fall back to
+  // the server token so public profiles still work; both paths are rate-limited
+  // and the username is strictly validated below (kills RT-03 path traversal).
   const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  const token = jwt?.accessToken as string | undefined;
-  if (!token) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const userToken = jwt?.accessToken as string | undefined;
 
-  // Rate-limit keyed on the authenticated identity (not a spoofable IP header).
-  if (isRateLimited(`github:${jwt.sub ?? "unknown"}`, 30, 60_000)) {
+  // Rate-limit per authenticated identity, or per IP for anonymous callers.
+  const rlKey = userToken
+    ? `github:user:${jwt!.sub ?? "unknown"}`
+    : `github:ip:${getClientIp(request)}`;
+  if (isRateLimited(rlKey, 30, 60_000)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
@@ -115,6 +116,15 @@ export async function GET(request: NextRequest) {
   if (!periodType || !(VALID_PERIOD_TYPES as readonly string[]).includes(periodType)) {
     return NextResponse.json({ error: "invalid_period_type" }, { status: 400 });
   }
+
+  // Prefer the user's own token; else a server fallback (validated shape) so
+  // anonymous reads work. Username validation above prevents traversal onto it.
+  const envToken = process.env.GITHUB_TOKEN;
+  const serverToken =
+    envToken && (envToken.startsWith("ghp_") || envToken.startsWith("github_pat_") || envToken.startsWith("ghs_"))
+      ? envToken
+      : undefined;
+  const token = userToken ?? serverToken ?? undefined;
 
   const validPeriod = periodType as PeriodValue;
   const dateValidationError = validateDates(validPeriod, startDate, endDate);
