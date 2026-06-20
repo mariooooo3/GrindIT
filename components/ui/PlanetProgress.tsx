@@ -152,9 +152,24 @@ export default function PlanetProgress({
     );
   }
 
+  const travelColor = colors[current] ?? "#a78bfa";
+
   return (
     <nav aria-label="Wrapped journey" className="relative flex h-8 w-full items-center sm:h-10">
+      {/* base path — the journey still ahead */}
       <div className="pointer-events-none absolute left-[24px] right-[24px] top-1/2 -translate-y-1/2 border-t border-dashed border-white/15 sm:left-[72px] sm:right-[72px]" />
+      {/* traveled path — glowing trail filling up to the current planet */}
+      <div className="pointer-events-none absolute left-[24px] right-[24px] top-1/2 -translate-y-1/2 sm:left-[72px] sm:right-[72px]">
+        <motion.div
+          className="absolute left-0 top-0 h-[2px] -translate-y-1/2 rounded-full"
+          animate={{ width: `${progress}%` }}
+          transition={{ type: "tween", duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+          style={{
+            background: `linear-gradient(90deg, ${travelColor}55, ${travelColor})`,
+            boxShadow: `0 0 12px ${travelColor}aa`,
+          }}
+        />
+      </div>
 
       <div className="relative flex w-full items-center justify-between px-[18px] sm:px-[72px]">
         {Array.from({ length: total }).map((_, i) => (

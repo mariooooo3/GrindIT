@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate, type MotionValue } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
@@ -21,9 +21,12 @@ function CountUp({ value }: { value: number }) {
   return <motion.span>{rounded}</motion.span>;
 }
 
-function Bullet({ delay, ufoX }: { delay: number; ufoX: number }) {
+function Bullet({ delay, ufoX }: { delay: number; ufoX: MotionValue<number> }) {
   const [phase, setPhase] = useState<"fly" | "burst">("fly");
   const travelDur = 1.2;
+  // Track the drifting UFO live: x follows the shared motion value (a plain
+  // template string can't interpolate a MotionValue — it stringifies to junk).
+  const x = useTransform(ufoX, (v) => `calc(-50% + ${v}px)`);
   useEffect(() => {
     let burstT: ReturnType<typeof setTimeout>;
     const flyT = setTimeout(() => {
@@ -36,7 +39,7 @@ function Bullet({ delay, ufoX }: { delay: number; ufoX: number }) {
   if (phase === "burst") {
     return (
       <div className="pointer-events-none absolute"
-        style={{ left: "50%", top: "26%", transform: `translate(calc(-50% + ${ufoX}px), 0)` }}>
+        style={{ left: "50%", top: "26%", transform: `translate(calc(-50% + ${ufoX.get()}px), 0)` }}>
         <motion.span className="absolute block rounded-full"
           initial={{ scale: 0.2, opacity: 1 }} animate={{ scale: 2.4, opacity: 0 }}
           transition={{ duration: 0.38, ease: "easeOut" }}
@@ -59,14 +62,14 @@ function Bullet({ delay, ufoX }: { delay: number; ufoX: number }) {
 
   return (
     <motion.span className="pointer-events-none absolute left-1/2 block h-3 w-3 rounded-full"
-      style={{ top: "60%", background: "#7cff8a", boxShadow: "0 0 14px 4px #4ade80, 0 0 30px 8px rgba(74,222,128,0.5)" }}
-      initial={{ x: "-50%", y: 0, opacity: 0, scale: 0.6 }}
-      animate={{ x: `calc(-50% + ${ufoX}px)`, y: "-34vh", opacity: [0, 1, 1, 1], scale: [0.6, 1, 1, 1.1] }}
+      style={{ top: "60%", x, background: "#7cff8a", boxShadow: "0 0 14px 4px #4ade80, 0 0 30px 8px rgba(74,222,128,0.5)" }}
+      initial={{ y: 0, opacity: 0, scale: 0.6 }}
+      animate={{ y: "-34vh", opacity: [0, 1, 1, 1], scale: [0.6, 1, 1, 1.1] }}
       transition={{ duration: travelDur, delay, ease: "easeOut", times: [0, 0.15, 0.85, 1] }} />
   );
 }
 
-function CommitStream({ ufoX }: { ufoX: number }) {
+function CommitStream({ ufoX }: { ufoX: MotionValue<number> }) {
   const bullets = useMemo(() => Array.from({ length: 3 }, (_, i) => ({ id: i, delay: i * 1.1 })), []);
   const [cycle, setCycle] = useState(0);
   useEffect(() => {

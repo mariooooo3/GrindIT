@@ -187,6 +187,50 @@ function Planet() {
   );
 }
 
+// ── Language orbits ──────────────────────────────────────────────────────────
+// The original planet stays as the hero; each top language adds a slim, elegant
+// orbit around it — the lit arc length encodes its share, with a satellite tip.
+function LanguagePlanet({ langs }: { langs: { name: string; color: string; percentage: number }[] }) {
+  const C = 280;            // svg center
+  const rings = langs.slice(0, 5);
+  return (
+    <div className="relative flex h-full w-full items-center justify-center">
+      <Planet />
+      <svg viewBox="0 0 560 560"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2">
+        {rings.map((l, i) => {
+          const r = 198 + i * 15;
+          const circ = 2 * Math.PI * r;
+          const arc = (circ * l.percentage) / 100;
+          const ang = ((-90 + (l.percentage / 100) * 360) * Math.PI) / 180;
+          const mx = C + r * Math.cos(ang);
+          const my = C + r * Math.sin(ang);
+          const spin = 95 + i * 20;
+          return (
+            <motion.g key={l.name}
+              animate={{ rotate: i % 2 ? -360 : 360 }}
+              transition={{ duration: spin, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: `${C}px ${C}px` }}>
+              {/* faint orbital track */}
+              <circle cx={C} cy={C} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={2.5} />
+              {/* lit share arc */}
+              <motion.circle cx={C} cy={C} r={r} fill="none" stroke={l.color} strokeWidth={2.5} strokeLinecap="round"
+                transform={`rotate(-90 ${C} ${C})`}
+                strokeDasharray={circ}
+                initial={{ strokeDashoffset: circ }}
+                animate={{ strokeDashoffset: circ - arc }}
+                transition={{ duration: 1.4, delay: 0.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                style={{ filter: `drop-shadow(0 0 4px ${l.color}aa)` }} />
+              {/* satellite marker at the arc tip */}
+              <circle cx={mx} cy={my} r={2.8} fill={l.color} style={{ filter: `drop-shadow(0 0 5px ${l.color})` }} />
+            </motion.g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 export default function SlideLanguages({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
   const langs = flat.topLanguages.slice(0, 5);
@@ -334,7 +378,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className="relative hidden order-3 lg:block">
           <PlanetStage>
-            <Planet />
+            {hasLangs ? <LanguagePlanet langs={langs} /> : <Planet />}
           </PlanetStage>
         </motion.div>
       </div>
