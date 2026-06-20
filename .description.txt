@@ -1,0 +1,1 @@
+GitHub Wrapped: A Next.js application that transforms GitHub profiles into shareable developer recaps with metrics, archetypes, AI-powered narratives, and visual themes.
