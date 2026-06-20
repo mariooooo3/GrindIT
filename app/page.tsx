@@ -325,7 +325,7 @@ function Nav() {
           {/* center: tagline — absolutely positioned so it's truly centered */}
           <div className="pointer-events-none absolute inset-x-0 flex justify-center">
             <div className="hidden flex-col items-center gap-1 md:flex">
-              <span className="text-[17px] font-bold tracking-[-0.03em] text-white/90">
+              <span className="text-[20px] font-bold tracking-[-0.03em] text-white/90">
                 Your GitHub story,{" "}
                 <span className="bg-clip-text text-transparent"
                   style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 55%,var(--commit-green))" }}>
@@ -336,10 +336,14 @@ function Nav() {
                 href="#features"
                 onClick={(event) => {
                   event.preventDefault();
-                  document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  const el = document.getElementById("features");
+                  if (el) {
+                    const y = el.getBoundingClientRect().top + window.scrollY + 20;
+                    window.scrollTo({ top: y, behavior: "smooth" });
+                  }
                   window.history.pushState(null, "", "#features");
                 }}
-                className="pointer-events-auto rounded-full border border-violet-300/20 bg-white/[0.075] px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-300 shadow-[0_6px_18px_-12px_rgba(167,139,250,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/50 hover:bg-violet-400/[0.16] hover:text-white hover:shadow-[0_10px_24px_-14px_rgba(167,139,250,1),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.96]"
+                className="pointer-events-auto rounded-full border border-violet-300/30 bg-white/[0.06] px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-300/80 shadow-[0_6px_18px_-12px_rgba(167,139,250,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/50 hover:bg-violet-400/[0.16] hover:text-white hover:shadow-[0_10px_24px_-14px_rgba(167,139,250,1),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.96]"
               >
                 How it works
               </a>
@@ -581,8 +585,8 @@ function HomePageInner() {
           className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-colors duration-700" : ""}`}
           style={{
             background: ready && worldCup
-              ? "linear-gradient(to top, var(--space-deep) 0%, rgba(26,8,45,0.98) 28%, rgba(54,20,86,0.68) 58%, rgba(74,24,112,0.22) 82%, transparent 100%)"
-              : "linear-gradient(to top,var(--space-deep) 18%,color-mix(in oklab,var(--space-deep) 62%,transparent) 68%,transparent)",
+              ? "linear-gradient(to top, rgba(35,4,60,0.98) 0%, rgba(45,5,80,0.88) 18%, rgba(70,20,130,0.50) 48%, rgba(100,40,170,0.18) 74%, transparent 100%)"
+              : "linear-gradient(to top, rgba(26,8,45,0.98) 0%, rgba(26,8,45,0.90) 18%, rgba(54,20,86,0.55) 50%, rgba(74,24,112,0.18) 72%, transparent 100%)",
           }}
         />
 
@@ -811,14 +815,14 @@ function HomePageInner() {
         className="relative scroll-mt-28 px-5 py-32 transition-colors duration-700"
         style={{
           background: worldCup
-            ? "linear-gradient(180deg, rgba(26,8,45,0.98) 0%, rgba(16,8,28,0.96) 22%, var(--space-deep) 68%)"
-            : "var(--space-deep)",
+            ? "linear-gradient(180deg, rgba(35,4,60,0.98) 0%, rgba(20,3,40,0.96) 22%, var(--space-deep) 68%)"
+            : "linear-gradient(180deg, rgba(26,8,45,0.95) 0%, rgba(16,8,28,0.96) 20%, var(--space-deep) 60%)",
         }}
       >
         <div
           className="pointer-events-none absolute inset-x-0 -top-40 h-72 transition-opacity duration-700"
           style={{
-            opacity: worldCup ? 1 : 0,
+            opacity: worldCup ? 1 : 0.7,
             background: "radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.24), rgba(92,38,132,0.16) 42%, transparent 72%)",
             filter: "blur(18px)",
           }}
@@ -826,35 +830,63 @@ function HomePageInner() {
         <div className="mx-auto max-w-4xl">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>
+
+            {/* section title — outside the card */}
+            <div className="mb-10 text-center">
+              <h2 className="text-[32px] font-bold tracking-[-0.04em] text-white md:text-[40px]">
+                How it{" "}
+                <span className="bg-clip-text text-transparent"
+                  style={{ backgroundImage: "linear-gradient(108deg, var(--violet-glow), var(--commit-green))" }}>
+                  works
+                </span>
+              </h2>
+              <p className="mt-2 text-[14px] text-zinc-500">Everything you need to know before you start.</p>
+            </div>
+
             {/* outer shell */}
-            <div className="rounded-[1.7rem] border border-white/[0.08] bg-white/[0.025] p-[5px] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="rounded-[1.7rem] p-[5px]"
+              style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.45) 0%, rgba(255,255,255,0.06) 50%, rgba(34,197,94,0.25) 100%)", boxShadow: "0 0 40px -10px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
               {/* inner core */}
-              <div className="relative overflow-hidden rounded-[calc(1.7rem-5px)] bg-black/45 px-5 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.07)] md:px-7 md:py-7">
+              <div className="relative overflow-hidden rounded-[calc(1.7rem-5px)] px-5 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.07)] md:px-7 md:py-7"
+                style={{ background: "linear-gradient(145deg, rgba(30,12,60,0.97) 0%, rgba(10,8,20,0.98) 55%, rgba(8,22,14,0.96) 100%)" }}>
                 {/* accent glow spot */}
-                <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20"
-                  style={{ background: "radial-gradient(circle, var(--violet-glow), transparent 70%)", filter: "blur(16px)" }} />
-                <div className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full opacity-[0.15]"
-                  style={{ background: "radial-gradient(circle, var(--commit-green), transparent 70%)", filter: "blur(16px)" }} />
+                <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-40"
+                  style={{ background: "radial-gradient(circle, var(--violet-glow), transparent 70%)", filter: "blur(20px)" }} />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-52 w-52 rounded-full opacity-30"
+                  style={{ background: "radial-gradient(circle, var(--commit-green), transparent 70%)", filter: "blur(20px)" }} />
 
                 <div className="relative grid items-center gap-7 md:grid-cols-[1fr_0.9fr]">
                   <div className="text-center md:text-left">
-                <span className="relative inline-block rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                  How it works
-                </span>
-                <h2 className="relative mt-4 text-[22px] font-bold leading-tight tracking-[-0.03em] text-white md:text-[28px]">
+                <h3 className="relative text-[18px] font-bold leading-tight tracking-[-0.03em] text-white md:text-[22px]">
                   Your GitHub activity, decoded into a cinematic recap.
-                </h2>
+                </h3>
                 <p className="relative mt-5 text-[14px] leading-relaxed text-zinc-300">
-                  Generate a cinematic recap of your GitHub year for any period. For the most complete
-                  experience, authentication is recommended: the{" "}
-                  <span className="font-semibold text-violet-300">All time</span> mode unlocks once you
-                  connect your GitHub account.
+                  Generate a cinematic recap of your GitHub activity — no account needed. Connect for the full experience and unlock{" "}
+                  <span className="font-semibold text-violet-300">All time</span> mode.
                 </p>
-                <p className="relative mt-3 text-[13px] leading-relaxed text-zinc-500">
-                  Every month we ship a fresh <span className="font-semibold text-zinc-300">visual theme</span>{" "}to keep
-                  things diverse — and this month&apos;s theme is{" "}
+
+                <ol className="relative mt-5 space-y-3">
+                  {[
+                    { n: "01", label: "Enter your username", desc: "Public profiles work instantly — no login required." },
+                    { n: "02", label: "Pick a period & AI tone", desc: "Last 30 days, this year, all time. Roast, hype, or poetic." },
+                    { n: "03", label: "Generate your recap", desc: "We analyse your repos, commits, languages & streaks." },
+                    { n: "04", label: "Share it", desc: "Download your slides or share a link directly." },
+                  ].map(({ n, label, desc }) => (
+                    <li key={n} className="flex items-start gap-3">
+                      <span className="mt-0.5 shrink-0 text-[10px] font-bold tabular-nums tracking-[0.12em]"
+                        style={{ color: "var(--violet-glow)" }}>{n}</span>
+                      <div>
+                        <span className="text-[13px] font-semibold text-white">{label}</span>
+                        <span className="ml-2 text-[12px] text-zinc-500">{desc}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                <p className="relative mt-5 text-[12px] leading-relaxed text-zinc-600">
+                  Every month we ship a fresh <span className="font-semibold text-zinc-400">visual theme</span> — this month&apos;s is{" "}
                   <span className="font-semibold" style={{ color: "var(--commit-green)" }}>World Cup</span>{" "}
-                  <span className="inline-flex translate-y-[1px]"><SoccerBallTiny size={13} /></span>
+                  <span className="inline-flex translate-y-[1px]"><SoccerBallTiny size={12} /></span>
                 </p>
                   </div>
 
