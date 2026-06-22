@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -153,6 +153,7 @@ function CatRocketScene() {
           className="relative block select-none object-contain"
           style={{ filter: "drop-shadow(0 0 18px rgba(74,222,128,0.6))" }}
           draggable={false} />
+        <RocketTailNodes scale={0.62} />
       </motion.div>
     </div>
   );

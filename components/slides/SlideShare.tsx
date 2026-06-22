@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useMemo, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
@@ -656,12 +656,13 @@ export default function SlideShare({
 <div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-8 px-4 pb-16 pt-16 lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
         {/* LEFT — cat rocket bobbing */}
         <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
-          <motion.div animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
+          <motion.div className="relative" animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/cat-rocket.png" alt="Cat astronaut" width={280} height={280}
-              className="select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
+              className="block select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
               draggable={false} />
+            <RocketTailNodes scale={1.6} />
           </motion.div>
         </motion.div>
 
@@ -747,10 +748,14 @@ export default function SlideShare({
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
           <div className="mt-6 flex justify-center lg:hidden">
-            <motion.img src="/cat-rocket.png" alt="Cat astronaut" width={220} height={220}
-              className="w-[min(220px,60vw)] select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
-              animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              draggable={false} />
+            <motion.div className="relative w-[min(220px,60vw)]"
+              animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/cat-rocket.png" alt="Cat astronaut" width={220} height={220}
+                className="block w-full select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
+                draggable={false} />
+              <RocketTailNodes scale={1.3} />
+            </motion.div>
           </div>
         </motion.div>
 

@@ -38,6 +38,77 @@ export function Stars({ count = 120 }: { count?: number }) {
   );
 }
 
+// ── Rocket tail twinkle ──────────────────────────────────────────────────────
+// Branch-tip circles in the cat's tail in cat-rocket.png, as % of the 1024×1024
+// image. Mirrors the landing-page effect: nodes flash green at random intervals.
+// Render as a sibling overlay inside a `relative` box whose aspect ratio matches
+// the image (so object-contain / natural sizing puts the tips where we expect).
+// Pass a custom `nodes` array for a different cat image (e.g. the dual-cat slides).
+const ROCKET_TAIL_NODES: [number, number][] = [
+  [74.4, 18.4],
+  [86.2, 16.0],
+  [91.7, 23.2],
+  [71.4, 28.0],
+  [89.5, 30.6],
+];
+
+// Tail-tip circles for the single cat in 3.png (1024×1055) — slide 6.
+export const SLIDE6_TAIL_NODES: [number, number][] = [
+  [34.0, 14.9],
+  [43.9, 19.2],
+  [28.8, 20.3],
+  [29.3, 28.9],
+  [45.7, 28.4],
+  [24.9, 33.4],
+];
+
+// Tail-tip circles for BOTH cats in two-cats-surprised.png (1376×768) — slide 7.
+// Left cat's tail fans out to the left, right cat's to the right.
+export const SLIDE7_TAIL_NODES: [number, number][] = [
+  // left cat
+  [6.0, 15.0], [12.7, 16.5], [3.5, 23.5], [16.5, 29.0], [3.8, 32.5], [2.5, 40.0],
+  // right cat
+  [86.2, 16.5], [80.8, 18.9], [88.9, 23.3], [79.1, 28.0], [88.4, 29.5], [89.9, 37.2],
+];
+
+export function RocketTailNodes({ scale = 1, nodes = ROCKET_TAIL_NODES }: { scale?: number; nodes?: [number, number][] }) {
+  const [lit, setLit] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const flash = () => {
+      const idx = Math.floor(Math.random() * nodes.length);
+      setLit((prev) => new Set([...prev, idx]));
+      setTimeout(
+        () => setLit((prev) => { const n = new Set(prev); n.delete(idx); return n; }),
+        260 + Math.random() * 340,
+      );
+      t = setTimeout(flash, 500 + Math.random() * 1100);
+    };
+    t = setTimeout(flash, 400 + Math.random() * 800);
+    return () => clearTimeout(t);
+  }, [nodes]);
+
+  const d = 7 * scale;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10">
+      {nodes.map(([px, py], i) => (
+        <span key={i} className="absolute rounded-full"
+          style={{
+            left: `${px}%`, top: `${py}%`,
+            width: d, height: d, marginLeft: -d / 2, marginTop: -d / 2,
+            background: lit.has(i) ? "oklch(0.88 0.32 145)" : "transparent",
+            boxShadow: lit.has(i)
+              ? `0 0 ${12 * scale}px ${4 * scale}px oklch(0.78 0.28 145 / 0.85), 0 0 ${5 * scale}px ${1 * scale}px oklch(0.92 0.36 145)`
+              : "none",
+            transition: "background 0.1s ease, box-shadow 0.1s ease",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Rocket ─────────────────────────────────────────────────────────────────
 function CatRocketImg() {
   return (
@@ -50,6 +121,7 @@ function CatRocketImg() {
         style={{ filter: "drop-shadow(0 0 28px rgba(190,160,255,0.75)) drop-shadow(0 20px 46px rgba(80,255,160,0.24))" }}
         draggable={false}
       />
+      <RocketTailNodes scale={1} />
     </div>
   );
 }

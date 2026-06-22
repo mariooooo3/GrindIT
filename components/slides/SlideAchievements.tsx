@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -74,13 +74,14 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
           className="relative hidden h-full items-center justify-center lg:flex">
           <motion.div animate={{ y: [0, -14, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
-            <motion.div animate={{ rotate: [-1, 1, -1] }}
+            <motion.div className="relative" animate={{ rotate: [-1, 1, -1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/wrapped/3.png" alt="Cat astronauts reunited in cardboard rocket and crew rocket"
                 width={440} height={440}
-                className="h-auto w-[440px] max-w-full select-none drop-shadow-[0_30px_60px_rgba(168,85,247,0.25)]"
+                className="block h-auto w-[440px] max-w-full select-none drop-shadow-[0_30px_60px_rgba(168,85,247,0.25)]"
                 draggable={false} />
+              <RocketTailNodes scale={2.0} nodes={SLIDE6_TAIL_NODES} />
             </motion.div>
           </motion.div>
         </motion.div>
@@ -171,10 +172,14 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
           <div className="mt-6 flex justify-center lg:hidden">
-            <motion.img src="/wrapped/3.png" alt="Cat astronauts crew"
-              width={300} height={300} className="w-[min(300px,80vw)] select-none drop-shadow-[0_20px_50px_rgba(168,85,247,0.25)]"
-              animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              draggable={false} />
+            <motion.div className="relative w-[min(300px,80vw)]"
+              animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/wrapped/3.png" alt="Cat astronauts crew"
+                width={300} height={300} className="block w-full select-none drop-shadow-[0_20px_50px_rgba(168,85,247,0.25)]"
+                draggable={false} />
+              <RocketTailNodes scale={1.4} nodes={SLIDE6_TAIL_NODES} />
+            </motion.div>
           </div>
         </motion.div>
 

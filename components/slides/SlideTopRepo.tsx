@@ -5,7 +5,7 @@ import { motion, useMotionValue, useTransform, animate, type MotionValue } from 
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -126,12 +126,18 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
               transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
               draggable={false} />
             {/* Cat rocket at bottom, swaying opposite phase */}
-            <motion.img src="/cat-rocket.png" alt="Cat astronaut"
-              className="absolute bottom-[2%] left-1/2 w-[58%] -translate-x-1/2 select-none object-contain"
+            <motion.div
+              className="absolute bottom-[2%] left-1/2 w-[58%] -translate-x-1/2"
+              style={{ aspectRatio: "1" }}
               animate={{ x: [-70, 70, -70] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))" }}
-              draggable={false} />
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/cat-rocket.png" alt="Cat astronaut"
+                className="block h-full w-full select-none object-contain"
+                style={{ filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))" }}
+                draggable={false} />
+              <RocketTailNodes scale={1.05} />
+            </motion.div>
             <CommitStream ufoX={ufoX} />
           </div>
         </div>
@@ -260,10 +266,16 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
               style={{ x: ufoX, filter: "drop-shadow(0 20px 40px rgba(74,222,128,0.5))" }}
               animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
               draggable={false} />
-            <motion.img src="/cat-rocket.png" alt="Cat astronaut"
-              className="absolute bottom-[2%] left-1/2 w-[52%] -translate-x-1/2 select-none object-contain"
-              animate={{ x: [-50, 50, -50] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))" }} draggable={false} />
+            <motion.div
+              className="absolute bottom-[2%] left-1/2 w-[52%] -translate-x-1/2"
+              style={{ aspectRatio: "1" }}
+              animate={{ x: [-50, 50, -50] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/cat-rocket.png" alt="Cat astronaut"
+                className="block h-full w-full select-none object-contain"
+                style={{ filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))" }} draggable={false} />
+              <RocketTailNodes scale={0.95} />
+            </motion.div>
             <CommitStream ufoX={ufoX} />
           </div>
         </div>

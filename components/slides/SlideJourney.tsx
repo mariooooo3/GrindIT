@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -69,6 +69,7 @@ function GasStationCat() {
           <img src="/cat-rocket.png" alt="" className="h-full w-full select-none object-contain"
             style={{ filter: "drop-shadow(0 0 16px rgba(255,180,30,0.8))" }}
             draggable={false} />
+          <RocketTailNodes scale={0.85} />
         </div>
         </div>
       </motion.div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -122,10 +122,11 @@ function ChaseScene({ merged }: { merged: boolean[] }) {
         initial={{ x: -200, opacity: 0 }}
         animate={{ x: [0, 30, 0], y: [0, -8, 0], opacity: 1 }}
         transition={{ x: { duration: 2.2, repeat: Infinity, ease: "easeInOut" }, y: { duration: 1.1, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.8, delay: 0.4 } }}>
-        <motion.div animate={{ rotate: [12, 18, 12] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+        <motion.div className="relative" animate={{ rotate: [12, 18, 12] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/cat-rocket.png" alt="" width={105} height={105} className="select-none object-contain" draggable={false}
+          <img src="/cat-rocket.png" alt="" width={105} height={105} className="block select-none object-contain" draggable={false}
             style={{ filter: "drop-shadow(0 0 14px rgba(74,222,128,0.5))" }} />
+          <RocketTailNodes scale={0.66} />
         </motion.div>
       </motion.div>
     </div>

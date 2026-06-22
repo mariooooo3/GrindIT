@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE7_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -141,9 +141,10 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
               className="relative -mt-2 w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/wrapped/two-cats-surprised.png" alt="Cat astronauts celebrating"
-                className="w-full select-none"
+                className="block w-full select-none"
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5)) drop-shadow(0 0 30px rgba(255,62,165,0.3))" }}
                 draggable={false} />
+              <RocketTailNodes scale={1.5} nodes={SLIDE7_TAIL_NODES} />
             </motion.div>
             <DanceFloor sparse={sparse} />
           </div>
@@ -303,8 +304,9 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <DiscoBall />
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="relative -mt-2 w-[min(320px,82vw)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/wrapped/two-cats-surprised.png" alt="Cat astronauts celebrating" className="w-full select-none"
+              <img src="/wrapped/two-cats-surprised.png" alt="Cat astronauts celebrating" className="block w-full select-none"
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5))" }} draggable={false} />
+              <RocketTailNodes scale={1.3} nodes={SLIDE7_TAIL_NODES} />
             </motion.div>
             <DanceFloor sparse={sparse} />
           </div>
