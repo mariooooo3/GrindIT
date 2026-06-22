@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupSlide } from "@/components/pawcup/WorldCupTheme";
+import { determineAward } from "@/lib/wc-award";
 import SlideIntro         from "@/components/slides/SlideIntro";
 import SlideContributions from "@/components/slides/SlideContributions";
 import SlideLanguages     from "@/components/slides/SlideLanguages";
@@ -152,14 +153,17 @@ export default function WrappedPage() {
   const [error,            setError]            = useState<string | null>(null);
   const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [shareOpen,        setShareOpen]        = useState(false);
+  const [wcSpeech,         setWcSpeech]         = useState<string | null>(null);
+  const [wcSpeechLoading,  setWcSpeechLoading]  = useState(false);
+  const wcSpeechFetched = useRef(false);
   const touchStartX = useRef(0);
   const slideAreaRef = useRef<HTMLDivElement>(null);
   const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
-  const fetchNarrative = useCallback(async (p: WrappedProfile) => {
+  const fetchNarrative = useCallback(async (p: WrappedProfile, wc: boolean) => {
     setNarrativeLoading(true);
     try {
-      const res = await fetch("/api/narrative", {
+      const res = await fetch(`/api/narrative?theme=${wc ? "worldcup" : "space"}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(p),
       });
@@ -171,16 +175,74 @@ export default function WrappedPage() {
     finally { setNarrativeLoading(false); }
   }, []);
 
+  const fetchWcSpeech = useCallback(async (p: WrappedProfile) => {
+    if (wcSpeechFetched.current) return;
+    const award = determineAward(p);
+    if (!award) return;
+    wcSpeechFetched.current = true;
+    setWcSpeechLoading(true);
+    try {
+      const res = await fetch("/api/wc-prize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: p.user.login,
+          awardName: award.name,
+          awardSubtitle: award.subtitle,
+          keyStat: award.keyStat(p),
+          speechHint: award.speech_hint,
+        }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { speech?: string };
+      setWcSpeech(data.speech ?? null);
+    } catch { /* optional */ }
+    finally { setWcSpeechLoading(false); }
+  }, []);
+
+  // Tracks the theme used for the most recent narrative fetch — lets the toggle
+  // effect skip a re-fetch when worldCup simply corrects from the SSR-default
+  // false to the real sessionStorage value (hydration timing, not a user toggle).
+  const lastFetchedTheme = useRef<boolean | null>(null);
+
   useEffect(() => {
     const stored = sessionStorage.getItem("wrappedProfile");
     if (!stored) { router.push("/"); return; }
     try {
       const parsed = JSON.parse(stored) as WrappedProfile;
-      queueMicrotask(() => { setProfile(parsed); setLoading(false); fetchNarrative(parsed); });
+      // Read theme directly from sessionStorage to avoid React hydration timing:
+      // on refresh, useSyncExternalStore fires with false (server snapshot) before
+      // correcting to the real value — reading storage directly is always correct.
+      const isWC = sessionStorage.getItem("gh-wrapped-theme") === "worldcup";
+      lastFetchedTheme.current = isWC;
+      queueMicrotask(() => {
+        setProfile(parsed);
+        setLoading(false);
+        fetchNarrative(parsed, isWC);
+        if (isWC) fetchWcSpeech(parsed);
+      });
     } catch {
       queueMicrotask(() => { setError("Failed to load profile"); setLoading(false); });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, fetchNarrative]);
+
+  // Re-generate the narrative when the user actively toggles themes. Skip if the
+  // theme matches what was already fetched (guards against the hydration correction
+  // false→true firing an unnecessary second request on page refresh).
+  const profileRef = useRef<WrappedProfile | null>(null);
+  profileRef.current = profile;
+  const didInitTheme = useRef(false);
+  useEffect(() => {
+    if (!didInitTheme.current) { didInitTheme.current = true; return; }
+    if (lastFetchedTheme.current === worldCup) return;
+    lastFetchedTheme.current = worldCup;
+    const p = profileRef.current;
+    if (p) {
+      fetchNarrative(p, worldCup);
+      if (worldCup) fetchWcSpeech(p);
+    }
+  }, [worldCup, fetchNarrative, fetchWcSpeech]);
 
   const goNext = useCallback(() => {
     setSlideState(prev => {
@@ -314,7 +376,7 @@ export default function WrappedPage() {
                 }`}
               >
                 <div className="wc-pawcup-scene absolute inset-0">
-                  <WorldCupSlide index={normalizedSlideState.index} profile={profile} />
+                  <WorldCupSlide index={normalizedSlideState.index} profile={profile} wcSpeech={wcSpeech} wcSpeechLoading={wcSpeechLoading} />
                 </div>
                 <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={normalizedSlideState.current}>
                   {normalizedSlideState.current === "archetype"

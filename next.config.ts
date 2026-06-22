@@ -8,7 +8,7 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://avatars.githubusercontent.com",
+  "img-src 'self' data: https://avatars.githubusercontent.com https://flagcdn.com",
   "font-src 'self' data:",
   "connect-src 'self' ws: wss:",
   "frame-ancestors 'none'",

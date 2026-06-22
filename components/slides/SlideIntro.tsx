@@ -1,9 +1,10 @@
 "use client";
 
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { PlanetStage, SlideShell, MobilePlanet, Rocket } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -285,9 +286,81 @@ function ProfileCard({ flat }: { flat: Flat }) {
   );
 }
 
+// ── cosmic transmission line carrying the personalized intro message ─────────
+function TransmissionLine({ message }: { message: string }) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    if (!message) { setDisplayedText(""); return; }
+    setDisplayedText("");
+    let tick: ReturnType<typeof setInterval> | null = null;
+    // Wait for the box fade-in to finish (delay 1.1s + duration 0.7s) then start typing
+    const start = setTimeout(() => {
+      let i = 0;
+      tick = setInterval(() => {
+        i++;
+        setDisplayedText(message.slice(0, i));
+        if (i >= message.length) { clearInterval(tick!); tick = null; }
+      }, 28);
+    }, 1900);
+    return () => { clearTimeout(start); if (tick) clearInterval(tick); };
+  }, [message]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      className="mt-4 w-full max-w-[380px]"
+    >
+      <div className="relative overflow-hidden rounded-2xl px-4 py-3"
+        style={{
+          border: `1px solid ${ACCENT}66`,
+          background: `linear-gradient(160deg, rgba(24,16,46,0.94), rgba(10,7,22,0.96))`,
+          boxShadow: `0 0 0 1px ${ACCENT}33, 0 0 22px ${ACCENT}55, 0 0 54px -8px ${ACCENT}4d, inset 0 1px 0 rgba(255,255,255,0.08)`,
+        }}>
+        <div className="flex items-center gap-1.5">
+          <motion.span className="h-1.5 w-1.5 rounded-full" style={{ background: "#4ade80", boxShadow: "0 0 6px #4ade80" }}
+            animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
+          <span className="text-[9px] font-medium uppercase tracking-[0.28em]" style={{ color: `${ACCENT}aa` }}>
+            Incoming transmission
+          </span>
+        </div>
+        <p className="mt-1.5 min-h-[2em] font-mono text-[12.5px] leading-relaxed text-zinc-200">
+          {displayedText}
+          <motion.span className="ml-0.5 inline-block w-[7px]" style={{ color: ACCENT }}
+            animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}>▋</motion.span>
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Slide ──────────────────────────────────────────────────────────────────
 export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   const flat = mapToFlat(profile);
+
+  const introVibeLine = useMemo(() => {
+    const nightRatio = flat.totalCommits > 0 ? flat.nightCommits / flat.totalCommits : 0;
+    return profile.narrative?.introVibeLine ?? buildFallbackNarrative({
+      username: flat.username,
+      archetype: flat.archetype,
+      archetypeId: profile.archetypeBlend.primary.id,
+      primaryWeight: profile.archetypeBlend.primary.weight,
+      totalCommits: flat.totalCommits,
+      longestStreak: flat.longestStreak,
+      currentStreak: flat.currentStreak,
+      peakHour: flat.peakHour,
+      topLanguage: flat.topLanguages[0]?.name ?? "code",
+      topRepo: flat.topRepos[0]?.name ?? "your repo",
+      nightRatio,
+      prsMerged: flat.pullRequests.merged,
+      totalRepos: flat.totalRepos,
+      periodLabel: flat.period.label,
+    }, profile.tone).introVibeLine;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flat.username, profile.tone, profile.narrative?.introVibeLine]);
+
   const cardFlat: Flat = {
     username: flat.username,
     avatarUrl: flat.avatarUrl,
@@ -309,6 +382,11 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
         <>
           <ChapterHeadingMobile n={1} title="Liftoff" />
           <MobilePlanet color="#cbd5e1" />
+          {introVibeLine && (
+            <div className="mb-2 flex justify-center">
+              <TransmissionLine message={introVibeLine} />
+            </div>
+          )}
         </>
       }
       mobileFooter={
@@ -319,9 +397,14 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
       center={<ProfileCard flat={cardFlat} />}
       right={
         <>
-          <PlanetStage className="lg:-translate-x-8">
+          <PlanetStage className="scale-[0.82] -translate-y-12 lg:-translate-x-8">
             <Moon />
           </PlanetStage>
+          {introVibeLine && (
+            <div className="absolute inset-x-0 bottom-6 flex justify-center px-4 lg:-translate-x-8">
+              <TransmissionLine message={introVibeLine} />
+            </div>
+          )}
         </>
       }
     />

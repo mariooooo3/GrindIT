@@ -90,6 +90,11 @@ const SYSTEM_PROMPT =
   `You are a creative writer generating GitHub Wrapped narratives. Each call MUST produce genuinely different text.\n\n` +
   `Output ONLY this JSON — no markdown fences, no preamble, nothing else:\n` +
   `{"roastLine":"...","archetypeDescription":"...","introVibeLine":"...","shareCaption":"..."}\n\n` +
+  `LENGTH LIMITS (strict — keep it tight and punchy, never wordy):\n` +
+  `- roastLine: 2 short sentences, ~24 words total.\n` +
+  `- archetypeDescription: 3 short sentences, ~45 words total.\n` +
+  `- introVibeLine: 2 short sentences, ~28 words total.\n` +
+  `- shareCaption: ONE short line, max 14 words.\n\n` +
   `Rules:\n` +
   `1. Reference SPECIFIC numbers from the data (exact commit count, streak, peak hour, repo name, language).\n` +
   `2. Apply the voice, focus area, mandatory element, and forbidden words given in the user message — they change each call to force genuine variety.\n` +
@@ -103,7 +108,7 @@ const SYSTEM_PROMPT_RETRY =
   `You are a JSON generator. Output ONLY this exact JSON structure — nothing else, no markdown:\n` +
   `{"roastLine":"...","archetypeDescription":"...","introVibeLine":"...","shareCaption":"..."}\n\n` +
   `Rules:\n` +
-  `1. All four fields must be non-empty strings.\n` +
+  `1. All four fields must be non-empty strings (shareCaption max ~14 words; roastLine & introVibeLine 2 short sentences; archetypeDescription 3 short sentences).\n` +
   `2. Reference at least one specific number from the developer stats (commits, streak, peak hour, repo name).\n` +
   `3. Match the tone specified in the user message.\n` +
   `4. Output ONLY the raw JSON object — nothing before or after.\n` +
@@ -258,7 +263,7 @@ async function callGroq(
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        max_tokens: 520,
+        max_tokens: 420,
         temperature,
         top_p: 0.9,
         response_format: { type: "json_object" },
@@ -291,7 +296,16 @@ async function callGroq(
 
 // ── main export ──────────────────────────────────────────────────────────────
 
-export async function generateNarrative(profile: WrappedProfile): Promise<NarrativeOutput | null> {
+export type NarrativeTheme = "space" | "worldcup";
+
+const THEME_FLAVOR: Record<NarrativeTheme, string> = {
+  space:
+    "Theme flavor: give the text a SUBTLE cosmic/space tint — you may lightly lean on planets, orbits, stars, gravity, or launch imagery. Keep it tasteful and still grounded in their real dev stats; do not overdo it.",
+  worldcup:
+    "Theme flavor: give the text a SUBTLE football/World Cup tint — you may lightly lean on stadium, match, squad, trophy, or championship imagery. Keep it tasteful and still grounded in their real dev stats; do not overdo it.",
+};
+
+export async function generateNarrative(profile: WrappedProfile, theme: NarrativeTheme = "space"): Promise<NarrativeOutput | null> {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
@@ -321,6 +335,7 @@ export async function generateNarrative(profile: WrappedProfile): Promise<Narrat
     `\nFocus area for this generation: ${focusArea}` +
     `\nMandatory element: include ${element} somewhere.` +
     `\nForbidden words — do NOT use any of: ${banned}.` +
+    `\n${THEME_FLAVOR[theme]}` +
     `\nDeveloper stats: ${JSON.stringify(payload)}`;
 
   console.log(`[groq] run=${rollId} voice="${voice.slice(0, 30)}..." focus="${focusArea.slice(0, 40)}..."`);
@@ -335,6 +350,7 @@ export async function generateNarrative(profile: WrappedProfile): Promise<Narrat
     const retryPrompt =
       `Tone: ${profile.tone}. ` +
       USER_PROMPTS[profile.tone] +
+      `\n${THEME_FLAVOR[theme]}` +
       `\nDeveloper stats: ${JSON.stringify(payload)}`;
     const attempt2 = await callGroq(apiKey, SYSTEM_PROMPT_RETRY, retryPrompt, 0.95);
     console.log("[groq] attempt 2:", attempt2.error ?? "OK");

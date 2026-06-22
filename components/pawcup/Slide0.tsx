@@ -1,11 +1,64 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import type { WrappedProfile } from "@/types/wrapped";
+import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catSinger from "@/components/pawcup/assets/cat-singer.png.asset.json";
 import trophy from "@/components/pawcup/assets/trophy-case.png.asset.json";
-function Slide0() {
+function Slide0({ profile }: { profile?: WrappedProfile }) {
+  const intro = useMemo(() => {
+    if (!profile) return null;
+    const flat = mapToFlat(profile);
+    const nightRatio = flat.totalCommits > 0 ? flat.nightCommits / flat.totalCommits : 0;
+    return profile.narrative?.introVibeLine ?? buildFallbackNarrative({
+      username: flat.username,
+      archetype: flat.archetype,
+      archetypeId: profile.archetypeBlend.primary.id,
+      primaryWeight: profile.archetypeBlend.primary.weight,
+      totalCommits: flat.totalCommits,
+      longestStreak: flat.longestStreak,
+      currentStreak: flat.currentStreak,
+      peakHour: flat.peakHour,
+      topLanguage: flat.topLanguages[0]?.name ?? "code",
+      topRepo: flat.topRepos[0]?.name ?? "your repo",
+      nightRatio,
+      prsMerged: flat.pullRequests.merged,
+      totalRepos: flat.totalRepos,
+      periodLabel: flat.period.label,
+    }, profile.tone).introVibeLine;
+  }, [profile]);
+  // Typewriter effect — plaque starts empty, text types in after the slide settles.
+  // Re-triggers if intro changes (e.g. LLM response replaces the fallback).
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  useEffect(() => {
+    if (!intro) { setDisplayedText(""); return; }
+    setDisplayedText("");
+    setIsTyping(false);
+    let tick: ReturnType<typeof setInterval> | null = null;
+    const start = setTimeout(() => {
+      let i = 0;
+      setIsTyping(true);
+      tick = setInterval(() => {
+        i++;
+        setDisplayedText(intro.slice(0, i));
+        if (i >= intro.length) {
+          if (tick) clearInterval(tick);
+          tick = null;
+          setIsTyping(false);
+        }
+      }, 28);
+    }, 700);
+    return () => {
+      clearTimeout(start);
+      if (tick) clearInterval(tick);
+      setIsTyping(false);
+    };
+  }, [intro]);
+
   const [stars] = useState(() => Array.from({ length: 40 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 3, s: 1 + Math.random() * 2 })));
   const [sparks] = useState(() => Array.from({ length: 20 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 100, d: Math.random() * 4 })));
   const [goldenSparkles] = useState(() => Array.from({ length: 14 }).map(() => ({ right: 10 + Math.random() * 70, top: 15 + Math.random() * 70, w: 2 + Math.random() * 3, h: 2 + Math.random() * 3, delay: Math.random() * 3 })));
@@ -114,7 +167,7 @@ function Slide0() {
           <div className="absolute right-[15%] top-[28%] w-[60%] h-[50%] rounded-full bg-purple-500/25 blur-3xl" />
 
           {/* trophy + stand */}
-          <div className="absolute left-[82%] -translate-x-1/2 top-[28%] flex flex-col items-center w-[82%] animate-float-slow">
+          <div className="absolute left-[82%] -translate-x-1/2 top-[33%] flex flex-col items-center w-[82%] animate-float-slow">
             {/* trophy image */}
               <div className="relative z-10 w-full">
                 <Image
@@ -152,6 +205,29 @@ function Slide0() {
             </div>
             <div className="w-[70%] h-3 rounded-[50%] bg-black/50 blur-md mt-1" />
           </div>
+
+          {/* engraved brass plaque on the trophy base — carries the intro line */}
+          {intro && (
+            <div className="absolute left-[41%] top-[19%] w-[95%] max-w-[400px] -translate-x-1/2">
+              <div className="relative overflow-hidden rounded-md px-5 py-3 text-center"
+                style={{
+                  background: "linear-gradient(160deg, #f8e8ad 0%, #e6c259 40%, #b5852e 100%)",
+                  border: "1px solid rgba(110,72,18,0.6)",
+                  boxShadow: "0 12px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 5px rgba(110,72,18,0.55)",
+                }}>
+                {/* synchronized shine sweep — same timing as the trophy */}
+                <div className="pointer-events-none absolute -inset-y-4 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent rotate-12 animate-shine" />
+                <div className="text-[7.5px] font-black uppercase tracking-[0.3em] text-amber-950/70">★ Champion&apos;s Inscription ★</div>
+                <p className="mt-1 min-h-[2.4em] font-serif text-[12.5px] font-semibold italic leading-snug text-amber-950"
+                  style={{ textShadow: "0 1px 0 rgba(255,255,255,0.4)" }}>
+                  {displayedText}
+                  {isTyping && (
+                    <span className="animate-cursor-blink ml-[1px] inline-block w-[1.5px] align-middle bg-amber-950/70" style={{ height: "0.9em" }} />
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* golden sparkles */}
           {goldenSparkles.map((sp, i) => (
@@ -252,6 +328,8 @@ function Slide0() {
         .animate-shine { animation: shine 4s ease-in-out infinite; }
         @keyframes pulse-slow { 0%,100%{opacity:.5} 50%{opacity:.9} }
         .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+        @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .animate-cursor-blink { animation: cursor-blink 0.7s ease-in-out infinite; }
       `}</style>
     </div>
   );

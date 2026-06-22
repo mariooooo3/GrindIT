@@ -548,13 +548,23 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 
       </div>
 
-      <motion.div className="mt-8 text-center"
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-        <p className="text-xs uppercase tracking-[0.3em]" style={{ color: palette.a, opacity: 0.8 }}>{planetType}</p>
-        <p className="mt-1 text-lg italic text-zinc-200" style={{ fontFamily: "serif" }}>{username}</p>
-        {caption && (
-          <p className="mt-2 text-xs leading-snug text-zinc-400 max-w-[280px] mx-auto">{caption}</p>
-        )}
+      <motion.div className="mx-auto mt-8 w-[min(300px,82%)]"
+        initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
+        <div className="relative rounded-2xl border px-5 py-4 text-center backdrop-blur-sm"
+          style={{
+            borderColor: `${palette.a}40`,
+            background: `linear-gradient(160deg, ${palette.a}16, rgba(255,255,255,0.015))`,
+            boxShadow: `0 0 34px ${palette.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+          }}>
+          <p className="text-[10px] uppercase tracking-[0.32em]" style={{ color: palette.a }}>{planetType}</p>
+          <p className="mt-1 text-xl italic text-zinc-100" style={{ fontFamily: "serif" }}>@{username}</p>
+          {caption && (
+            <>
+              <div className="mx-auto my-2.5 h-px w-12" style={{ background: `${palette.a}55` }} />
+              <p className="text-[13px] leading-snug text-zinc-300">{caption}</p>
+            </>
+          )}
+        </div>
       </motion.div>
     </div>
   );
@@ -619,6 +629,17 @@ export default function SlideShare({
 
   const badgesEarned = flat.traitBadges.slice(0, 6);
 
+  // Collectible-poster metadata: a stable serial from the username and a star
+  // grade from the rarity of the strongest badge earned.
+  const serial = useMemo(() => {
+    let h = 2166136261;
+    for (let i = 0; i < flat.username.length; i++) { h ^= flat.username.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return String((h >>> 0) % 10000).padStart(4, "0");
+  }, [flat.username]);
+  const RARITY_RANK: Record<string, number> = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+  const grade = badgesEarned[0]?.rarity ?? "rare";
+  const stars = RARITY_RANK[grade] ?? 3;
+
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
     window.location.href = "/";
@@ -651,6 +672,11 @@ export default function SlideShare({
             <MobilePlanet color={palette.a} />
           </div>
           <SlideCard ref={cardRef} accentColor={palette.a}>
+            {/* collectible edition strip */}
+            <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2.5">
+              <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-zinc-500">★ Wrapped · {flat.period.label}</span>
+              <span className="font-mono text-[9px] tracking-[0.2em] text-zinc-500">No.{serial}</span>
+            </div>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-base font-bold text-white"
                 style={{ background: `linear-gradient(135deg, ${palette.a}, ${palette.b})`, boxShadow: `0 0 20px ${palette.glow}` }}>
@@ -662,6 +688,18 @@ export default function SlideShare({
               <div className="flex-1">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Your Planet</p>
                 <p className="text-base font-bold text-zinc-100">@{flat.username}</p>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
+                  style={{ color: palette.a, border: `1px solid ${palette.a}55`, background: `${palette.a}14`, boxShadow: `0 0 10px ${palette.glow}` }}>
+                  {grade} grade
+                </span>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className="text-[13px] leading-none"
+                      style={{ color: i < stars ? palette.a : "rgba(255,255,255,0.18)", textShadow: i < stars ? `0 0 6px ${palette.glow}` : undefined }}>★</span>
+                  ))}
+                </div>
               </div>
               {profile.narrative && (
                 <div
@@ -698,10 +736,10 @@ export default function SlideShare({
                 { n: formatNum(flat.pullRequests.merged), l: "PRs merged" },
                 { n: formatNum(flat.totalRepos), l: "repos" },
               ].map((s) => (
-                <div key={s.l} className="rounded-xl border px-3 py-3"
+                <div key={s.l} className="rounded-lg border px-2.5 py-1.5"
                   style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.025)" }}>
-                  <p className="text-xl font-semibold text-zinc-50">{s.n}</p>
-                  <p className="mt-0.5 text-[10px] uppercase tracking-widest text-zinc-500">{s.l}</p>
+                  <p className="text-base font-semibold text-zinc-50">{s.n}</p>
+                  <p className="mt-0.5 text-[9px] uppercase tracking-widest text-zinc-500">{s.l}</p>
                 </div>
               ))}
             </div>

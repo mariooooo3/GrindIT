@@ -1,7 +1,10 @@
 ﻿"use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useMemo } from "react";
+import type { WrappedProfile } from "@/types/wrapped";
+import { mapToFlat } from "@/components/wrapped/flatProfile";
+import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import champion from "@/components/pawcup/assets/champion-cat.png.asset.json";
 import stadiumCelebration from "@/components/pawcup/assets/stadium-celebration.jpg.asset.json";
@@ -57,7 +60,30 @@ const SCREEN_FW = [
   { x: 30, y: 15, d: 0.3,  c: "#a855f7", size: 62,  n: 14 },
 ];
 
-function Slide7() {
+function Slide7({ profile }: { profile?: WrappedProfile }) {
+  const { username, caption } = useMemo(() => {
+    if (!profile) return { username: null as string | null, caption: null as string | null };
+    const flat = mapToFlat(profile);
+    const nightRatio = flat.totalCommits > 0 ? flat.nightCommits / flat.totalCommits : 0;
+    const cap = profile.narrative?.shareCaption ?? buildFallbackNarrative({
+      username: flat.username,
+      archetype: flat.archetype,
+      archetypeId: profile.archetypeBlend.primary.id,
+      primaryWeight: profile.archetypeBlend.primary.weight,
+      totalCommits: flat.totalCommits,
+      longestStreak: flat.longestStreak,
+      currentStreak: flat.currentStreak,
+      peakHour: flat.peakHour,
+      topLanguage: flat.topLanguages[0]?.name ?? "code",
+      topRepo: flat.topRepos[0]?.name ?? "your repo",
+      nightRatio,
+      prsMerged: flat.pullRequests.merged,
+      totalRepos: flat.totalRepos,
+      periodLabel: flat.period.label,
+    }, profile.tone).shareCaption;
+    return { username: flat.username, caption: cap };
+  }, [profile]);
+
   return (
     <div
       className="relative w-screen h-screen overflow-hidden bg-[#0b0418]"
@@ -227,8 +253,8 @@ function Slide7() {
                   style={{ fontSize: "clamp(22px,7vw,34px)" }}>
                 CHAMPIONS!
               </h2>
-              <p className="text-center text-[7.5px] font-semibold italic text-zinc-700 mt-1 mb-2 px-1">
-                Purple Paws FC stun the world, lift the trophy after a thrilling 2–1 final
+              <p className="text-center text-[16px] font-semibold italic leading-snug text-zinc-800 mt-1.5 mb-2 px-1">
+                {caption ?? "Purple Paws FC stun the world, lift the trophy after a thrilling 2–1 final"}
               </p>
 
               {/* photo */}
@@ -255,7 +281,7 @@ function Slide7() {
               {/* two-column body copy (typographic filler, sells the print layout) */}
               <div className="grid grid-cols-2 gap-2 border-t border-zinc-400 pt-1.5">
                 <div>
-                  <p className="text-[5.5px] font-black uppercase tracking-wide text-zinc-900 mb-1">By Our Pitch-side Correspondent</p>
+                  <p className="text-[11px] font-black uppercase tracking-wide text-zinc-900 mb-1">{username ? `By @${username}` : "By Our Pitch-side Correspondent"}</p>
                   <FakeTextLines seed={11} lines={7} />
                 </div>
                 <div>

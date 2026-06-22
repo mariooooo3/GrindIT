@@ -64,8 +64,10 @@ export async function POST(request: NextRequest) {
   const tone: AiTone = VALID_TONES.includes(rawProfile.tone) ? rawProfile.tone : "funny";
   const profile: WrappedProfile = { ...rawProfile, tone };
 
+  const theme = request.nextUrl.searchParams.get("theme") === "worldcup" ? "worldcup" : "space";
+
   try {
-    const narrative = await generateNarrative(profile);
+    const narrative = await generateNarrative(profile, theme);
     return NextResponse.json({ ...profile, narrative }, {
       status: 200,
       headers: { "Cache-Control": "no-store, max-age=0" },

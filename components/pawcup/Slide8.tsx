@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo } from "react";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import { determineAward, AwardIcon } from "@/lib/wc-award";
 import type { WrappedProfile } from "@/types/wrapped";
@@ -23,13 +23,12 @@ const RIGHT = [
   ["Uruguay", "uy"], ["Uzbekistan", "uz"], ["Algeria", "dz"], ["DR Congo", "cd"],
 ] as const;
 
-export default function Slide8({ profile }: { profile?: WrappedProfile }) {
+export default function Slide8({ profile, speech, speechLoading }: {
+  profile?: WrappedProfile;
+  speech: string | null;
+  speechLoading: boolean;
+}) {
   const award = useMemo(() => (profile ? determineAward(profile) : null), [profile]);
-  const requestKey = award && profile ? `${profile.user.login}:${award.id}` : null;
-  const [speechState, setSpeechState] = useState<{ key: string | null; speech: string | null }>({
-    key: null,
-    speech: null,
-  });
 
   const stars = useMemo(
     () =>
@@ -42,41 +41,6 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
       }),
     [],
   );
-
-  useEffect(() => {
-    if (!award || !profile || !requestKey) return;
-
-    const controller = new AbortController();
-
-    fetch("/api/wc-prize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: profile.user.login,
-        awardName: award.name,
-        awardSubtitle: award.subtitle,
-        keyStat: award.keyStat(profile),
-        speechHint: award.speech_hint,
-      }),
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((d: { speech?: string }) => {
-        if (!controller.signal.aborted) {
-          setSpeechState({ key: requestKey, speech: d.speech ?? null });
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setSpeechState({ key: requestKey, speech: null });
-        }
-      });
-
-    return () => controller.abort();
-  }, [award, profile, requestKey]);
-
-  const speechLoading = requestKey !== null && speechState.key !== requestKey;
-  const speech = speechState.key === requestKey ? speechState.speech : null;
 
   const startOver = () => {
     try { sessionStorage.removeItem("wrappedProfile"); } catch {}
@@ -145,6 +109,21 @@ export default function Slide8({ profile }: { profile?: WrappedProfile }) {
                   >
                     INDIVIDUAL AWARD
                   </div>
+                  {/* LLM status LED */}
+                  {!speechLoading && (
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <div
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{
+                          background: speech ? "#4ade80" : "#f87171",
+                          boxShadow: speech ? "0 0 6px #4ade80" : "0 0 6px #f87171",
+                        }}
+                      />
+                      <span className="text-[8px] tracking-[0.2em] text-white/30">
+                        {speech ? "LLM" : "FALLBACK"}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {/* award icon */}
                 <div

@@ -140,7 +140,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               className="relative -mt-2 w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/wrapped/cats-only.png" alt="Cat astronauts celebrating"
+              <img src="/wrapped/two-cats-surprised.png" alt="Cat astronauts celebrating"
                 className="w-full select-none"
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5)) drop-shadow(0 0 30px rgba(255,62,165,0.3))" }}
                 draggable={false} />
@@ -274,11 +274,26 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
               <StatItem label="PRs merged" value={flat.pullRequests.merged} />
               <StatItem label="repos" value={flat.totalRepos} />
             </div>
-            <div className="mt-3 text-center">
-              <div className="text-[10px] uppercase tracking-[0.25em] text-white/45">Your vibe</div>
-              <div className="mt-1 text-2xl font-black"
-                style={{ background: "linear-gradient(90deg,#facc15,#ff3ea5,#a855f7,#22d3ee)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7b 5s linear infinite", letterSpacing: "0.02em" }}>
-                {archetypeDisplay}
+            <div className="relative mt-3 text-center">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+                className="text-[10px] uppercase tracking-[0.25em] text-white/45">
+                Your vibe
+              </motion.div>
+              {/* climactic reveal of the archetype — lands last, with a light burst behind */}
+              <div className="relative mt-1 flex items-center justify-center">
+                <motion.div
+                  className="pointer-events-none absolute inset-0 mx-auto h-full w-2/3 rounded-full"
+                  style={{ background: "radial-gradient(ellipse at center, rgba(192,132,252,0.55), rgba(34,211,238,0.25) 45%, transparent 72%)", filter: "blur(14px)" }}
+                  initial={{ opacity: 0, scale: 0.4 }}
+                  animate={{ opacity: [0, 0.9, 0], scale: [0.4, 1.6, 2.1] }}
+                  transition={{ delay: 1.35, duration: 1.1, ease: "easeOut" }} />
+                <motion.div className="relative text-2xl font-black"
+                  style={{ background: "linear-gradient(90deg,#facc15,#ff3ea5,#a855f7,#22d3ee)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "arc7b 5s linear infinite", letterSpacing: "0.02em" }}
+                  initial={{ opacity: 0, scale: 0.7, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  transition={{ delay: 1.45, type: "spring", stiffness: 200, damping: 14 }}>
+                  {archetypeDisplay}
+                </motion.div>
               </div>
             </div>
           </SlideCard>
@@ -288,7 +303,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
             <DiscoBall />
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="relative -mt-2 w-[min(320px,82vw)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/wrapped/cats-only.png" alt="Cat astronauts celebrating" className="w-full select-none"
+              <img src="/wrapped/two-cats-surprised.png" alt="Cat astronauts celebrating" className="w-full select-none"
                 style={{ filter: "drop-shadow(0 18px 40px rgba(168,85,247,0.5))" }} draggable={false} />
             </motion.div>
             <DanceFloor sparse={sparse} />

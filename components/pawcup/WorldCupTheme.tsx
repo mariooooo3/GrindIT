@@ -34,13 +34,40 @@ export function WorldCupLanding({ isLoggedIn = false }: { isLoggedIn?: boolean }
   );
 }
 
-export function WorldCupSlide({ index, profile }: { index: number; profile?: WrappedProfile }) {
+export function WorldCupSlide({ index, profile, wcSpeech, wcSpeechLoading }: {
+  index: number;
+  profile?: WrappedProfile;
+  wcSpeech?: string | null;
+  wcSpeechLoading?: boolean;
+}) {
   // Slide 8 (bonus) is personalized and needs the profile
   if (index === 8) {
     return (
       <ClientOnly>
         <div className="relative h-full w-full">
-          <Slide8 profile={profile} />
+          <Slide8 profile={profile} speech={wcSpeech ?? null} speechLoading={wcSpeechLoading ?? false} />
+          <WorldCupChapterHeading index={index} />
+        </div>
+      </ClientOnly>
+    );
+  }
+  // Slide 7 (share) personalizes the newspaper with the user's share caption
+  if (index === 7) {
+    return (
+      <ClientOnly>
+        <div className="relative h-full w-full">
+          <Slide7 profile={profile} />
+          <WorldCupChapterHeading index={index} />
+        </div>
+      </ClientOnly>
+    );
+  }
+  // Slide 0 (opening) personalizes the opening tagline with the user's intro line
+  if (index === 0) {
+    return (
+      <ClientOnly>
+        <div className="relative h-full w-full">
+          <Slide0 profile={profile} />
           <WorldCupChapterHeading index={index} />
         </div>
       </ClientOnly>

@@ -77,7 +77,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
             <motion.div animate={{ rotate: [-1, 1, -1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/wrapped/cats-rockets.png" alt="Cat astronauts reunited in cardboard rocket and crew rocket"
+              <img src="/wrapped/3.png" alt="Cat astronauts reunited in cardboard rocket and crew rocket"
                 width={440} height={440}
                 className="h-auto w-[440px] max-w-full select-none drop-shadow-[0_30px_60px_rgba(168,85,247,0.25)]"
                 draggable={false} />
@@ -171,7 +171,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
           <div className="mt-6 flex justify-center lg:hidden">
-            <motion.img src="/wrapped/cats-rockets.png" alt="Cat astronauts crew"
+            <motion.img src="/wrapped/3.png" alt="Cat astronauts crew"
               width={300} height={300} className="w-[min(300px,80vw)] select-none drop-shadow-[0_20px_50px_rgba(168,85,247,0.25)]"
               animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               draggable={false} />
