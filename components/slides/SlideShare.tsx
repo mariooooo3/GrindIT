@@ -550,7 +550,7 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 
       <motion.div className="mx-auto mt-8 w-[min(300px,82%)]"
         initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="relative rounded-2xl border px-5 py-4 text-center backdrop-blur-sm"
+        <div className="relative rounded-2xl border px-5 py-3 text-center backdrop-blur-sm"
           style={{
             borderColor: `${palette.a}40`,
             background: `linear-gradient(160deg, ${palette.a}16, rgba(255,255,255,0.015))`,
@@ -667,7 +667,12 @@ export default function SlideShare({
         </motion.div>
 
         {/* CENTER — share card */}
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="flex flex-col items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.5 }}
+          className="flex flex-col items-center justify-center"
+        >
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
             <MobilePlanet color={palette.a} />

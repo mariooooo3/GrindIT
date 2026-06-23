@@ -134,7 +134,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
           className="relative hidden items-center justify-center lg:flex">
-          <div className="relative flex w-[88%] max-w-[360px] flex-col items-center">
+          <div className="relative flex w-[88%] max-w-[360px] flex-col items-center lg:-translate-x-28">
             <DiscoBall />
             <motion.div animate={{ y: [0, -10, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
@@ -152,7 +152,8 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
 
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }} className={`relative w-[min(380px,92vw)] justify-self-center ${sparse ? "lg:-translate-y-8" : "lg:-translate-y-16"}`}>
+          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
+          className="relative mt-10 w-[min(380px,92vw)] justify-self-center lg:absolute lg:left-1/2 lg:top-[8%] lg:mt-0 lg:-translate-x-1/2">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={7} title="The Reveal" />
             <MobilePlanet color="#a855f7" />
@@ -315,9 +316,9 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         {/* RIGHT — party planet with pulsing rays */}
         <motion.div initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.35, ease: "easeOut" }}
-          className="relative hidden h-full items-center justify-center overflow-hidden lg:flex">
-          <PlanetStage>
-          <div className="relative h-[560px] w-[560px]">
+          className="pointer-events-none absolute right-[-10px] top-[28%] hidden overflow-visible lg:block">
+          <PlanetStage className="!h-auto !w-auto !pt-0">
+          <div className="relative h-[460px] w-[460px]">
             <motion.img src="/wrapped/party-planet.png" alt="Party planet bursting with neon color"
               width={1024} height={1024}
               className="h-full w-full select-none object-contain"
