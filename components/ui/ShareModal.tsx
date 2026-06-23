@@ -8,16 +8,14 @@ import { captureElement, captureDesktopElement } from "@/lib/captureElement";
 type Scope = "card" | "slide";
 type ShareNav = Navigator & { canShare?: (d?: ShareData) => boolean; share?: (d: ShareData) => Promise<void> };
 
-// ── animation keyframes (injected once into <head>) ────────────────────────────
 const ANIM_CSS = `
 @keyframes sm-glow{0%,100%{box-shadow:0 0 0 1px rgba(139,92,246,.18),0 48px 80px -20px rgba(0,0,0,.95),0 0 48px rgba(139,92,246,.07)}50%{box-shadow:0 0 0 1px rgba(139,92,246,.36),0 48px 80px -20px rgba(0,0,0,.95),0 0 80px rgba(139,92,246,.18)}}
 @keyframes sm-scan{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
 @keyframes sm-dot{0%,100%{opacity:.18;transform:scale(.8)}50%{opacity:.85;transform:scale(1)}}
 `;
 
-const SP = [0.32, 0.72, 0, 1] as const; // spring cubic-bezier
+const SP = [0.32, 0.72, 0, 1] as const;
 
-// ── ultra-light icon ───────────────────────────────────────────────────────────
 function Icon({ d, size = 13 }: { d: string; size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="none"
@@ -27,7 +25,6 @@ function Icon({ d, size = 13 }: { d: string; size?: number }) {
   );
 }
 
-// ── action definitions ─────────────────────────────────────────────────────────
 const ACTIONS = [
   { id: "download", label: "Save",      icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
   { id: "copy",     label: "Copy",      icon: "M9 9h10a1 1 011 1v10a1 1 01-1 1H9a1 1 01-1-1V10a1 1 011-1zM5 15H4a1 1 01-1-1V4a1 1 011-1h10a1 1 011 1v1" },
@@ -35,47 +32,42 @@ const ACTIONS = [
   { id: "linkedin", label: "LinkedIn",  icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 014 0v4" },
 ] as const;
 
-// ── cinematic loading state ────────────────────────────────────────────────────
 function ScanLoader() {
   return (
-    <div className="relative flex min-h-[200px] w-full flex-col items-center justify-center gap-4 overflow-hidden"
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden"
          style={{ background: "rgba(3,1,14,.9)" }}>
-      {/* scanning light beam */}
       <div className="absolute inset-y-0 w-1/4 pointer-events-none"
            style={{ background: "linear-gradient(90deg,transparent,rgba(139,92,246,.1),transparent)",
                     animation: "sm-scan 2.2s cubic-bezier(.4,0,.6,1) infinite" }} />
-      {/* rhythm dots */}
       <div className="flex items-center gap-1.5">
-        {[0, 1, 2, 3].map((i) => (
+        {[0,1,2,3].map((i) => (
           <div key={i} className="h-[5px] w-[5px] rounded-full"
-               style={{ background: "#7c3aed", animation: `sm-dot 1.5s ease-in-out ${i * 0.18}s infinite` }} />
+               style={{ background: "#7c3aed", animation: `sm-dot 1.5s ease-in-out ${i*0.18}s infinite` }} />
         ))}
       </div>
-      <span className="text-[9px] tracking-[0.28em] uppercase"
-            style={{ color: "rgba(255,255,255,.18)", letterSpacing: "0.28em" }}>
+      <span style={{ fontSize:9, letterSpacing:"0.28em", textTransform:"uppercase", color:"rgba(255,255,255,.18)" }}>
         Rendering
       </span>
     </div>
   );
 }
 
-// ── main component ─────────────────────────────────────────────────────────────
+
 export default function ShareModal({
   open, onClose, slideRef, username, slideTitle, worldCup = false,
 }: {
   open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
   username: string; slideTitle: string; worldCup?: boolean;
 }) {
-  const [scope,     setScope]     = useState<Scope>("card");
-  const [busy,      setBusy]      = useState(false);
-  const [preview,   setPreview]   = useState<string | null>(null);
-  const [toast,     setToast]     = useState<string | null>(null);
-  const [failed,    setFailed]    = useState(false);
-  const [mounted,   setMounted]   = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [scope,   setScope]   = useState<Scope>("card");
+  const [busy,    setBusy]    = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [toast,   setToast]   = useState<string | null>(null);
+  const [failed,  setFailed]  = useState(false);
+  const [mounted, setMounted] = useState(false);
   const blobRef = useRef<Blob | null>(null);
 
-  // inject CSS animations once
+  // inject CSS once
   useEffect(() => {
     setMounted(true);
     const id = "__share-modal-css";
@@ -85,7 +77,13 @@ export default function ShareModal({
     document.head.appendChild(s);
   }, []);
 
-  useEffect(() => { if (!preview) setImgLoaded(false); }, [preview]);
+  // clear preview after modal exit animation completes
+  useEffect(() => {
+    if (!open) {
+      const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); }, 320);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
   const caption  = worldCup
@@ -93,7 +91,6 @@ export default function ShareModal({
     : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
-  // ── capture ────────────────────────────────────────────────────────────────
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
@@ -102,34 +99,37 @@ export default function ShareModal({
       if (!card) return null;
       const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
       const wrapperBg = `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, { scale, wrapperBg });
+      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
     if (typeof window !== "undefined" && window.innerWidth < 1024)
       return await captureDesktopElement(slide, { cropToSelector: null, scale });
     return await captureElement(slide, { scale });
   }, [scope, slideRef]);
 
-  // ── render trigger ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
     let alive = true;
     blobRef.current = null;
     const t = setTimeout(async () => {
       if (!alive) return;
-      setBusy(true); setPreview(null); setFailed(false);
+      setBusy(true);
+      setPreview(null); // show ScanLoader while re-rendering
+      setFailed(false);
       const prev = await capture(1);
       if (!alive) return;
       const hiPromise = capture(2.5);
       if (prev) {
         const dataUrl = await new Promise<string>((res, rej) => {
-          const r = new FileReader();
-          r.onload = () => res(r.result as string); r.onerror = rej;
+          const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = rej;
           r.readAsDataURL(prev);
         });
         if (!alive) return;
         setPreview(dataUrl);
+      } else {
+        setPreview(null);
       }
-      setFailed(!prev); setBusy(false);
+      setFailed(!prev);
+      setBusy(false);
       const hi = await hiPromise;
       if (!alive) return;
       blobRef.current = hi;
@@ -144,7 +144,6 @@ export default function ShareModal({
     return () => window.removeEventListener("keydown", h);
   }, [open, onClose]);
 
-  // ── actions ────────────────────────────────────────────────────────────────
   const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2400); };
   const getBlob = async () => {
     if (blobRef.current) return blobRef.current;
@@ -164,7 +163,7 @@ export default function ShareModal({
     } else { dl(blob); flash("Downloaded instead."); }
   };
   const onDownload = async () => { const b = await getBlob(); if (b) { dl(b); flash("Image saved."); } };
-  const onCopy     = async () => {
+  const onCopy = async () => {
     const blob = await getBlob(); if (!blob) return;
     try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
     catch { dl(blob); flash("Saved instead."); }
@@ -190,18 +189,16 @@ export default function ShareModal({
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}>
 
-          {/* backdrop */}
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,.82)", backdropFilter: "blur(20px)" }} />
 
-          {/* ambient orb — depth anchor */}
           <div className="pointer-events-none absolute"
-               style={{ width: 320, height: 320, borderRadius: "50%",
-                        background: "radial-gradient(circle,rgba(109,40,217,.16) 0%,transparent 68%)",
-                        filter: "blur(28px)" }} />
+               style={{ width:320, height:320, borderRadius:"50%",
+                        background:"radial-gradient(circle,rgba(109,40,217,.16) 0%,transparent 68%)",
+                        filter:"blur(28px)" }} />
 
-          {/* ── modal shell ── */}
+          {/* ── modal — spring-expands for Full slide ── */}
           <motion.div
-            className="relative w-full max-w-[328px] overflow-hidden rounded-[24px]"
+            className="relative w-full max-w-[400px] overflow-hidden rounded-[24px]"
             style={{
               background: "linear-gradient(168deg,#0d0822 0%,#070419 52%,#040213 100%)",
               animation: "sm-glow 4.5s ease-in-out infinite",
@@ -212,15 +209,14 @@ export default function ShareModal({
             transition={{ duration: 0.26, ease: SP }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* top hairline — glass rim light */}
+            {/* top hairline */}
             <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px"
-                 style={{ background: "linear-gradient(90deg,transparent 8%,rgba(255,255,255,.14) 38%,rgba(255,255,255,.07) 62%,transparent 92%)" }} />
+                 style={{ background:"linear-gradient(90deg,transparent 8%,rgba(255,255,255,.14) 38%,rgba(255,255,255,.07) 62%,transparent 92%)" }} />
 
-            {/* close — floating pill */}
+            {/* close */}
             <motion.button onClick={onClose} aria-label="Close"
               className="absolute right-3.5 top-3.5 z-20 flex h-7 w-7 items-center justify-center rounded-full"
-              style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)",
-                       color: "rgba(255,255,255,.22)" }}
+              style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.08)", color:"rgba(255,255,255,.22)" }}
               whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 440, damping: 24 }}>
               <Icon d="M6 6l12 12M18 6L6 18" size={11} />
@@ -228,119 +224,129 @@ export default function ShareModal({
 
             {/* ── HERO: double-bezel preview ── */}
             <div className="px-4 pt-4">
-              {/* outer bezel — gradient rim */}
-              <div style={{
-                padding: "1.5px",
-                borderRadius: "20px",
-                background: "linear-gradient(148deg,rgba(139,92,246,.32) 0%,rgba(255,255,255,.04) 42%,rgba(99,60,180,.18) 100%)",
-              }}>
+              {/* outer bezel */}
+              <div style={{ padding:"1.5px", borderRadius:"20px",
+                            background:"linear-gradient(148deg,rgba(139,92,246,.32) 0%,rgba(255,255,255,.04) 42%,rgba(99,60,180,.18) 100%)" }}>
                 {/* inner core */}
-                <div className="relative flex min-h-[190px] items-center justify-center overflow-hidden"
-                     style={{ borderRadius: "18.5px", background: "rgba(3,1,14,.88)",
-                              boxShadow: "inset 0 1px 0 rgba(255,255,255,.06)" }}>
-                  {preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Share preview"
-                         onLoad={() => setImgLoaded(true)}
-                         className="max-h-[360px] w-auto max-w-full object-contain"
-                         style={{
-                           opacity: imgLoaded ? 1 : 0,
-                           transform: imgLoaded ? "scale(1)" : "scale(0.96)",
-                           transition: `opacity .45s cubic-bezier(${SP.join(",")}),transform .45s cubic-bezier(${SP.join(",")})`,
-                         }} />
-                  ) : failed ? (
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,.2)", letterSpacing: ".06em" }}>
-                      Couldn&apos;t render this slide.
-                    </span>
-                  ) : (
-                    <ScanLoader />
-                  )}
+                <div className="relative flex h-[272px] items-center justify-center overflow-hidden"
+                     style={{ borderRadius:"18.5px", background:"rgba(3,1,14,.88)",
+                              boxShadow:"inset 0 1px 0 rgba(255,255,255,.06)" }}>
+
+                  {/* preview image — crossfade on key change */}
+                  <AnimatePresence mode="sync">
+                    {preview && (
+                      <motion.img
+                        key={preview}
+                        src={preview}
+                        alt="Share preview"
+                        className="h-full w-full object-contain"
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        transition={{ duration: 0.38, ease: SP } as any}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* initial scan loader (first load, no preview yet) */}
+                  <AnimatePresence>
+                    {!preview && !failed && (
+                      <motion.div key="scan" className="absolute inset-0"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}>
+                        <ScanLoader />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* failed state */}
+                  <AnimatePresence>
+                    {failed && (
+                      <motion.span key="fail"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ fontSize:10, color:"rgba(255,255,255,.2)", letterSpacing:".06em" }}>
+                        Couldn&apos;t render this slide.
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+
                 </div>
               </div>
             </div>
 
-            {/* ── scope toggle — floating island pill ── */}
+            {/* ── scope toggle ── */}
             <div className="mt-4 px-4">
               <div className="relative flex items-center rounded-full py-[3px]"
-                   style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)" }}>
-                {(["card", "slide"] as Scope[]).map((val) => (
+                   style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.07)" }}>
+                {/* sliding pill — pure CSS transform, no layout recalc */}
+                <div className="pointer-events-none absolute inset-y-[3px] rounded-full"
+                     style={{
+                       width: "calc(50% - 3px)",
+                       background: "rgba(124,58,237,.2)",
+                       boxShadow: "0 0 0 1px rgba(167,139,250,.3)",
+                       transform: scope === "card" ? "translateX(3px)" : "translateX(calc(100% + 3px))",
+                       transition: "transform 0.22s cubic-bezier(0.32,0.72,0,1)",
+                     }} />
+                {(["card","slide"] as Scope[]).map((val) => (
                   <button key={val} onClick={() => setScope(val)}
-                    className="relative z-10 flex-1 py-[7px] text-center transition-colors duration-200"
-                    style={{ fontSize: 11, fontWeight: 500,
-                             color: scope === val ? "#c4b5fd" : "rgba(255,255,255,.28)" }}>
-                    {/* sliding spring indicator */}
-                    {scope === val && (
-                      <motion.div layoutId="scope-pill"
-                        className="absolute inset-[1px] rounded-full"
-                        style={{ background: "rgba(124,58,237,.2)", boxShadow: "0 0 0 1px rgba(167,139,250,.3)" }}
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }} />
-                    )}
-                    <span className="relative z-10">{val === "card" ? "Card" : "Full slide"}</span>
+                    className="relative z-10 flex-1 py-[7px] text-center"
+                    style={{ fontSize:11, fontWeight:500,
+                             color: scope === val ? "#c4b5fd" : "rgba(255,255,255,.28)",
+                             transition: "color 0.18s ease" }}>
+                    {val === "card" ? "Card" : "Full slide"}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* ── native share (mobile) ── */}
+            {/* native share */}
             {canNativeShare && (
               <div className="mt-3 px-4">
                 <motion.button onClick={onNative} disabled={busy}
                   className="flex w-full items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:opacity-35"
-                  style={{ background: "linear-gradient(130deg,#5b21b6,#7c3aed,#6d28d9)" }}
-                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.975 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 26 }}>
+                  style={{ background:"linear-gradient(130deg,#5b21b6,#7c3aed,#6d28d9)" }}
+                  whileHover={{ scale:1.01 }} whileTap={{ scale:0.975 }}
+                  transition={{ type:"spring", stiffness:400, damping:26 }}>
                   <Icon d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" />
                   Share…
                 </motion.button>
               </div>
             )}
 
-            {/* ── action grid — button-in-button architecture ── */}
+            {/* ── action grid ── */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
               {ACTIONS.map(({ id, label, icon }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
                   className="group flex flex-col items-center gap-[9px] rounded-[13px] py-3.5 disabled:pointer-events-none disabled:opacity-25"
-                  style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)" }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.055, duration: 0.35, ease: SP }}
-                  whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget;
-                    el.style.background = "rgba(255,255,255,.07)";
-                    el.style.borderColor = "rgba(255,255,255,.13)";
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget;
-                    el.style.background = "rgba(255,255,255,.03)";
-                    el.style.borderColor = "rgba(255,255,255,.07)";
-                  }}>
-                  {/* button-in-button — icon circle */}
-                  <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full transition-colors duration-200"
-                       style={{ background: "rgba(255,255,255,.06)", color: "rgba(255,255,255,.45)" }}>
+                  style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)" }}
+                  initial={{ opacity:0, y:10 }}
+                  animate={{ opacity:1, y:0 }}
+                  transition={{ delay: 0.1 + i*0.055, duration:0.35, ease:SP }}
+                  whileHover={{ y:-2 }} whileTap={{ scale:0.95 }}
+                  onMouseEnter={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.07)"; el.style.borderColor="rgba(255,255,255,.13)"; }}
+                  onMouseLeave={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.03)"; el.style.borderColor="rgba(255,255,255,.07)"; }}>
+                  <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
+                       style={{ background:"rgba(255,255,255,.06)", color:"rgba(255,255,255,.45)" }}>
                     <Icon d={icon} size={13} />
                   </div>
-                  <span className="text-[10px] font-medium transition-colors duration-200"
-                        style={{ color: "rgba(255,255,255,.38)" }}>
-                    {label}
-                  </span>
+                  <span style={{ fontSize:10, fontWeight:500, color:"rgba(255,255,255,.38)" }}>{label}</span>
                 </motion.button>
               ))}
             </div>
 
-            {/* bottom violet hairline */}
+            {/* bottom hairline */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
-                 style={{ background: "linear-gradient(90deg,transparent,rgba(124,58,237,.2),transparent)" }} />
+                 style={{ background:"linear-gradient(90deg,transparent,rgba(124,58,237,.2),transparent)" }} />
 
-            {/* ── toast ── */}
+            {/* toast */}
             <AnimatePresence>
               {toast && (
-                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                <motion.div initial={{ opacity:0, y:5 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
                   className="pointer-events-none absolute inset-x-0 bottom-3.5 mx-auto w-fit rounded-full"
-                  style={{ padding: "6px 14px", background: "rgba(0,0,0,.92)",
-                           backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,.09)",
-                           fontSize: 10, fontWeight: 500, color: "rgba(255,255,255,.55)",
-                           letterSpacing: ".02em" }}>
+                  style={{ padding:"6px 14px", background:"rgba(0,0,0,.92)", backdropFilter:"blur(12px)",
+                           border:"1px solid rgba(255,255,255,.09)", fontSize:10, fontWeight:500,
+                           color:"rgba(255,255,255,.55)", letterSpacing:".02em" }}>
                   {toast}
                 </motion.div>
               )}
