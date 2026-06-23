@@ -6,263 +6,341 @@ import { motion, AnimatePresence } from "framer-motion";
 import { captureElement, captureDesktopElement } from "@/lib/captureElement";
 
 type Scope = "card" | "slide";
+type ShareNav = Navigator & { canShare?: (d?: ShareData) => boolean; share?: (d: ShareData) => Promise<void> };
 
-type ShareNavigator = Navigator & {
-  canShare?: (data?: ShareData) => boolean;
-  share?: (data: ShareData) => Promise<void>;
-};
+// ── animation keyframes (injected once into <head>) ────────────────────────────
+const ANIM_CSS = `
+@keyframes sm-glow{0%,100%{box-shadow:0 0 0 1px rgba(139,92,246,.18),0 48px 80px -20px rgba(0,0,0,.95),0 0 48px rgba(139,92,246,.07)}50%{box-shadow:0 0 0 1px rgba(139,92,246,.36),0 48px 80px -20px rgba(0,0,0,.95),0 0 80px rgba(139,92,246,.18)}}
+@keyframes sm-scan{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+@keyframes sm-dot{0%,100%{opacity:.18;transform:scale(.8)}50%{opacity:.85;transform:scale(1)}}
+`;
 
-function Icon({ d, viewBox = "0 0 24 24" }: { d: string; viewBox?: string }) {
+const SP = [0.32, 0.72, 0, 1] as const; // spring cubic-bezier
+
+// ── ultra-light icon ───────────────────────────────────────────────────────────
+function Icon({ d, size = 13 }: { d: string; size?: number }) {
   return (
-    <svg viewBox={viewBox} width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none"
+         stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={d} />
     </svg>
   );
 }
 
+// ── action definitions ─────────────────────────────────────────────────────────
+const ACTIONS = [
+  { id: "download", label: "Save",      icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
+  { id: "copy",     label: "Copy",      icon: "M9 9h10a1 1 011 1v10a1 1 01-1 1H9a1 1 01-1-1V10a1 1 011-1zM5 15H4a1 1 01-1-1V4a1 1 011-1h10a1 1 011 1v1" },
+  { id: "x",        label: "Post on X", icon: "M4 4l16 16M20 4L4 20" },
+  { id: "linkedin", label: "LinkedIn",  icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 014 0v4" },
+] as const;
+
+// ── cinematic loading state ────────────────────────────────────────────────────
+function ScanLoader() {
+  return (
+    <div className="relative flex min-h-[200px] w-full flex-col items-center justify-center gap-4 overflow-hidden"
+         style={{ background: "rgba(3,1,14,.9)" }}>
+      {/* scanning light beam */}
+      <div className="absolute inset-y-0 w-1/4 pointer-events-none"
+           style={{ background: "linear-gradient(90deg,transparent,rgba(139,92,246,.1),transparent)",
+                    animation: "sm-scan 2.2s cubic-bezier(.4,0,.6,1) infinite" }} />
+      {/* rhythm dots */}
+      <div className="flex items-center gap-1.5">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-[5px] w-[5px] rounded-full"
+               style={{ background: "#7c3aed", animation: `sm-dot 1.5s ease-in-out ${i * 0.18}s infinite` }} />
+        ))}
+      </div>
+      <span className="text-[9px] tracking-[0.28em] uppercase"
+            style={{ color: "rgba(255,255,255,.18)", letterSpacing: "0.28em" }}>
+        Rendering
+      </span>
+    </div>
+  );
+}
+
+// ── main component ─────────────────────────────────────────────────────────────
 export default function ShareModal({
-  open,
-  onClose,
-  slideRef,
-  username,
-  slideTitle,
-  worldCup = false,
+  open, onClose, slideRef, username, slideTitle, worldCup = false,
 }: {
-  open: boolean;
-  onClose: () => void;
-  slideRef: RefObject<HTMLDivElement | null>;
-  username: string;
-  slideTitle: string;
-  worldCup?: boolean;
+  open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
+  username: string; slideTitle: string; worldCup?: boolean;
 }) {
-  const [scope, setScope] = useState<Scope>("card");
-  const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [scope,     setScope]     = useState<Scope>("card");
+  const [busy,      setBusy]      = useState(false);
+  const [preview,   setPreview]   = useState<string | null>(null);
+  const [toast,     setToast]     = useState<string | null>(null);
+  const [failed,    setFailed]    = useState(false);
+  const [mounted,   setMounted]   = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const blobRef = useRef<Blob | null>(null);
-  const previewUrlRef = useRef<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only mount guard for the portal
-  useEffect(() => { setMounted(true); }, []);
-
+  // inject CSS animations once
   useEffect(() => {
-    return () => {
-      if (previewUrlRef.current) {
-        URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = null;
-      }
-    };
+    setMounted(true);
+    const id = "__share-modal-css";
+    if (document.getElementById(id)) return;
+    const s = document.createElement("style");
+    s.id = id; s.textContent = ANIM_CSS;
+    document.head.appendChild(s);
   }, []);
 
-  const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNavigator).canShare === "function";
-  const caption = worldCup
+  useEffect(() => { if (!preview) setImgLoaded(false); }, [preview]);
+
+  const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
+  const caption  = worldCup
     ? `@${username} at the World Cup ⚽🐾 #WorldCup #GitHubWrapped`
     : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
+  // ── capture ────────────────────────────────────────────────────────────────
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
-    // On viewports below the desktop breakpoint, render the slide in an off-screen
-    // desktop-width iframe so the share image matches the desktop layout.
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      return await captureDesktopElement(slide, {
-        cropToSelector: scope === "card" ? "[data-share-card]" : null,
-        scale,
-      });
-    }
     if (scope === "card") {
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
-      return await captureElement(slide, { cropTo: card, scale });
+      const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
+      const wrapperBg = `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
+      return await captureElement(card, { scale, wrapperBg });
     }
+    if (typeof window !== "undefined" && window.innerWidth < 1024)
+      return await captureDesktopElement(slide, { cropToSelector: null, scale });
     return await captureElement(slide, { scale });
   }, [scope, slideRef]);
 
-  // Generate preview at scale=1 (crisp at display size) then hi-res in background.
+  // ── render trigger ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
     let alive = true;
     blobRef.current = null;
     const t = setTimeout(async () => {
       if (!alive) return;
-      setBusy(true);
-      if (previewUrlRef.current) {
-        URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = null;
-      }
-      setPreview(null);
-      setFailed(false);
-      // Low-res first → fast, pixel-perfect at modal display size
+      setBusy(true); setPreview(null); setFailed(false);
       const prev = await capture(1);
       if (!alive) return;
-      const nextPreview = prev ? URL.createObjectURL(prev) : null;
-      previewUrlRef.current = nextPreview;
-      setPreview(nextPreview);
-      setFailed(!prev);
-      setBusy(false);
-      // Hi-res in background → used for download/share
-      const hi = await capture(2.5);
+      const hiPromise = capture(2.5);
+      if (prev) {
+        const dataUrl = await new Promise<string>((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result as string); r.onerror = rej;
+          r.readAsDataURL(prev);
+        });
+        if (!alive) return;
+        setPreview(dataUrl);
+      }
+      setFailed(!prev); setBusy(false);
+      const hi = await hiPromise;
       if (!alive) return;
       blobRef.current = hi;
     }, 80);
-    return () => {
-      alive = false;
-      clearTimeout(t);
-      if (previewUrlRef.current) {
-        URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = null;
-      }
-    };
+    return () => { alive = false; clearTimeout(t); };
   }, [open, scope, capture]);
 
-  // Close on Escape.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [open, onClose]);
 
-  const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
-
-  const getBlob = async (): Promise<Blob | null> => {
+  // ── actions ────────────────────────────────────────────────────────────────
+  const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2400); };
+  const getBlob = async () => {
     if (blobRef.current) return blobRef.current;
-    setBusy(true);
-    const b = await capture();
-    setBusy(false);
-    blobRef.current = b;
-    return b;
+    setBusy(true); const b = await capture(); setBusy(false); blobRef.current = b; return b;
   };
-
-  const download = (blob: Blob) => {
+  const dl = (blob: Blob) => {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
+    Object.assign(document.createElement("a"), { href: url, download: filename }).click();
     URL.revokeObjectURL(url);
   };
-
   const onNative = async () => {
-    const blob = await getBlob();
-    if (!blob) return;
+    const blob = await getBlob(); if (!blob) return;
     const file = new File([blob], filename, { type: "image/png" });
-    const nav = navigator as ShareNavigator;
+    const nav = navigator as ShareNav;
     if (nav.share && nav.canShare?.({ files: [file] })) {
-      try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); } catch { /* user cancelled */ }
-    } else {
-      download(blob);
-      flash("Native share unavailable — image downloaded instead.");
-    }
+      try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); } catch { /* cancelled */ }
+    } else { dl(blob); flash("Downloaded instead."); }
   };
-
-  const onDownload = async () => { const b = await getBlob(); if (b) { download(b); flash("Image downloaded."); } };
-
-  const onCopy = async () => {
-    const blob = await getBlob();
-    if (!blob) return;
-    try {
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      flash("Image copied to clipboard.");
-    } catch {
-      download(blob);
-      flash("Copy unsupported — image downloaded instead.");
-    }
+  const onDownload = async () => { const b = await getBlob(); if (b) { dl(b); flash("Image saved."); } };
+  const onCopy     = async () => {
+    const blob = await getBlob(); if (!blob) return;
+    try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
+    catch { dl(blob); flash("Saved instead."); }
   };
-
   const onX = async () => {
-    const b = await getBlob(); if (b) download(b);
+    const b = await getBlob(); if (b) dl(b);
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(caption)}`, "_blank", "noopener");
-    flash("Image downloaded — attach it in the post.");
+    flash("Image saved — attach in X.");
   };
-
   const onLinkedIn = async () => {
-    const b = await getBlob(); if (b) download(b);
+    const b = await getBlob(); if (b) dl(b);
     window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(caption)}`, "_blank", "noopener");
-    flash("Image downloaded — attach it in the post.");
+    flash("Image saved — attach in LinkedIn.");
   };
+  const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
 
   if (!mounted) return null;
 
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onClose}
-        >
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          onClick={onClose}>
+
+          {/* backdrop */}
+          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,.82)", backdropFilter: "blur(20px)" }} />
+
+          {/* ambient orb — depth anchor */}
+          <div className="pointer-events-none absolute"
+               style={{ width: 320, height: 320, borderRadius: "50%",
+                        background: "radial-gradient(circle,rgba(109,40,217,.16) 0%,transparent 68%)",
+                        filter: "blur(28px)" }} />
+
+          {/* ── modal shell ── */}
           <motion.div
-            className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#0d0a1a] p-5 text-white shadow-2xl"
-            initial={{ scale: 0.94, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }}
-            transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+            className="relative w-full max-w-[328px] overflow-hidden rounded-[24px]"
+            style={{
+              background: "linear-gradient(168deg,#0d0822 0%,#070419 52%,#040213 100%)",
+              animation: "sm-glow 4.5s ease-in-out infinite",
+            }}
+            initial={{ scale: 0.91, y: 22, opacity: 0 }}
+            animate={{ scale: 1,    y: 0,  opacity: 1 }}
+            exit={{    scale: 0.94, y: 10, opacity: 0 }}
+            transition={{ duration: 0.26, ease: SP }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold">Share this slide</h2>
-              <button onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white">
-                <Icon d="M6 6l12 12M18 6L6 18" />
-              </button>
+            {/* top hairline — glass rim light */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px"
+                 style={{ background: "linear-gradient(90deg,transparent 8%,rgba(255,255,255,.14) 38%,rgba(255,255,255,.07) 62%,transparent 92%)" }} />
+
+            {/* close — floating pill */}
+            <motion.button onClick={onClose} aria-label="Close"
+              className="absolute right-3.5 top-3.5 z-20 flex h-7 w-7 items-center justify-center rounded-full"
+              style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)",
+                       color: "rgba(255,255,255,.22)" }}
+              whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 440, damping: 24 }}>
+              <Icon d="M6 6l12 12M18 6L6 18" size={11} />
+            </motion.button>
+
+            {/* ── HERO: double-bezel preview ── */}
+            <div className="px-4 pt-4">
+              {/* outer bezel — gradient rim */}
+              <div style={{
+                padding: "1.5px",
+                borderRadius: "20px",
+                background: "linear-gradient(148deg,rgba(139,92,246,.32) 0%,rgba(255,255,255,.04) 42%,rgba(99,60,180,.18) 100%)",
+              }}>
+                {/* inner core */}
+                <div className="relative flex min-h-[190px] items-center justify-center overflow-hidden"
+                     style={{ borderRadius: "18.5px", background: "rgba(3,1,14,.88)",
+                              boxShadow: "inset 0 1px 0 rgba(255,255,255,.06)" }}>
+                  {preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={preview} alt="Share preview"
+                         onLoad={() => setImgLoaded(true)}
+                         className="max-h-[360px] w-auto max-w-full object-contain"
+                         style={{
+                           opacity: imgLoaded ? 1 : 0,
+                           transform: imgLoaded ? "scale(1)" : "scale(0.96)",
+                           transition: `opacity .45s cubic-bezier(${SP.join(",")}),transform .45s cubic-bezier(${SP.join(",")})`,
+                         }} />
+                  ) : failed ? (
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,.2)", letterSpacing: ".06em" }}>
+                      Couldn&apos;t render this slide.
+                    </span>
+                  ) : (
+                    <ScanLoader />
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* scope toggle */}
-            <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1">
-              {([["card", "Card"], ["slide", "Full slide"]] as [Scope, string][]).map(([val, label]) => (
-                <button key={val} onClick={() => setScope(val)}
-                  className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${scope === val ? "bg-violet-500/30 text-violet-100 shadow-[inset_0_0_0_1px_rgba(167,139,250,0.5)]" : "text-white/55 hover:text-white/80"}`}>
-                  {label}
-                </button>
+            {/* ── scope toggle — floating island pill ── */}
+            <div className="mt-4 px-4">
+              <div className="relative flex items-center rounded-full py-[3px]"
+                   style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)" }}>
+                {(["card", "slide"] as Scope[]).map((val) => (
+                  <button key={val} onClick={() => setScope(val)}
+                    className="relative z-10 flex-1 py-[7px] text-center transition-colors duration-200"
+                    style={{ fontSize: 11, fontWeight: 500,
+                             color: scope === val ? "#c4b5fd" : "rgba(255,255,255,.28)" }}>
+                    {/* sliding spring indicator */}
+                    {scope === val && (
+                      <motion.div layoutId="scope-pill"
+                        className="absolute inset-[1px] rounded-full"
+                        style={{ background: "rgba(124,58,237,.2)", boxShadow: "0 0 0 1px rgba(167,139,250,.3)" }}
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }} />
+                    )}
+                    <span className="relative z-10">{val === "card" ? "Card" : "Full slide"}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ── native share (mobile) ── */}
+            {canNativeShare && (
+              <div className="mt-3 px-4">
+                <motion.button onClick={onNative} disabled={busy}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:opacity-35"
+                  style={{ background: "linear-gradient(130deg,#5b21b6,#7c3aed,#6d28d9)" }}
+                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.975 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 26 }}>
+                  <Icon d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" />
+                  Share…
+                </motion.button>
+              </div>
+            )}
+
+            {/* ── action grid — button-in-button architecture ── */}
+            <div className="grid grid-cols-2 gap-2 p-4 pt-3">
+              {ACTIONS.map(({ id, label, icon }, i) => (
+                <motion.button key={id} onClick={handlers[id]} disabled={busy}
+                  className="group flex flex-col items-center gap-[9px] rounded-[13px] py-3.5 disabled:pointer-events-none disabled:opacity-25"
+                  style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.055, duration: 0.35, ease: SP }}
+                  whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = "rgba(255,255,255,.07)";
+                    el.style.borderColor = "rgba(255,255,255,.13)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = "rgba(255,255,255,.03)";
+                    el.style.borderColor = "rgba(255,255,255,.07)";
+                  }}>
+                  {/* button-in-button — icon circle */}
+                  <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full transition-colors duration-200"
+                       style={{ background: "rgba(255,255,255,.06)", color: "rgba(255,255,255,.45)" }}>
+                    <Icon d={icon} size={13} />
+                  </div>
+                  <span className="text-[10px] font-medium transition-colors duration-200"
+                        style={{ color: "rgba(255,255,255,.38)" }}>
+                    {label}
+                  </span>
+                </motion.button>
               ))}
             </div>
 
-            {/* preview */}
-            <div className="mt-4 flex min-h-[200px] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/40">
-              {preview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={preview} alt="Share preview" className="max-h-[460px] w-auto max-w-full object-contain" />
-              ) : failed ? (
-                <span className="py-10 text-[11px] text-white/40">Couldn&apos;t render this slide.</span>
-              ) : (
-                <div className="flex flex-col items-center gap-2 py-10 text-white/50">
-                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-violet-400" />
-                  <span className="text-[11px]">Rendering image…</span>
-                </div>
-              )}
-            </div>
+            {/* bottom violet hairline */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+                 style={{ background: "linear-gradient(90deg,transparent,rgba(124,58,237,.2),transparent)" }} />
 
-            {/* actions */}
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {canNativeShare && (
-                <button onClick={onNative} disabled={busy}
-                  className="col-span-2 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
-                  style={{ background: "linear-gradient(90deg,#7c3aed,#a78bfa)" }}>
-                  <Icon d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" /> Share…
-                </button>
-              )}
-              <button onClick={onDownload} disabled={busy} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium transition hover:bg-white/10 disabled:opacity-50">
-                <Icon d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2M7 10l5 5 5-5M12 15V3" /> Download
-              </button>
-              <button onClick={onCopy} disabled={busy} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium transition hover:bg-white/10 disabled:opacity-50">
-                <Icon d="M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" /> Copy
-              </button>
-              <button onClick={onX} disabled={busy} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium transition hover:bg-white/10 disabled:opacity-50">
-                <Icon d="M4 4l16 16M20 4L4 20" /> X
-              </button>
-              <button onClick={onLinkedIn} disabled={busy} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium transition hover:bg-white/10 disabled:opacity-50">
-                <Icon d="M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" /> LinkedIn
-              </button>
-            </div>
-
-            <p className="mt-3 text-center text-[10px] leading-relaxed text-white/35">
-              X / LinkedIn don&apos;t accept direct image uploads from the web — we download the PNG and open the composer so you can attach it.
-            </p>
-
+            {/* ── toast ── */}
             <AnimatePresence>
               {toast && (
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full bg-black/80 px-3 py-1.5 text-[11px] text-white/80">
+                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="pointer-events-none absolute inset-x-0 bottom-3.5 mx-auto w-fit rounded-full"
+                  style={{ padding: "6px 14px", background: "rgba(0,0,0,.92)",
+                           backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,.09)",
+                           fontSize: 10, fontWeight: 500, color: "rgba(255,255,255,.55)",
+                           letterSpacing: ".02em" }}>
                   {toast}
                 </motion.div>
               )}

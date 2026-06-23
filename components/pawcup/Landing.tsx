@@ -326,15 +326,17 @@ function BallTelevision() {
 
 function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [confetti] = useState(() =>
-    Array.from({ length: 70 }).map((_, i) => ({
-      left: Math.random() * 100,
-      delay: Math.random() * 5,
-      duration: 4 + Math.random() * 5,
-      size: 6 + Math.random() * 8,
-      rot: Math.random() * 360,
-      color: ["#a855f7", "#facc15", "#22d3ee", "#f472b6", "#ffffff", "#34d399"][i % 6],
-      shape: i % 3,
-    }))
+    Array.from({ length: 70 }).map((_, i) => {
+      const duration = 4 + Math.random() * 6;
+      return {
+        left: Math.random() * 100,
+        duration,
+        negDelay: -(Math.random() * duration),
+        size: 6 + Math.random() * 8,
+        color: ["#a855f7", "#facc15", "#22d3ee", "#f472b6", "#ffffff", "#34d399"][i % 6],
+        shape: i % 3,
+      };
+    })
   );
 
   const [stars] = useState(() => Array.from({ length: 30 }).map(() => ({ x: Math.random() * 100, y: Math.random() * 40, d: Math.random() * 3 })));
@@ -398,14 +400,15 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
         {confetti.map((c, i) => (
           <div
             key={i}
-            className="absolute top-0 animate-confetti"
+            className="absolute animate-confetti"
             style={{
               left: `${c.left}%`,
+              top: "-20px",
               width: c.size,
               height: c.size * 0.4,
               background: c.color,
-              animationDelay: `${c.delay}s`,
               animationDuration: `${c.duration}s`,
+              animationDelay: `${c.negDelay}s`,
               borderRadius: c.shape === 0 ? "2px" : c.shape === 1 ? "50%" : "0",
               willChange: "transform, opacity",
             }}
@@ -415,8 +418,8 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
 
       <style>{`
         @keyframes confetti-fall {
-          0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(105vh) rotate(720deg); opacity: 0.7; }
+          0%   { transform: rotate(0deg); opacity: 1; }
+          100% { transform: translateY(115vh) rotate(720deg); opacity: 0.7; }
         }
         .animate-confetti { animation: confetti-fall linear infinite; }
         @keyframes twinkle {

@@ -9,7 +9,20 @@
       "Bash(ls C:\\\\Users\\\\gvcor\\\\Desktop\\\\pawCup 2>/dev/null || ls \"C:\\\\Users\\\\gvcor\\\\Desktop\\\\pawCup\")",
       "PowerShell($env:USERPROFILE; [System.Environment]::GetFolderPath\\(\"Desktop\"\\))",
       "PowerShell(for \\($i = 1; $i -le 7; $i++\\) { echo \"=== SLIDE $i ===\"; Get-Content \"C:\\\\Users\\\\gvcor\\\\OneDrive\\\\Desktop\\\\pawCup\\\\src\\\\routes\\\\slide-$i.tsx\" | Select-Object -First 60 })",
-      "Bash(\\\\.ts\" | wc -l)"
+      "Bash(\\\\.ts\" | wc -l)",
+      "Bash(python3)",
+      "Bash(git checkout *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(python3 -c \"import playwright; print\\('ok'\\)\")",
+      "Bash(node -e \"require\\('playwright'\\); console.log\\('ok'\\)\")",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; [print\\(k\\) for k in deps if 'puppeteer' in k.lower\\(\\) or 'playwright' in k.lower\\(\\) or 'screenshot' in k.lower\\(\\) or 'canvas' in k.lower\\(\\)]\")",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e \"require\\('puppeteer'\\); console.log\\('puppeteer ok'\\)\")",
+      "Bash(node -e \"require\\('playwright'\\); console.log\\('playwright ok'\\)\")",
+      "Bash(node -e \"require\\('@playwright/test'\\); console.log\\('playwright-test ok'\\)\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('html2canvas:', p.dependencies['html2canvas'] || p.devDependencies?.['html2canvas'] || 'not found'\\); console.log\\('modern-screenshot:', p.dependencies['modern-screenshot'] || 'not found'\\)\")",
+      "Bash(del \"D:\\\\AA\\\\IdeaProjects\\\\wrapper\\\\github-wrapped\\\\lib\\\\sharePreviewCache.ts\")",
+      "mcp__visualize__read_me"
     ]
   }
 }

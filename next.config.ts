@@ -10,7 +10,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://avatars.githubusercontent.com https://flagcdn.com",
   "font-src 'self' data:",
-  "connect-src 'self' ws: wss:",
+  "connect-src 'self' ws: wss: https://avatars.githubusercontent.com https://flagcdn.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

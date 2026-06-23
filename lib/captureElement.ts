@@ -4,6 +4,46 @@
 //             apply radial vignette so edges fade to dark. No CSS manipulation.
 // SLIDE mode: full screenshot, pixel-accurate.
 
+// Per-session cache: external img src → data URL (avoids re-fetching on every capture)
+const imgDataCache = new Map<string, string>();
+
+async function toDataUrl(src: string): Promise<string | null> {
+  if (imgDataCache.has(src)) return imgDataCache.get(src)!;
+  try {
+    const res = await fetch(src, { mode: "cors" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    imgDataCache.set(src, dataUrl);
+    return dataUrl;
+  } catch {
+    return null;
+  }
+}
+
+// Replace all external <img> src with cached data URLs so modern-screenshot
+// doesn't need to fetch them during render (faster + avoids connect-src issues).
+async function inlineExternalImages(root: HTMLElement): Promise<() => void> {
+  const imgs = Array.from(root.querySelectorAll<HTMLImageElement>("img"));
+  const restores: Array<() => void> = [];
+  await Promise.all(
+    imgs.map(async (img) => {
+      const src = img.getAttribute("src") ?? "";
+      if (!src || src.startsWith("data:") || src.startsWith("/")) return;
+      const dataUrl = await toDataUrl(src);
+      if (!dataUrl) return;
+      img.setAttribute("src", dataUrl);
+      restores.push(() => img.setAttribute("src", src));
+    }),
+  );
+  return () => restores.forEach((fn) => fn());
+}
+
 /**
  * Crop a region around the card from the full-slide canvas and apply a dark
  * radial vignette that fades the outer slide context to near-black.
@@ -191,12 +231,91 @@ function applyNodeFixes(
   }
 }
 
+// ── star-dot overlay for card wrapper ────────────────────────────────────────
+
+function addStarDots(container: HTMLElement, accent: string) {
+  let seed = Math.abs(accent.split("").reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0));
+  const rand = () => { seed = ((seed * 1664525 + 1013904223) | 0) >>> 0; return seed / 4294967295; };
+
+  for (let i = 0; i < 50; i++) {
+    const x  = rand() * 100;
+    const y  = rand() * 100;
+    const r  = rand() * 1.4 + 0.4;
+    const op = rand() * 0.55 + 0.12;
+    const col = rand() < 0.30 ? accent : "#ffffff";
+    const el = document.createElement("div");
+    el.style.cssText = `position:absolute;left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${(r*2).toFixed(1)}px;height:${(r*2).toFixed(1)}px;border-radius:50%;background:${col};opacity:${op.toFixed(2)};transform:translate(-50%,-50%);pointer-events:none;`;
+    container.appendChild(el);
+  }
+  for (let i = 0; i < 5; i++) {
+    const x  = rand() * 80 + 10;
+    const y  = rand() * 80 + 10;
+    const r  = rand() * 2.5 + 2;
+    const op = rand() * 0.35 + 0.25;
+    const el = document.createElement("div");
+    el.style.cssText = `position:absolute;left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${(r*2).toFixed(1)}px;height:${(r*2).toFixed(1)}px;border-radius:50%;background:${accent};opacity:${op.toFixed(2)};transform:translate(-50%,-50%);pointer-events:none;`;
+    container.appendChild(el);
+  }
+}
+
 // ── live-DOM capture ──────────────────────────────────────────────────────────
 
-type Opts = { scale?: number; background?: string; cropTo?: HTMLElement | null };
+type Opts = {
+  scale?: number;
+  background?: string;
+  cropTo?: HTMLElement | null;
+  /** If set, clone the element into an off-screen wrapper with this CSS background (gradient ok). */
+  wrapperBg?: string;
+  /** Padding (px) around the element when wrapperBg is used. Default 40. */
+  wrapperPad?: number;
+};
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
-  const { scale = 2.5, background = "#080612", cropTo = null } = opts;
+  const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40 } = opts;
+
+  // Clone-into-wrapper mode: captures the element on a styled gradient background
+  // without touching the live DOM (safe with React).
+  if (wrapperBg && !cropTo) {
+    const W = root.offsetWidth || 380;
+    const H = root.offsetHeight || 580;
+    const totalW = W + wrapperPad * 2;
+    const totalH = H + wrapperPad * 2;
+    const wrap = document.createElement("div");
+    wrap.style.cssText = [
+      "position:fixed", "top:-9999px", "left:0",
+      `width:${totalW}px`, `height:${totalH}px`,
+      "display:flex", "align-items:center", "justify-content:center",
+      `background:${wrapperBg}`,
+      "overflow:hidden",
+    ].join(";") + ";";
+
+    const accent = (root.dataset as DOMStringMap).accent ?? "#a78bfa";
+    addStarDots(wrap, accent);
+
+    const clone = root.cloneNode(true) as HTMLElement;
+    clone.style.width  = `${W}px`;
+    clone.style.height = `${H}px`;
+    clone.style.minWidth  = `${W}px`;
+    clone.style.minHeight = `${H}px`;
+    wrap.appendChild(clone);
+    document.body.appendChild(wrap);
+    try {
+      const cloneNodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];
+      for (const el of cloneNodes) {
+        const cs = getComputedStyle(el);
+        applyNodeFixes(el, cs, (elem, props) => {
+          for (const k of Object.keys(props)) elem.style.setProperty(k, props[k]);
+        }, (_e, _o) => {});
+      }
+      await inlineExternalImages(clone);
+      const { domToCanvas } = await import("modern-screenshot");
+      const canvas = await domToCanvas(wrap, { backgroundColor: background, scale });
+      return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
+    } finally {
+      wrap.remove();
+    }
+  }
+
   const restores: Array<() => void> = [];
 
   const setStyle = (el: HTMLElement, props: Record<string, string>) => {
@@ -221,6 +340,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     }, (fn) => restores.push(fn));
   }
 
+  const restoreImgs = await inlineExternalImages(root);
   try {
     const { domToCanvas } = await import("modern-screenshot");
     const canvas = await domToCanvas(root, {
@@ -245,6 +365,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     const final = cropWithVignette(canvas, cLeft, cTop, cW, cH, scale);
     return await new Promise<Blob | null>((res) => final.toBlob((b) => res(b), "image/png"));
   } finally {
+    restoreImgs();
     restores.forEach((fn) => fn());
   }
 }
@@ -365,6 +486,7 @@ export async function captureDesktopElement(
       ? clone.querySelector<HTMLElement>(cropToSelector)
       : null;
 
+    await inlineExternalImages(clone);
     const { domToCanvas } = await import("modern-screenshot");
     const canvas = await domToCanvas(clone, {
       backgroundColor: background,
