@@ -363,8 +363,9 @@ function Index({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
       ))}
 
       {/* Top header */}
-      <header className="absolute top-0 left-0 right-0 z-20 flex items-center px-8 py-6">
-        <Image src={logo.url} alt="GitHub Wrapped" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1 ring-2 ring-purple-400/60" unoptimized />
+      <header className="absolute top-0 left-0 right-0 z-20 flex items-center px-6 pt-9 pb-6">
+        <Image src={logo.url} alt="GitHub Wrapped" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1" unoptimized
+          style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
       </header>
 
       <div className="pointer-events-none absolute left-[6vw] top-[58%] z-20 hidden -translate-y-1/2 xl:block">

@@ -16,7 +16,7 @@ export default function WorldCupChapterHeading({ index }: { index: number }) {
   const entry = CHAPTERS[index] ?? CHAPTERS[0];
 
   return (
-    <div className="pointer-events-none absolute left-[18px] top-[44px] z-40 sm:left-[72px] sm:top-[56px]">
+    <div className="pointer-events-none absolute left-[68px] top-[44px] z-40 sm:left-[88px] sm:top-[56px]">
       <div className="relative overflow-hidden rounded-[14px] border border-amber-300/24 bg-[#090412]/74 px-2 py-1.5 shadow-[0_12px_24px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-2.5 sm:py-2">
         <div
           className="absolute inset-0 opacity-40"

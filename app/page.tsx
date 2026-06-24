@@ -9,6 +9,7 @@ import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
+import logo from "@/components/pawcup/assets/logo3.asset.json";
 
 // ── constants ──────────────────────────────────────────────────────────────
 const PERIODS = [
@@ -581,6 +582,15 @@ function HomePageInner() {
         {/* top fade — covers nav area */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36"
           style={{ background: "linear-gradient(to bottom,color-mix(in oklab,var(--space-deep) 85%,transparent),transparent)" }} />
+
+        {/* planets landing logo — above top fade, same visibility as planets theme */}
+        <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
+          <div className="flex items-center px-6 pt-9">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
+              style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+          </div>
+        </div>
         {/* bottom fade — blends scene into content */}
         <div
           className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-colors duration-700" : ""}`}
