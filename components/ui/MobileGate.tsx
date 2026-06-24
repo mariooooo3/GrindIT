@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 // Reference desktop height for scale calculation.
 // scale = physicalHeight / DESKTOP_H → 100dvh ≈ DESKTOP_H after browser scales content.
@@ -11,8 +12,6 @@ type ViewportState = "desktop" | "landscape" | "portrait";
 function applyLandscapeViewport(w: number, h: number) {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
   if (!meta) return;
-  // w and h must be the PHYSICAL CSS pixel dimensions (captured before any viewport change).
-  // scale makes 100dvh ≈ DESKTOP_H; cssWidth ensures 100vw ≈ desktop width → lg: fires.
   const scale = h / DESKTOP_H;
   const cssWidth = Math.round(w / scale);
   meta.content = `width=${cssWidth}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
@@ -21,16 +20,6 @@ function applyLandscapeViewport(w: number, h: number) {
 function resetViewport() {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
   if (meta) meta.content = "width=device-width, initial-scale=1, viewport-fit=cover";
-}
-
-function applyPhone(w: number, h: number, set: (s: ViewportState) => void) {
-  if (w > h) {
-    applyLandscapeViewport(w, h);
-    set("landscape");
-  } else {
-    resetViewport();
-    set("portrait");
-  }
 }
 
 // ── Portrait overlay ────────────────────────────────────────────────────────
@@ -121,47 +110,83 @@ function PortraitOverlay() {
 // ── MobileGate ──────────────────────────────────────────────────────────────
 export function MobileGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ViewportState>("desktop");
+  // Store the physical dimensions used for scaling so we can re-apply on any navigation.
+  const dims = useRef<{ w: number; h: number } | null>(null);
+  const ready = useRef(false);
+  const pathname = usePathname();
 
+  // ── Initial setup (runs once on mount) ──────────────────────────────────
   useEffect(() => {
-    // Non-touch (desktop/laptop) → pass through, nothing to do
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    ready.current = true;
+
     if (!isTouch) {
       setState("desktop");
       return;
     }
 
     // Capture physical dimensions BEFORE any viewport change.
-    // After applyLandscapeViewport(), window.innerWidth/Height change → DO NOT
-    // re-read them for detection (that would trigger a false "desktop" state).
+    // After applyLandscapeViewport(), innerWidth/Height change — don't re-read for detection.
     const physW = window.innerWidth;
     const physH = window.innerHeight;
 
-    // Tablets: max dimension ≥ 1024px → show desktop layout untouched
+    // Tablets (max dim ≥ 1024px) → show desktop layout untouched
     if (Math.max(physW, physH) >= 1024) {
       setState("desktop");
       return;
     }
 
-    // Phone — set initial state
-    applyPhone(physW, physH, setState);
+    const applyPhone = (w: number, h: number) => {
+      if (w > h) {
+        dims.current = { w, h };
+        applyLandscapeViewport(w, h);
+        setState("landscape");
+      } else {
+        dims.current = null;
+        resetViewport();
+        setState("portrait");
+      }
+    };
 
-    // On orientation change: reset viewport first (restores real CSS pixel dimensions),
-    // then wait 200ms for the browser to finish the rotation, then re-detect.
-    // We do NOT listen to "resize" here: changing the viewport meta itself fires resize,
-    // which would create a feedback loop (scaled width ≥ 1024 → reset → real width → scale → ...).
+    applyPhone(physW, physH);
+
+    // orientationchange: reset viewport first to recover real CSS px dimensions,
+    // then wait for browser to finish rotation before re-detecting.
+    // We deliberately avoid "resize" — changing viewport meta fires resize,
+    // creating a feedback loop (scaled width ≥ 1024 → reset → real width → scale → ...).
     const onOrientationChange = () => {
       resetViewport();
-      setTimeout(() => {
-        applyPhone(window.innerWidth, window.innerHeight, setState);
-      }, 200);
+      setTimeout(() => applyPhone(window.innerWidth, window.innerHeight), 200);
+    };
+
+    // pageshow with e.persisted = true means the browser restored the page from
+    // bfcache (back/forward navigation). In that case the viewport meta may have
+    // been reset to its cached value — re-apply immediately.
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted && dims.current) {
+        applyLandscapeViewport(dims.current.w, dims.current.h);
+      }
     };
 
     window.addEventListener("orientationchange", onOrientationChange);
+    window.addEventListener("pageshow", onPageShow);
+
     return () => {
       window.removeEventListener("orientationchange", onOrientationChange);
+      window.removeEventListener("pageshow", onPageShow);
       resetViewport();
     };
   }, []);
+
+  // ── Re-apply on every Next.js client-side navigation ────────────────────
+  // Covers the case where the browser or Next.js resets the viewport meta
+  // when the route changes (e.g. back button handled by the router, not bfcache).
+  useEffect(() => {
+    if (!ready.current) return;
+    if (dims.current) {
+      applyLandscapeViewport(dims.current.w, dims.current.h);
+    }
+  }, [pathname]);
 
   if (state === "portrait") return <PortraitOverlay />;
   return <>{children}</>;
