@@ -643,6 +643,7 @@ async function fetchContribExtras(
 
         for (const n of col.pullRequestContributions.nodes) {
           const pr = n.pullRequest;
+          if (!pr) continue;
           if (pr.state !== "MERGED" || !pr.mergedAt) continue;
           if (!isDateInPeriod(pr.mergedAt.slice(0, 10), period)) continue;
           const key = `${pr.repository.name}:${pr.title}`;

@@ -8,8 +8,11 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       authorization: {
         params: {
-            // read:user — profile data; repo — private repos, PRs, issues, contributions; read:org — org repos and membership
-          scope: "read:user repo read:org",
+          // read:user — public profile. repo — required to include the user's own
+          // PRIVATE repos/commits in their Wrapped (lib/github.ts fetches
+          // /user/repos?affiliation=owner + private commit messages). read:org is
+          // intentionally NOT requested: no org/membership data is fetched anywhere.
+          scope: "read:user repo",
         },
       },
     }),
