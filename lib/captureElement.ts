@@ -4,6 +4,8 @@
 //             apply radial vignette so edges fade to dark. No CSS manipulation.
 // SLIDE mode: full screenshot, pixel-accurate.
 
+import logoAsset from "@/components/pawcup/assets/logo3.asset.json";
+
 // Per-session cache: external img src → data URL (avoids re-fetching on every capture)
 const imgDataCache = new Map<string, string>();
 
@@ -231,6 +233,47 @@ function applyNodeFixes(
   }
 }
 
+// ── GrindIT watermark for card wrapper ───────────────────────────────────────
+
+async function addCardWatermark(container: HTMLElement): Promise<void> {
+  const logoDataUrl = await toDataUrl(logoAsset.url);
+
+  const wm = document.createElement("div");
+  wm.style.cssText = [
+    "position:absolute", "bottom:18px", "right:18px",
+    "display:flex", "align-items:center", "gap:8px",
+    "padding:6px 12px 6px 7px", "border-radius:20px",
+    "background:rgba(0,0,0,0.38)", "pointer-events:none",
+  ].join(";");
+
+  if (logoDataUrl) {
+    const img = document.createElement("img");
+    img.src = logoDataUrl;
+    img.width = 26; img.height = 26;
+    img.style.cssText = [
+      "width:26px", "height:26px", "border-radius:50%",
+      "box-shadow:0 0 0 1.5px oklch(0.72 0.18 295 / 0.72),0 0 9px oklch(0.72 0.18 295 / 0.5)",
+    ].join(";");
+    wm.appendChild(img);
+  }
+
+  // "G" + "rind" + "IT" — matching landing screen violet branding
+  const makeSpan = (text: string, color: string) => {
+    const s = document.createElement("span");
+    s.textContent = text;
+    s.style.cssText = `color:${color};font-size:13px;font-weight:700;letter-spacing:0.06em;font-family:system-ui,-apple-system,sans-serif;white-space:nowrap;`;
+    return s;
+  };
+  const label = document.createElement("span");
+  label.style.cssText = "display:inline-flex;white-space:nowrap;";
+  label.appendChild(makeSpan("G",    "oklch(0.72 0.18 295)"));
+  label.appendChild(makeSpan("rind", "rgba(255,255,255,0.85)"));
+  label.appendChild(makeSpan("IT",   "oklch(0.72 0.18 295)"));
+  wm.appendChild(label);
+
+  container.appendChild(wm);
+}
+
 // ── star-dot overlay for card wrapper ────────────────────────────────────────
 
 function addStarDots(container: HTMLElement, accent: string) {
@@ -308,6 +351,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         }, (_e, _o) => {});
       }
       await inlineExternalImages(clone);
+      await addCardWatermark(wrap);
       const { domToCanvas } = await import("modern-screenshot");
       const canvas = await domToCanvas(wrap, { backgroundColor: background, scale });
       return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));

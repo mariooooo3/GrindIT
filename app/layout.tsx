@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
+import { MobileGate } from "@/components/ui/MobileGate";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -46,7 +47,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <SessionProviderWrapper>
+          <MobileGate>{children}</MobileGate>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

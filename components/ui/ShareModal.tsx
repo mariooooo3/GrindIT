@@ -87,8 +87,8 @@ export default function ShareModal({
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
   const caption  = worldCup
-    ? `@${username} at the World Cup ⚽🐾 #WorldCup #GitHubWrapped`
-    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GitHubWrapped`;
+    ? `@${username} at the World Cup ⚽🐾 #WorldCup #GrindIT`
+    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱 #GrindIT`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
@@ -115,7 +115,7 @@ export default function ShareModal({
       setBusy(true);
       setPreview(null); // show ScanLoader while re-rendering
       setFailed(false);
-      const prev = await capture(1);
+      const prev = await capture(1.5);
       if (!alive) return;
       const hiPromise = capture(2.5);
       if (prev) {

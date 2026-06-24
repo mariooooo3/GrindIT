@@ -16,6 +16,7 @@ import SlideArchetype     from "@/components/slides/SlideArchetype";
 import SlideShare         from "@/components/slides/SlideShare";
 import PlanetProgress     from "@/components/ui/PlanetProgress";
 import ShareModal         from "@/components/ui/ShareModal";
+import { SlideWatermark } from "@/components/ui/SlideWatermark";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 
@@ -357,12 +358,18 @@ export default function WrappedPage() {
         {/* Logo fixed below back arrow — pt-3(12px)+h-9(36px)+gap(6px)=54px; sm:pt-4(16px)+h-9(36px)+gap(6px)=58px */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}
-          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
+          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] w-12 h-12 rounded-full"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
       </div>
 
       {/* â”€â”€ slide â”€â”€ */}
       <div ref={slideAreaRef} className="absolute inset-0 z-10">
+        {/* capture-only logo — covered on screen by real top bar (z-40), visible in screenshot */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo.url} alt="GrindIT" width={48} height={48}
+          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] z-20 w-12 h-12 rounded-full"
+          style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+        <SlideWatermark />
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={normalizedSlideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
