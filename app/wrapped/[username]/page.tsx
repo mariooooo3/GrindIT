@@ -16,6 +16,7 @@ import SlideArchetype     from "@/components/slides/SlideArchetype";
 import SlideShare         from "@/components/slides/SlideShare";
 import PlanetProgress     from "@/components/ui/PlanetProgress";
 import ShareModal         from "@/components/ui/ShareModal";
+import { SlideWatermark } from "@/components/ui/SlideWatermark";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 
@@ -363,6 +364,7 @@ export default function WrappedPage() {
 
       {/* â”€â”€ slide â”€â”€ */}
       <div ref={slideAreaRef} className="absolute inset-0 z-10">
+        <SlideWatermark />
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div key={normalizedSlideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
