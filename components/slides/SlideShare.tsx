@@ -616,7 +616,7 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
       </motion.div>
 
       {/* ── caption — double-bezel card with archetype badge ── */}
-      <motion.div className="mx-auto mt-8 w-[min(360px,90%)]"
+      <motion.div className="mx-auto mt-4 w-[min(320px,85%)]"
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
         {/* outer shell */}
@@ -854,7 +854,7 @@ export default function SlideShare({
 
         {/* RIGHT — planet */}
         <motion.div className="relative hidden lg:block" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.8 }}>
-          <PlanetStage>
+          <PlanetStage className="!pt-10">
             <Planet spec={planetSpec} caption={shareCaption} />
           </PlanetStage>
         </motion.div>
