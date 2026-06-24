@@ -115,21 +115,6 @@ export default function Slide8({ profile, speech, speechLoading }: {
                 >
                   INDIVIDUAL AWARD
                 </div>
-                {/* LLM status LED */}
-                {!speechLoading && (
-                  <div className="mt-1.5 flex items-center gap-1.5">
-                    <div
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{
-                        background: speech ? "#4ade80" : "#f87171",
-                        boxShadow: speech ? "0 0 6px #4ade80" : "0 0 6px #f87171",
-                      }}
-                    />
-                    <span className="text-[8px] tracking-[0.2em] text-white/30">
-                      {speech ? "LLM" : "FALLBACK"}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* award name + badge aligned */}

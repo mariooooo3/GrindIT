@@ -791,16 +791,6 @@ export default function SlideShare({
                     style={{ color: palette.a, border: `1px solid ${palette.a}55`, background: `${palette.a}14`, boxShadow: `0 0 10px ${palette.glow}` }}>
                     {grade} grade
                   </span>
-                  {profile.narrative && (
-                    <div
-                      title={profile.narrative.isFallback ? "Fallback narrative" : "AI narrative"}
-                      className="h-2 w-2 rounded-full flex-shrink-0"
-                      style={{
-                        background: profile.narrative.isFallback ? "#ef4444" : "#22c55e",
-                        boxShadow: profile.narrative.isFallback ? "0 0 6px #ef4444" : "0 0 6px #22c55e",
-                      }}
-                    />
-                  )}
                 </div>
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -823,17 +813,17 @@ export default function SlideShare({
                 </span>
               ))}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-4 gap-1.5">
               {[
                 { n: formatNum(flat.totalCommits), l: "commits" },
-                { n: formatNum(flat.totalLinesOfCode), l: "lines of code" },
-                { n: formatNum(flat.pullRequests.merged), l: "PRs merged" },
+                { n: formatNum(flat.totalLinesOfCode), l: "lines" },
+                { n: formatNum(flat.pullRequests.merged), l: "PRs" },
                 { n: formatNum(flat.totalRepos), l: "repos" },
               ].map((s) => (
-                <div key={s.l} className="rounded-lg border px-2.5 py-1"
-                  style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.025)" }}>
+                <div key={s.l} className="rounded-lg border px-2 py-1.5 text-center"
+                  style={{ borderColor: "rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.04)" }}>
                   <p className="text-sm font-semibold text-zinc-50">{s.n}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-zinc-500">{s.l}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-zinc-400">{s.l}</p>
                 </div>
               ))}
             </div>
