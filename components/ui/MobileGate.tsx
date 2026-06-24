@@ -2,27 +2,17 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-// Reference desktop height used to calculate the viewport scale on mobile landscape.
-// Chosen so the desktop layout (designed at ~1440×810) fits the phone screen perfectly:
-// scale = innerHeight / DESKTOP_H  →  100dvh ≈ DESKTOP_H in CSS px after scaling.
+// Reference desktop height for scale calculation.
+// scale = physicalHeight / DESKTOP_H → 100dvh ≈ DESKTOP_H after browser scales content.
 const DESKTOP_H = 810;
 
 type ViewportState = "desktop" | "landscape" | "portrait";
 
-function detectState(w: number, h: number): ViewportState {
-  // (pointer: coarse) = touch device — distinguishes phone/tablet from desktop browser
-  const isTouch = window.matchMedia("(pointer: coarse)").matches;
-  // Tablets in landscape (≥1024px) get the desktop layout untouched
-  if (!isTouch || w >= 1024) return "desktop";
-  return h > w ? "portrait" : "landscape";
-}
-
 function applyLandscapeViewport(w: number, h: number) {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
   if (!meta) return;
-  // Scale so the phone height equals DESKTOP_H CSS px; width follows proportionally.
-  // Result: 100dvh ≈ DESKTOP_H, 100vw ≈ w/scale (≥1440 for common phones),
-  // lg: breakpoint (1024px) fires → desktop 3-column layout activates naturally.
+  // w and h must be the PHYSICAL CSS pixel dimensions (captured before any viewport change).
+  // scale makes 100dvh ≈ DESKTOP_H; cssWidth ensures 100vw ≈ desktop width → lg: fires.
   const scale = h / DESKTOP_H;
   const cssWidth = Math.round(w / scale);
   meta.content = `width=${cssWidth}, initial-scale=${scale}, maximum-scale=${scale}, user-scalable=no, viewport-fit=cover`;
@@ -31,6 +21,16 @@ function applyLandscapeViewport(w: number, h: number) {
 function resetViewport() {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
   if (meta) meta.content = "width=device-width, initial-scale=1, viewport-fit=cover";
+}
+
+function applyPhone(w: number, h: number, set: (s: ViewportState) => void) {
+  if (w > h) {
+    applyLandscapeViewport(w, h);
+    set("landscape");
+  } else {
+    resetViewport();
+    set("portrait");
+  }
 }
 
 // ── Portrait overlay ────────────────────────────────────────────────────────
@@ -61,8 +61,6 @@ function PortraitOverlay() {
             animation: "mg-glow-pulse 2.6s ease-in-out infinite",
           }}
         />
-
-        {/* phone icon that tilts to landscape */}
         <div style={{ animation: "mg-phone-tilt 2.8s ease-in-out infinite" }}>
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden>
             <rect
@@ -125,27 +123,42 @@ export function MobileGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ViewportState>("desktop");
 
   useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const s = detectState(w, h);
-      if (s === "landscape") {
-        applyLandscapeViewport(w, h);
-      } else {
-        resetViewport();
-      }
-      setState(s);
+    // Non-touch (desktop/laptop) → pass through, nothing to do
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (!isTouch) {
+      setState("desktop");
+      return;
+    }
+
+    // Capture physical dimensions BEFORE any viewport change.
+    // After applyLandscapeViewport(), window.innerWidth/Height change → DO NOT
+    // re-read them for detection (that would trigger a false "desktop" state).
+    const physW = window.innerWidth;
+    const physH = window.innerHeight;
+
+    // Tablets: max dimension ≥ 1024px → show desktop layout untouched
+    if (Math.max(physW, physH) >= 1024) {
+      setState("desktop");
+      return;
+    }
+
+    // Phone — set initial state
+    applyPhone(physW, physH, setState);
+
+    // On orientation change: reset viewport first (restores real CSS pixel dimensions),
+    // then wait 200ms for the browser to finish the rotation, then re-detect.
+    // We do NOT listen to "resize" here: changing the viewport meta itself fires resize,
+    // which would create a feedback loop (scaled width ≥ 1024 → reset → real width → scale → ...).
+    const onOrientationChange = () => {
+      resetViewport();
+      setTimeout(() => {
+        applyPhone(window.innerWidth, window.innerHeight, setState);
+      }, 200);
     };
 
-    update();
-    window.addEventListener("resize", update);
-    // orientationchange fires before innerWidth/Height update — small delay
-    const onOrientation = () => setTimeout(update, 150);
-    window.addEventListener("orientationchange", onOrientation);
-
+    window.addEventListener("orientationchange", onOrientationChange);
     return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", onOrientation);
+      window.removeEventListener("orientationchange", onOrientationChange);
       resetViewport();
     };
   }, []);
