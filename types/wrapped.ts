@@ -41,6 +41,7 @@ export type CommitStats = {
   chore: number;
   other: number;
   hourHistogram: number[]; // 24 buckets, from real commit timestamps in the sample
+  truncated?: boolean;     // true when Search API hit the 1000-commit page cap
 };
 
 export type Contribution = {
@@ -72,6 +73,7 @@ export type GitHubRawData = {
   languages: LanguageStats[];
   pullRequests: PullRequest[];
   prsOpened: number;
+  prsMergedTotal?: number; // accurate merged count from Search API; falls back to pullRequests.filter(merged).length
   issueContributions: { opened: number };
   totalStarsReceived: number;
   totalForksReceived: number;

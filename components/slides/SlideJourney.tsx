@@ -135,13 +135,38 @@ function GasPlanet() {
   );
 }
 
-function Heatmap({ values, hotMonth }: { values: number[]; hotMonth: string }) {
+function Heatmap({ values, hotMonth, periodStart, periodEnd }: {
+  values: number[];
+  hotMonth: string;
+  periodStart: string;
+  periodEnd: string;
+}) {
   const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
   const fullMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const max = Math.max(...values, 1);
+
+  const startDate = new Date(periodStart);
+  const endDate = new Date(periodEnd);
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+  const startMonth = startDate.getMonth();
+  const endMonth = endDate.getMonth();
+  const monthSpan = (endYear - startYear) * 12 + (endMonth - startMonth);
+
+  const visibleIndices: number[] = [];
+  if (monthSpan >= 11) {
+    for (let i = 0; i < 12; i++) visibleIndices.push(i);
+  } else if (startYear !== endYear) {
+    for (let i = startMonth; i <= 11; i++) visibleIndices.push(i);
+    for (let i = 0; i <= endMonth; i++) visibleIndices.push(i);
+  } else {
+    for (let i = startMonth; i <= endMonth; i++) visibleIndices.push(i);
+  }
+
   return (
     <div className="flex items-end gap-1">
-      {values.map((v, i) => {
+      {visibleIndices.map((i) => {
+        const v = values[i];
         const intensity = v / max;
         const isHot = hotMonth.length > 0 && fullMonths[i] === hotMonth;
         return (
@@ -288,7 +313,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
                 <span className="text-sm font-bold text-yellow-200">{flat.mostActiveMonth || "—"}</span>
               </div>
               <div className="mt-2">
-                <Heatmap values={heatmap} hotMonth={flat.mostActiveMonth} />
+                <Heatmap values={heatmap} hotMonth={flat.mostActiveMonth} periodStart={flat.period.startDate} periodEnd={flat.period.endDate} />
               </div>
               {flat.mostProductiveDay.date && flat.mostProductiveDay.commits > 0 && (
                 <div className="mt-2 flex items-center justify-between border-t border-yellow-400/10 pt-2">

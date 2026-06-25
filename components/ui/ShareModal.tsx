@@ -27,9 +27,9 @@ function Icon({ d, size = 13 }: { d: string; size?: number }) {
 
 const ACTIONS = [
   { id: "download", label: "Save",      icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
-  { id: "copy",     label: "Copy",      icon: "M9 9h10a1 1 011 1v10a1 1 01-1 1H9a1 1 01-1-1V10a1 1 011-1zM5 15H4a1 1 01-1-1V4a1 1 011-1h10a1 1 011 1v1" },
+  { id: "copy",     label: "Copy",      icon: "M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" },
   { id: "x",        label: "Post on X", icon: "M4 4l16 16M20 4L4 20" },
-  { id: "linkedin", label: "LinkedIn",  icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 014 0v4" },
+  { id: "linkedin", label: "LinkedIn",  icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
 ] as const;
 
 function ScanLoader() {
@@ -59,12 +59,13 @@ export default function ShareModal({
   open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
   username: string; slideTitle: string; worldCup?: boolean;
 }) {
-  const [scope,   setScope]   = useState<Scope>("card");
-  const [busy,    setBusy]    = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [toast,   setToast]   = useState<string | null>(null);
-  const [failed,  setFailed]  = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [scope,      setScope]      = useState<Scope>("card");
+  const [busy,       setBusy]       = useState(false);
+  const [preview,    setPreview]    = useState<string | null>(null);
+  const [toast,      setToast]      = useState<string | null>(null);
+  const [failed,     setFailed]     = useState(false);
+  const [mounted,    setMounted]    = useState(false);
+  const [captureKey, setCaptureKey] = useState(0);
   const blobRef = useRef<Blob | null>(null);
 
   // inject CSS once
@@ -135,7 +136,7 @@ export default function ShareModal({
       blobRef.current = hi;
     }, 80);
     return () => { alive = false; clearTimeout(t); };
-  }, [open, scope, capture]);
+  }, [open, scope, capture, captureKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -263,11 +264,17 @@ export default function ShareModal({
                   {/* failed state */}
                   <AnimatePresence>
                     {failed && (
-                      <motion.span key="fail"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{ fontSize:10, color:"rgba(255,255,255,.2)", letterSpacing:".06em" }}>
-                        Couldn&apos;t render this slide.
-                      </motion.span>
+                      <motion.div key="fail" className="flex flex-col items-center gap-2"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <span style={{ fontSize:10, color:"rgba(255,255,255,.2)", letterSpacing:".06em" }}>
+                          Couldn&apos;t render this slide.
+                        </span>
+                        <button
+                          onClick={() => setCaptureKey(k => k + 1)}
+                          style={{ fontSize:10, color:"rgba(139,92,246,.7)", letterSpacing:".06em", background:"none", cursor:"pointer", padding:"2px 8px", borderRadius:4, border:"1px solid rgba(139,92,246,.25)" }}>
+                          Retry
+                        </button>
+                      </motion.div>
                     )}
                   </AnimatePresence>
 

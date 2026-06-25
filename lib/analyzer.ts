@@ -14,6 +14,9 @@
   Period,
 } from "@/types/wrapped";
 
+const NOCTURNAL_START = 22;
+const NOCTURNAL_END = 5;
+
 // --- Utilities ---
 
 function clamp(v: number, min: number, max: number): number {
@@ -83,7 +86,7 @@ function calcHourBias(contributions: Contribution[]): HourBias {
   return {
     peakHour,
     peakHourLabel: formatHour(peakHour),
-    isNocturnal: peakHour >= 22 || peakHour <= 5,
+    isNocturnal: peakHour >= NOCTURNAL_START || peakHour <= NOCTURNAL_END,
     distributionByHour: dist,
   };
 }
@@ -195,7 +198,7 @@ function calcScores(
   const consistencyScore = clamp(Math.round(consistency), 0, 100);
 
   const nocturnal = data.contributions
-    .filter((c) => c.hour >= 22 || c.hour <= 5)
+    .filter((c) => c.hour >= NOCTURNAL_START || c.hour <= NOCTURNAL_END)
     .reduce((s, c) => s + c.count, 0);
   const nocturnalScore = total === 0 ? 0 : clamp(Math.round((nocturnal / total) * 100), 0, 100);
 

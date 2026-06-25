@@ -171,7 +171,6 @@ export default function WrappedPage() {
       });
       if (!res.ok) return;
       const data = (await res.json()) as WrappedProfile;
-      console.log(`[narrative] source=${data.narrative?.isFallback ? "FALLBACK" : "GROQ"}${data.narrative?._debug ? ` | error: ${data.narrative._debug}` : ""}`);
       setProfile(prev => prev ? { ...prev, narrative: data.narrative } : prev);
     } catch { /* narrative is optional */ }
     finally { setNarrativeLoading(false); }
@@ -180,7 +179,6 @@ export default function WrappedPage() {
   const fetchWcSpeech = useCallback(async (p: WrappedProfile) => {
     if (wcSpeechFetched.current) return;
     const award = determineAward(p);
-    if (!award) return;
     wcSpeechFetched.current = true;
     setWcSpeechLoading(true);
     try {

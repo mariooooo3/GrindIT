@@ -371,6 +371,9 @@ async function fetchCommitStats(
       stats[classifyCommit(pm.message)]++;
     }
 
+    // Flag when the Search API page cap was hit — classification is a partial sample.
+    stats.truncated = publicItems.length >= MAX_SEARCH_PAGES * SEARCH_PAGE_SIZE;
+
     return stats;
   } catch (e) {
     console.error("fetchCommitStats failed", e);
@@ -381,11 +384,17 @@ async function fetchCommitStats(
 async function fetchLanguageStats(
   repos: GitHubRepo[],
   username: string,
-  token?: string
+  token?: string,
+  period?: Period
 ): Promise<LanguageStats[]> {
   const bytes: Record<string, number> = {};
   const counts: Record<string, number> = {};
-  const ownedRepos = repos.filter((r) => !r.isFork);
+  // Exclude repos with no activity on or after the period start (all-time is unaffected).
+  const ownedRepos = repos.filter((r) => {
+    if (r.isFork) return false;
+    if (period && r.pushedAt && r.pushedAt < period.startDate) return false;
+    return true;
+  });
 
   for (let i = 0; i < ownedRepos.length; i += LANGUAGE_STATS_CONCURRENCY) {
     const batch = ownedRepos.slice(i, i + LANGUAGE_STATS_CONCURRENCY);
@@ -592,6 +601,7 @@ async function fetchContributions(
 type ContribExtras = {
   pullRequests: PullRequest[];
   prsOpened: number;
+  prsMergedTotal?: number;
   issuesOpened: number;
 };
 
@@ -658,7 +668,21 @@ async function fetchContribExtras(
         }
       }
 
-      return { pullRequests, prsOpened, issuesOpened };
+      // Single Search API request for an accurate merged-PR count.
+      // contributionsCollection nodes are capped at 100/year-chunk, so counting
+      // them directly undercounts for power users. The merged: qualifier filters
+      // by actual merge date (not open date), matching what we show in the UI.
+      let prsMergedTotal: number | undefined;
+      try {
+        type PRSearch = { total_count: number };
+        const q = encodeURIComponent(`is:pr is:merged author:${username} merged:${period.startDate}..${period.endDate}`);
+        const data = await apiFetch<PRSearch>(`${GH_API}/search/issues?q=${q}&per_page=1`, token);
+        prsMergedTotal = data.total_count;
+      } catch (e) {
+        console.error("[fetchContribExtras prsMergedTotal] failed:", e);
+      }
+
+      return { pullRequests, prsOpened, issuesOpened, prsMergedTotal };
     } catch (e) {
       console.error("[fetchContribExtras graphql] failed:", e);
       // fall through to Search API
@@ -728,7 +752,7 @@ export async function fetchGitHubRawData(
   }
 
   const [languages, contributions, extras, commitStats] = await Promise.all([
-    fetchLanguageStats(repos, username, token),
+    fetchLanguageStats(repos, username, token, period),
     fetchContributions(username, period, token, cachedSearchItems),
     fetchContribExtras(username, period, token),
     fetchCommitStats(username, period, token, cachedSearchItems, repos),
@@ -741,6 +765,7 @@ export async function fetchGitHubRawData(
     languages,
     pullRequests: extras.pullRequests,
     prsOpened: extras.prsOpened,
+    prsMergedTotal: extras.prsMergedTotal,
     issueContributions: { opened: extras.issuesOpened },
     totalStarsReceived: repos.reduce((s, r) => s + r.stargazersCount, 0),
     totalForksReceived: repos.reduce((s, r) => s + r.forksCount, 0),

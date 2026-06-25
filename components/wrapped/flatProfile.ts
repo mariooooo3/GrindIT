@@ -131,7 +131,8 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
 
   const mostProdEntry = Object.entries(byDate).sort((a, b) => b[1] - a[1])[0] ?? ["", 0];
   const hotMonthIdx = byMonth.indexOf(Math.max(...byMonth));
-  const merged = p.raw.pullRequests.filter(pr => pr.state === "merged").length;
+  // Prefer the Search API total (accurate for >100 PRs) over counting capped GraphQL nodes.
+  const merged = p.raw.prsMergedTotal ?? p.raw.pullRequests.filter(pr => pr.state === "merged").length;
 
   // ── repos ──
   const ownRepos = p.raw.repos.filter(r => !r.isFork);
