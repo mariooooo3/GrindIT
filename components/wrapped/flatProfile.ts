@@ -102,7 +102,24 @@ function formatHour(h: number): string {
   return h < 12 ? `${h} AM` : `${h - 12} PM`;
 }
 
+// mapToFlat is a pure function of the profile object, but it's a heavy ~200-line
+// transform (iterates every contribution + repo, builds several maps, sorts). It
+// is called once per slide render with no memoization, and the wrapped page mounts
+// two slide layers (space + world-cup) at once — so the same work ran up to ~14×
+// per frame during animations. profile is treated immutably (state only ever
+// replaces it with a new object, e.g. when the narrative arrives), so caching by
+// object identity is always correct: a new profile ⇒ cache miss ⇒ recompute.
+const flatCache = new WeakMap<WrappedProfile, FlatProfile>();
+
 export function mapToFlat(p: WrappedProfile): FlatProfile {
+  const cached = flatCache.get(p);
+  if (cached) return cached;
+  const result = computeFlat(p);
+  flatCache.set(p, result);
+  return result;
+}
+
+function computeFlat(p: WrappedProfile): FlatProfile {
   const byRepo: Record<string, number> = {};
   const byHour = Array(24).fill(0) as number[];
   const byDay: Record<string, number> = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
