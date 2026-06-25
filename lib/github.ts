@@ -633,7 +633,21 @@ async function fetchContribExtras(
   // Correctly filters by period, includes private repos, avoids Search API quirks.
   if (token) {
     try {
-      const chunks = buildYearChunks(period.startDate, period.endDate);
+      // In-period chunks: PRs/issues *opened* within the period.
+      const periodChunks = buildYearChunks(period.startDate, period.endDate)
+        .map((c) => ({ ...c, lookbackOnly: false }));
+
+      // P1-10: contributionsCollection groups PRs by the date they were *opened*,
+      // so a PR opened before the period but merged inside it would be missed
+      // (e.g. opened in Dec, merged in Jan). Add a lookback window — the year
+      // before the period — purely to harvest its merged-in-period PRs. These are
+      // NOT counted toward prsOpened (they weren't opened in the period).
+      const lbStart = new Date(`${period.startDate}T00:00:00Z`);
+      lbStart.setUTCFullYear(lbStart.getUTCFullYear() - 1);
+      const lookbackChunks = buildYearChunks(lbStart.toISOString().slice(0, 10), period.startDate)
+        .map((c) => ({ ...c, lookbackOnly: true }));
+
+      const chunks = [...periodChunks, ...lookbackChunks];
       const chunkResults = await Promise.allSettled(
         chunks.map(({ from, to }) =>
           gql<ContribExtrasData>(CONTRIB_EXTRAS_QUERY, { username, from, to }, token)
@@ -644,12 +658,16 @@ async function fetchContribExtras(
       let prsOpened = 0;
       let issuesOpened = 0;
 
-      for (const r of chunkResults) {
+      for (let i = 0; i < chunkResults.length; i++) {
+        const r = chunkResults[i];
         if (r.status !== "fulfilled") continue;
         const col = r.value.user.contributionsCollection;
 
-        prsOpened += col.pullRequestContributions.totalCount;
-        issuesOpened += col.issueContributions.totalCount;
+        // Lookback chunks supply merged-in-period PRs only — never open counts.
+        if (!chunks[i].lookbackOnly) {
+          prsOpened += col.pullRequestContributions.totalCount;
+          issuesOpened += col.issueContributions.totalCount;
+        }
 
         for (const n of col.pullRequestContributions.nodes) {
           const pr = n.pullRequest;
@@ -733,10 +751,14 @@ async function fetchContribExtras(
 export async function fetchGitHubRawData(
   username: string,
   period: Period,
-  token?: string
+  token?: string,
+  // The `alltime` path already fetched the user (for accountCreatedAt) before
+  // deriving the period; pass it back in so we don't hit GET /users/{username}
+  // a second time here (P2-1).
+  prefetchedUser?: GitHubUser
 ): Promise<GitHubRawData> {
   const [user, repos] = await Promise.all([
-    fetchGitHubUser(username, token),
+    prefetchedUser ? Promise.resolve(prefetchedUser) : fetchGitHubUser(username, token),
     fetchGitHubRepos(username, token),
   ]);
 

@@ -17,6 +17,7 @@ import SlideShare         from "@/components/slides/SlideShare";
 import PlanetProgress     from "@/components/ui/PlanetProgress";
 import ShareModal         from "@/components/ui/ShareModal";
 import { SlideWatermark } from "@/components/ui/SlideWatermark";
+import { SlideErrorBoundary } from "@/components/ui/SlideErrorBoundary";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 
@@ -372,6 +373,7 @@ export default function WrappedPage() {
           <motion.div key={normalizedSlideState.current} custom={direction}
             variants={slideVariants} initial="enter" animate="center" exit="exit"
             className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
+            <SlideErrorBoundary>
             <div className="relative h-full w-full overflow-hidden">
               <div
                 className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
@@ -399,6 +401,7 @@ export default function WrappedPage() {
                 </div>
               </div>
             </div>
+            </SlideErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </div>

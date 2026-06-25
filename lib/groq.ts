@@ -11,14 +11,6 @@ type GroqApiResponse = {
   choices: Array<{ message: { content: string } }>;
 };
 
-// Untrusted, attacker-controllable free text (e.g. a GitHub bio) is embedded in
-// the prompt as DATA. Collapse newlines/tabs and cap length so it can't smuggle
-// in its own instruction blocks (prompt injection — RT-05/RT-08).
-function sanitizeUserText(value: unknown, maxLen: number): string {
-  if (typeof value !== "string") return "";
-  return value.replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim().slice(0, maxLen);
-}
-
 // ── randomness pools ────────────────────────────────────────────────────────
 
 const VOICES = [
@@ -135,7 +127,6 @@ function buildPayload(profile: WrappedProfile): Record<string, unknown> {
   const ownedRepoCount = r.repos.filter((repo) => !repo.isFork).length;
   return {
     username: r.user.login,
-    bio: sanitizeUserText(r.user.bio, 200),
     followers: r.user.followersCount,
     period: profile.period.label,
     tone: profile.tone,

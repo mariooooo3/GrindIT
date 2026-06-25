@@ -34,6 +34,32 @@ const handler = NextAuth({
       return session;
     },
   },
+  events: {
+    // Clearing the session cookie does NOT invalidate the GitHub token — classic
+    // OAuth App tokens often never expire on their own, so a logged-out token
+    // would stay live at GitHub with full `repo` scope (private repos). On
+    // sign-out we proactively revoke it via GitHub's token-revocation endpoint
+    // (P1-15). Best-effort: a failure here must never block logout.
+    async signOut({ token }) {
+      const accessToken = (token as { accessToken?: string }).accessToken;
+      const clientId = process.env.GITHUB_CLIENT_ID;
+      const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+      if (!accessToken || !clientId || !clientSecret) return;
+      try {
+        await fetch(`https://api.github.com/applications/${clientId}/token`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ access_token: accessToken }),
+        });
+      } catch (err) {
+        console.error("[auth] token revocation on signOut failed:", err);
+      }
+    },
+  },
   pages: {
     signIn: "/",
   },

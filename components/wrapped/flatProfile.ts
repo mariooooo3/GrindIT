@@ -1,5 +1,6 @@
 import type { WrappedProfile } from "@/types/wrapped";
 import { deriveTraitBadges, BADGE_COUNT, type TraitBadge } from "@/lib/badges";
+import { daysBetween, formatHour, parseUTCDate } from "@/lib/datetime";
 
 export type TrophyEntry = { icon: string; color: string; rarity: string; importance: number; label: string; reason: string; description: string };
 
@@ -36,12 +37,8 @@ export type FlatProfile = {
   fixCommits: number;
   firstCommitDate: string;
   mostProductiveDay: { date: string; commits: number };
-  collaborators: { username: string; avatarUrl?: string }[];
   archetype: string;
   narrative: string;
-  linesAdded: number;
-  linesDeleted: number;
-  filesChanged: number;
   mostActiveMonth: string;
   commitsByHour: number[];
   commitsByWeekday: Record<string, number>;
@@ -91,18 +88,24 @@ export type FlatProfile = {
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-function daysBetween(a: string, b: string): number {
-  if (!a || !b) return 0;
-  return Math.abs((new Date(b).getTime() - new Date(a).getTime()) / 86_400_000);
-}
-
-function formatHour(h: number): string {
-  if (h === 0) return "12 AM";
-  if (h === 12) return "12 PM";
-  return h < 12 ? `${h} AM` : `${h - 12} PM`;
-}
+// mapToFlat is a pure function of the profile object, but it's a heavy ~200-line
+// transform (iterates every contribution + repo, builds several maps, sorts). It
+// is called once per slide render with no memoization, and the wrapped page mounts
+// two slide layers (space + world-cup) at once — so the same work ran up to ~14×
+// per frame during animations. profile is treated immutably (state only ever
+// replaces it with a new object, e.g. when the narrative arrives), so caching by
+// object identity is always correct: a new profile ⇒ cache miss ⇒ recompute.
+const flatCache = new WeakMap<WrappedProfile, FlatProfile>();
 
 export function mapToFlat(p: WrappedProfile): FlatProfile {
+  const cached = flatCache.get(p);
+  if (cached) return cached;
+  const result = computeFlat(p);
+  flatCache.set(p, result);
+  return result;
+}
+
+function computeFlat(p: WrappedProfile): FlatProfile {
   const byRepo: Record<string, number> = {};
   const byHour = Array(24).fill(0) as number[];
   const byDay: Record<string, number> = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
@@ -115,12 +118,13 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     byRepo[c.repoName] = (byRepo[c.repoName] || 0) + c.count;
     byHour[c.hour] = (byHour[c.hour] || 0) + c.count;
     byDate[c.date] = (byDate[c.date] || 0) + c.count;
-    const d = new Date(c.date);
-    const dayKey = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    const d = parseUTCDate(c.date);
+    const dow = d.getUTCDay();
+    const dayKey = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][dow];
     byDay[dayKey] = (byDay[dayKey] || 0) + c.count;
-    byMonth[d.getMonth()] += c.count;
+    byMonth[d.getUTCMonth()] += c.count;
     if (c.hour < 5) nightCommits += c.count;
-    if (d.getDay() === 0 || d.getDay() === 6) weekendCommits += c.count;
+    if (dow === 0 || dow === 6) weekendCommits += c.count;
   }
 
   const topRepos = Object.entries(byRepo)
@@ -275,12 +279,8 @@ export function mapToFlat(p: WrappedProfile): FlatProfile {
     fixCommits,
     firstCommitDate: p.metrics.firstContributionDate,
     mostProductiveDay: { date: mostProdEntry[0] as string, commits: mostProdEntry[1] as number },
-    collaborators: [],
     archetype: p.archetypeBlend.primary.label,
     narrative: p.narrative?.archetypeDescription ?? "",
-    linesAdded: 0,
-    linesDeleted: 0,
-    filesChanged: 0,
     mostActiveMonth: MONTH_NAMES[hotMonthIdx] ?? "",
     commitsByHour: byHour,
     commitsByWeekday: byDay,

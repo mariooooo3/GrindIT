@@ -5,6 +5,7 @@ import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import type { AiTone } from "@/types/wrapped";
+import { isValidGitHubUsername } from "@/lib/validation";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
 import { useTheme } from "@/lib/theme-context";
@@ -516,7 +517,7 @@ function HomePageInner() {
   const [error,      setError]      = useState<string | null>(null);
 
   const usernameTouched = manualUsername.length > 0;
-  const usernameValid = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(manualUsername);
+  const usernameValid = isValidGitHubUsername(manualUsername);
 
   const username = isLoggedIn ? sessionUsername : manualUsername;
 
@@ -928,7 +929,7 @@ function HomePageInner() {
       <footer className="py-10 text-center">
         <div className="mx-auto max-w-xs border-t border-white/[0.06] pt-8">
           <p className="text-[11px] text-zinc-500">
-            Made with GitHub API · No data stored · Open source
+            Made with GitHub API · AI summaries by Groq · No data stored on our servers · Open source
           </p>
         </div>
       </footer>

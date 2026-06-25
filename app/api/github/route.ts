@@ -4,14 +4,10 @@ import { fetchGitHubRawData, fetchGitHubUser } from "@/lib/github";
 import type { GitHubError } from "@/lib/github";
 import type { Period } from "@/types/wrapped";
 import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+import { GITHUB_USERNAME_RE } from "@/lib/validation";
 
 const VALID_PERIOD_TYPES = ["week", "month", "year", "alltime", "custom"] as const;
 type PeriodValue = (typeof VALID_PERIOD_TYPES)[number];
-
-// GitHub usernames: 1–39 chars, alphanumeric or single hyphens (no leading/
-// trailing hyphen). Rejecting anything else also kills path traversal via
-// `../user` and any URL-injection in downstream GitHub API calls.
-const GITHUB_USERNAME_RE = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 
 function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -134,10 +130,14 @@ export async function GET(request: NextRequest) {
   }
 
   let accountCreatedAt: string | undefined;
+  // Reuse this for alltime so fetchGitHubRawData doesn't re-fetch the same
+  // GET /users/{username} below (P2-1).
+  let prefetchedUser: Awaited<ReturnType<typeof fetchGitHubUser>> | undefined;
   if (validPeriod === "alltime") {
     try {
       const user = await fetchGitHubUser(username, token);
       accountCreatedAt = user.accountCreatedAt;
+      prefetchedUser = user;
     } catch {
       // fall back to 10-year default in derivePeriod
     }
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
   const period = derivePeriod(validPeriod, startDate, endDate, accountCreatedAt);
 
   try {
-    const rawData = await fetchGitHubRawData(username, period, token);
+    const rawData = await fetchGitHubRawData(username, period, token, prefetchedUser);
     return NextResponse.json(rawData, { status: 200 });
   } catch (err) {
     const ghErr = err as GitHubError;
