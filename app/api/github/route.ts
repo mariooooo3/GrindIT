@@ -130,10 +130,14 @@ export async function GET(request: NextRequest) {
   }
 
   let accountCreatedAt: string | undefined;
+  // Reuse this for alltime so fetchGitHubRawData doesn't re-fetch the same
+  // GET /users/{username} below (P2-1).
+  let prefetchedUser: Awaited<ReturnType<typeof fetchGitHubUser>> | undefined;
   if (validPeriod === "alltime") {
     try {
       const user = await fetchGitHubUser(username, token);
       accountCreatedAt = user.accountCreatedAt;
+      prefetchedUser = user;
     } catch {
       // fall back to 10-year default in derivePeriod
     }
@@ -142,7 +146,7 @@ export async function GET(request: NextRequest) {
   const period = derivePeriod(validPeriod, startDate, endDate, accountCreatedAt);
 
   try {
-    const rawData = await fetchGitHubRawData(username, period, token);
+    const rawData = await fetchGitHubRawData(username, period, token, prefetchedUser);
     return NextResponse.json(rawData, { status: 200 });
   } catch (err) {
     const ghErr = err as GitHubError;

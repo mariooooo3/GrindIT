@@ -929,7 +929,7 @@ function HomePageInner() {
       <footer className="py-10 text-center">
         <div className="mx-auto max-w-xs border-t border-white/[0.06] pt-8">
           <p className="text-[11px] text-zinc-500">
-            Made with GitHub API · No data stored · Open source
+            Made with GitHub API · AI summaries by Groq · No data stored on our servers · Open source
           </p>
         </div>
       </footer>
