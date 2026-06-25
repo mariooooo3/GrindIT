@@ -37,12 +37,8 @@ export type FlatProfile = {
   fixCommits: number;
   firstCommitDate: string;
   mostProductiveDay: { date: string; commits: number };
-  collaborators: { username: string; avatarUrl?: string }[];
   archetype: string;
   narrative: string;
-  linesAdded: number;
-  linesDeleted: number;
-  filesChanged: number;
   mostActiveMonth: string;
   commitsByHour: number[];
   commitsByWeekday: Record<string, number>;
@@ -282,12 +278,8 @@ function computeFlat(p: WrappedProfile): FlatProfile {
     fixCommits,
     firstCommitDate: p.metrics.firstContributionDate,
     mostProductiveDay: { date: mostProdEntry[0] as string, commits: mostProdEntry[1] as number },
-    collaborators: [],
     archetype: p.archetypeBlend.primary.label,
     narrative: p.narrative?.archetypeDescription ?? "",
-    linesAdded: 0,
-    linesDeleted: 0,
-    filesChanged: 0,
     mostActiveMonth: MONTH_NAMES[hotMonthIdx] ?? "",
     commitsByHour: byHour,
     commitsByWeekday: byDay,
