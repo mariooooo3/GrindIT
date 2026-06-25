@@ -13,6 +13,7 @@
   LanguageStats,
   Period,
 } from "@/types/wrapped";
+import { daysBetween, formatHour, parseUTCDate, dayOfWeekUTC } from "@/lib/datetime";
 
 // --- Utilities ---
 
@@ -20,26 +21,17 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max);
 }
 
-function daysBetween(a: string, b: string): number {
-  return Math.abs((new Date(b).getTime() - new Date(a).getTime()) / 86_400_000);
-}
-
 function getWeekNumber(date: string): string {
-  const d = new Date(date);
-  const jan1 = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(((d.getTime() - jan1.getTime()) / 86_400_000 + jan1.getDay() + 1) / 7);
-  return `${d.getFullYear()}-${String(week).padStart(2, "0")}`;
-}
-
-function formatHour(h: number): string {
-  if (h === 0) return "12 AM";
-  if (h === 12) return "12 PM";
-  return h < 12 ? `${h} AM` : `${h - 12} PM`;
+  const d = parseUTCDate(date);
+  const year = d.getUTCFullYear();
+  const jan1 = new Date(Date.UTC(year, 0, 1));
+  const week = Math.ceil(((d.getTime() - jan1.getTime()) / 86_400_000 + jan1.getUTCDay() + 1) / 7);
+  return `${year}-${String(week).padStart(2, "0")}`;
 }
 
 function isoToDay(d: string): string {
   return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
-    new Date(d).getDay()
+    dayOfWeekUTC(d)
   ];
 }
 
@@ -100,16 +92,16 @@ function calcActiveDays(contributions: Contribution[], period: Period): ActiveDa
   }
 
   const weekdayCount = unique.filter((d) => {
-    const n = new Date(d).getDay();
+    const n = dayOfWeekUTC(d);
     return n >= 1 && n <= 5;
   }).length;
   const mostActiveDayOfWeek =
     Object.entries(dayTotals).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Monday";
 
   const weekends = new Map<string, boolean>();
-  const end = new Date(period.endDate);
-  for (let d = new Date(period.startDate); d <= end; d.setDate(d.getDate() + 1)) {
-    const n = d.getDay();
+  const end = parseUTCDate(period.endDate);
+  for (let d = parseUTCDate(period.startDate); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    const n = d.getUTCDay();
     if (n === 0 || n === 6) {
       const iso = d.toISOString().slice(0, 10);
       const key = n === 0 ? iso : new Date(d.getTime() + 86_400_000).toISOString().slice(0, 10);
@@ -260,7 +252,7 @@ function activeWeekdayCount(data: GitHubRawData): number {
   return new Set(
     data.contributions
       .filter((c) => c.count > 0)
-      .map((c) => new Date(c.date).getDay())
+      .map((c) => dayOfWeekUTC(c.date))
   ).size;
 }
 function mergedRepoCount(data: GitHubRawData): number {
