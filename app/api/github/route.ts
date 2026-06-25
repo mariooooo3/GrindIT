@@ -4,14 +4,10 @@ import { fetchGitHubRawData, fetchGitHubUser } from "@/lib/github";
 import type { GitHubError } from "@/lib/github";
 import type { Period } from "@/types/wrapped";
 import { getClientIp, isRateLimited } from "@/lib/rate-limit";
+import { GITHUB_USERNAME_RE } from "@/lib/validation";
 
 const VALID_PERIOD_TYPES = ["week", "month", "year", "alltime", "custom"] as const;
 type PeriodValue = (typeof VALID_PERIOD_TYPES)[number];
-
-// GitHub usernames: 1–39 chars, alphanumeric or single hyphens (no leading/
-// trailing hyphen). Rejecting anything else also kills path traversal via
-// `../user` and any URL-injection in downstream GitHub API calls.
-const GITHUB_USERNAME_RE = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 
 function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;

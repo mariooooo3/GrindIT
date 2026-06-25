@@ -5,6 +5,7 @@ import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import type { AiTone } from "@/types/wrapped";
+import { isValidGitHubUsername } from "@/lib/validation";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
 import { useTheme } from "@/lib/theme-context";
@@ -516,7 +517,7 @@ function HomePageInner() {
   const [error,      setError]      = useState<string | null>(null);
 
   const usernameTouched = manualUsername.length > 0;
-  const usernameValid = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(manualUsername);
+  const usernameValid = isValidGitHubUsername(manualUsername);
 
   const username = isLoggedIn ? sessionUsername : manualUsername;
 
