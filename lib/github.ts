@@ -727,10 +727,14 @@ async function fetchContribExtras(
 export async function fetchGitHubRawData(
   username: string,
   period: Period,
-  token?: string
+  token?: string,
+  // The `alltime` path already fetched the user (for accountCreatedAt) before
+  // deriving the period; pass it back in so we don't hit GET /users/{username}
+  // a second time here (P2-1).
+  prefetchedUser?: GitHubUser
 ): Promise<GitHubRawData> {
   const [user, repos] = await Promise.all([
-    fetchGitHubUser(username, token),
+    prefetchedUser ? Promise.resolve(prefetchedUser) : fetchGitHubUser(username, token),
     fetchGitHubRepos(username, token),
   ]);
 
