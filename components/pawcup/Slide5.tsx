@@ -72,10 +72,10 @@ function Slide5() {
           />
         </div>
 
-        {/* emotion sparks */}
-        <div className="absolute left-[55%] top-[28%] text-red-400 text-lg font-black animate-spark" style={{ animationDelay: "0s" }}>!</div>
-        <div className="absolute left-[62%] top-[22%] text-red-300 text-base font-black animate-spark" style={{ animationDelay: "0.4s" }}>!</div>
-        <div className="absolute left-[50%] top-[24%] text-amber-300 text-sm animate-spark" style={{ animationDelay: "0.8s" }}>{"\u2605"}</div>
+        {/* emotion sparks \u2014 above the angry player cat's head */}
+        <div className="absolute right-[8%] bottom-[46%] text-red-400 text-lg font-black animate-spark" style={{ animationDelay: "0s" }}>!</div>
+        <div className="absolute right-[16%] bottom-[51%] text-red-300 text-base font-black animate-spark" style={{ animationDelay: "0.4s" }}>!</div>
+        <div className="absolute right-[4%] bottom-[42%] text-amber-300 text-sm animate-spark" style={{ animationDelay: "0.8s" }}>{"\u2605"}</div>
       </div>
 
       {/* ====== RIGHT: VAR room ====== */}

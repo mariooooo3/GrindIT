@@ -197,7 +197,6 @@ function Slide2() {
           />
         </div>
 
-
         {/* celebrating cat · same mascot as the homepage */}
         <div className="absolute right-[0%] bottom-[4%] w-[60%] origin-bottom z-20">
           <Image

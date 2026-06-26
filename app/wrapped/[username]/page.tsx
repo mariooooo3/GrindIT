@@ -406,22 +406,8 @@ export default function WrappedPage() {
         </AnimatePresence>
       </div>
 
-      {/* â”€â”€ tap zones with hover arrows (desktop only; mobile uses swipe + vertical scroll) â”€â”€ */}
-      <div className="absolute inset-0 z-30 hidden pointer-events-none lg:flex">
-        <div className="w-2/5 h-full pointer-events-auto group flex items-center cursor-pointer" onClick={goPrev}>
-          <span className="ml-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/0 bg-white/0 text-white/0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:border-white/10 group-hover:bg-white/5 group-hover:text-white/50">
-            <ChevronLeft />
-          </span>
-        </div>
-        <div className="w-3/5 h-full pointer-events-auto group flex items-center justify-end cursor-pointer" onClick={goNext}>
-          <span className="mr-5 flex h-9 w-9 items-center justify-center rounded-full border border-white/0 bg-white/0 text-white/0 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:border-white/10 group-hover:bg-white/5 group-hover:text-white/50">
-            <ChevronRight />
-          </span>
-        </div>
-      </div>
-
-      {/* â”€â”€ mobile nav arrows (small floating buttons; don't block vertical scroll) â”€â”€ */}
-      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 lg:hidden">
+      {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
+      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2">
         <button onClick={goPrev} aria-label="Previous slide"
           className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${normalizedSlideState.index === 0 ? "invisible" : ""}`}
           style={{ backdropFilter: "blur(8px)" }}>

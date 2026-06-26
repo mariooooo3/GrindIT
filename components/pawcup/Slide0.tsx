@@ -30,17 +30,21 @@ function Slide0({ profile }: { profile?: WrappedProfile }) {
       periodLabel: flat.period.label,
     }, profile.tone).introVibeLine;
   }, [profile]);
-  // Typewriter effect — plaque starts empty, text types in after the slide settles.
-  // Re-triggers if intro changes (e.g. LLM response replaces the fallback).
+  // Typewriter effect — mirrors the planet-theme TransmissionLine approach:
+  // don't clear on intro change; the longer delay lets the LLM response arrive
+  // before typing starts, so only one sequence (LLM text) ever plays.
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   useEffect(() => {
-    if (!intro) { setDisplayedText(""); return; }
-    setDisplayedText("");
+    if (!intro) { setDisplayedText(""); setIsTyping(false); setIsWaiting(false); return; }
     setIsTyping(false);
+    setIsWaiting(true);
     let tick: ReturnType<typeof setInterval> | null = null;
     const start = setTimeout(() => {
       let i = 0;
+      setDisplayedText("");
+      setIsWaiting(false);
       setIsTyping(true);
       tick = setInterval(() => {
         i++;
@@ -51,11 +55,12 @@ function Slide0({ profile }: { profile?: WrappedProfile }) {
           setIsTyping(false);
         }
       }, 28);
-    }, 700);
+    }, 1800);
     return () => {
       clearTimeout(start);
       if (tick) clearInterval(tick);
       setIsTyping(false);
+      setIsWaiting(false);
     };
   }, [intro]);
 
@@ -221,7 +226,7 @@ function Slide0({ profile }: { profile?: WrappedProfile }) {
                 <p className="mt-1 min-h-[2.4em] font-serif text-[12.5px] font-semibold italic leading-snug text-amber-950"
                   style={{ textShadow: "0 1px 0 rgba(255,255,255,0.4)" }}>
                   {displayedText}
-                  {isTyping && (
+                  {(isTyping || isWaiting) && (
                     <span className="animate-cursor-blink ml-[1px] inline-block w-[1.5px] align-middle bg-amber-950/70" style={{ height: "0.9em" }} />
                   )}
                 </p>

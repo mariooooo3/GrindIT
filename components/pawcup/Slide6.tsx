@@ -127,8 +127,11 @@ function Slide6() {
               <span className="font-black text-[11px]">WRP</span>
               <span className="w-3 h-3 rounded-sm bg-gradient-to-br from-fuchsia-500 to-purple-700" />
             </div>
-            <div className="mt-1 text-amber-300 text-[8px] font-mono tabular-nums" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-              {mounted ? `${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}` : "67:00"}
+            <div className="mt-1 flex flex-col items-center leading-none">
+              {(mounted ? `${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}` : "67:00")
+                .split("").map((ch, i) => (
+                  <span key={i} className="text-amber-300 text-[10px] font-black font-mono tabular-nums">{ch}</span>
+                ))}
             </div>
           </div>
         </div>

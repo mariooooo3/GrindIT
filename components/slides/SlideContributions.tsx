@@ -332,8 +332,8 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                 )}
 
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.92 }}>
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Activity reach</div>
-                  <div className="grid grid-cols-3 gap-2 rounded-xl py-3"
+                  <div className="mb-1 text-[9px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Activity reach</div>
+                  <div className="grid grid-cols-3 gap-1.5 rounded-lg py-2"
                     style={{ border: `1px solid ${ACCENT}18`, background: `${ACCENT}06` }}>
                     {[
                       { label: "Commits", value: flat.totalCommits },
@@ -341,21 +341,21 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                       { label: "Active days", value: flat.activeDayCount },
                     ].map((s, i) => (
                       <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? `1px solid ${ACCENT}18` : undefined }}>
-                        <div className="text-base font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
-                        <div className="mt-0.5 text-[9px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
+                        <div className="text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                        <div className="mt-0.5 text-[8px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
                       </div>
                     ))}
                   </div>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Open-source impact</div>
-                  <div className="grid grid-cols-3 gap-2 rounded-xl py-3"
+                  <div className="mb-1 text-[9px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Open-source impact</div>
+                  <div className="grid grid-cols-3 gap-1.5 rounded-lg py-2"
                     style={{ border: `1px solid ${ACCENT}18`, background: `${ACCENT}06` }}>
                     {impactItems.map((s, i) => (
                       <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? `1px solid ${ACCENT}18` : undefined }}>
-                        <div className="text-base font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
-                        <div className="mt-0.5 text-[9px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
+                        <div className="text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                        <div className="mt-0.5 text-[8px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
                       </div>
                     ))}
                   </div>

@@ -111,9 +111,9 @@ function Slide1() {
           <TacticsBoard className="absolute right-[18%] top-[18%]" />
 
           {/* Cat seen from back */}
-          <div className="absolute right-[6%] bottom-[6%] w-[60%] animate-float-slow">
+          <div className="absolute right-[12%] bottom-[6%] w-[42%] animate-float-slow">
             <Image
-              src={catBack.url}
+              src="/cat-back-2-transparent-v2.png"
               alt="Cat coach from behind"
               width={1024}
               height={1024}
