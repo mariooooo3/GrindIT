@@ -37,9 +37,8 @@ function Slide0({ profile }: { profile?: WrappedProfile }) {
   const [isTyping, setIsTyping] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);
   useEffect(() => {
-    if (!intro) { setDisplayedText(""); setIsTyping(false); setIsWaiting(false); return; }
-    setIsTyping(false);
-    setIsWaiting(true);
+    if (!intro) { queueMicrotask(() => { setDisplayedText(""); setIsTyping(false); setIsWaiting(false); }); return; }
+    queueMicrotask(() => { setIsTyping(false); setIsWaiting(true); });
     let tick: ReturnType<typeof setInterval> | null = null;
     const start = setTimeout(() => {
       let i = 0;

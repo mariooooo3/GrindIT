@@ -289,8 +289,8 @@ function TransmissionLine({ message }: { message: string }) {
   const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {
-    if (!message) { setDisplayedText(""); return; }
-    setDisplayedText("");
+    if (!message) { queueMicrotask(() => setDisplayedText("")); return; }
+    queueMicrotask(() => setDisplayedText(""));
     let tick: ReturnType<typeof setInterval> | null = null;
     // Wait for the box fade-in to finish (delay 1.1s + duration 0.7s) then start typing
     const start = setTimeout(() => {
