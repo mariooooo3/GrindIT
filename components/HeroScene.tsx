@@ -172,12 +172,6 @@ export function HeroScene() {
         </g>
       </svg>
 
-      {/* ── orbit ellipse guide ── */}
-      <svg className="absolute left-1/2 opacity-[0.08]" style={{ top: MOON_ANCHOR, transform: "translate(-50%,-50%)", width: ORBIT_RX*2+40, height: ORBIT_RY*2+40, overflow:"visible" }} aria-hidden>
-        <ellipse cx={ORBIT_RX+20} cy={ORBIT_RY+20} rx={ORBIT_RX} ry={ORBIT_RY}
-          fill="none" stroke="var(--violet-glow)" strokeWidth="1"
-          strokeDasharray="4 10" />
-      </svg>
 
       {/* ── moon glow ── */}
       <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)" }} />
