@@ -32,7 +32,7 @@ const TONES: { label: string; value: AiTone; icon: ComponentType<{ size?: number
 type PeriodType = (typeof PERIODS)[number]["value"];
 
 const EASE = [0.32, 0.72, 0, 1] as const;
-const pillBase = "rounded-full px-3 py-1.5 text-[11px] font-medium cursor-pointer transition-all duration-300 border";
+const pillBase = "rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-medium cursor-pointer transition-all duration-300 border";
 const pillOff  = "bg-white/[0.04] border-white/[0.08] text-zinc-500 hover:border-white/20 hover:text-zinc-300";
 const pillOn   = "bg-violet-500/[0.15] border-violet-500/40 text-violet-300 shadow-[0_0_14px_-4px_rgba(139,92,246,0.5)]";
 
@@ -143,11 +143,11 @@ function SoccerBallTiny({ size = 12 }: { size?: number }) {
   );
 }
 
-function TrophyMark() {
+function TrophyMark({ className = "h-7 w-7 sm:h-8 sm:w-8" }: { className?: string }) {
   // FIFA World Cup trophy: two figures spiralling up to a green globe with gold
   // continents, on a green base band
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className="h-8 w-8">
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
       <defs>
         <linearGradient id="wcGold" x1="18" y1="6" x2="46" y2="60" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#fff4ad" />
@@ -199,13 +199,13 @@ function TrophyMark() {
   );
 }
 
-function SoccerBallMark() {
+function SoccerBallMark({ className = "h-7 w-7 sm:h-8 sm:w-8" }: { className?: string }) {
   // FIFA "Trionda" 2026 ball — three colour waves (red / green / blue)
   // pinwheeling around a central emblem on a white sphere
   // wavy S-curve spine, stroked thick → reads as a flowing Trionda colour wave
   const wave = "M31 33 C 35 25 24 21 25 13 C 25.5 8.5 21 6.5 15 8";
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className="h-8 w-8">
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
       <defs>
         <radialGradient id="ballSphere" cx="38%" cy="30%" r="72%">
           <stop offset="0%" stopColor="#ffffff" />
@@ -274,7 +274,7 @@ function ThemeSwitch() {
       onClick={handleToggle}
       aria-label={worldCup ? "Switch to normal theme" : "Switch to World Cup theme"}
       title={worldCup ? "World Cup theme active — click to switch back" : "Monthly theme · World Cup — click to activate"}
-      className={`group relative flex items-center gap-1.5 rounded-full border py-1 pl-2 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:pr-3 ${
+      className={`group relative flex items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:gap-1.5 sm:py-1 sm:pl-2 sm:pr-3 ${
         worldCup
           ? "border-amber-400/50 bg-amber-950/50 hover:border-amber-300/70 hover:bg-amber-950/70"
           : "border-white/[0.12] bg-black/40 hover:border-emerald-300/40 hover:bg-zinc-900/70"
@@ -294,9 +294,9 @@ function ThemeSwitch() {
       >
         <SoccerBallMark />
       </motion.span>
-      <span className="hidden flex-col items-start leading-none sm:flex">
-        <span className={`text-[8px] font-bold uppercase tracking-[0.16em] transition-colors ${worldCup ? "text-amber-400/80 group-hover:text-amber-300" : "text-zinc-500 group-hover:text-emerald-300/70"}`}>Theme</span>
-        <span className={`text-[11px] font-semibold tracking-[-0.01em] transition-colors ${worldCup ? "text-amber-200" : "text-white/90"}`}>
+      <span className="flex flex-col items-start leading-none">
+        <span className={`text-[7px] font-bold uppercase tracking-[0.14em] transition-colors sm:text-[8px] sm:tracking-[0.16em] ${worldCup ? "text-amber-400/80 group-hover:text-amber-300" : "text-zinc-500 group-hover:text-emerald-300/70"}`}>Theme</span>
+        <span className={`text-[9px] font-semibold tracking-[-0.01em] transition-colors sm:text-[11px] ${worldCup ? "text-amber-200" : "text-white/90"}`}>
           World Cup
         </span>
       </span>
@@ -333,7 +333,7 @@ function Nav() {
             How it works
           </a>
         </div>
-        {/* floating glass pill */}
+        {/* floating glass pill — full width, no ThemeSwitch inside */}
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
@@ -378,17 +378,18 @@ function Nav() {
               </a>
             </div>
           </div>
-          {/* right: theme switch + auth + eyebrow sub-label */}
-          <div className="relative z-10 flex items-center gap-1.5 sm:gap-2.5">
-            <ThemeSwitch />
-            <div className="flex flex-col items-center gap-1">
-              <AuthButton />
-              <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
-                Developer Recap · Any Period
-              </div>
+          {/* right: auth */}
+          <div className="relative z-10 flex flex-col items-center gap-1">
+            <AuthButton />
+            <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
+              Developer Recap · Any Period
             </div>
           </div>
+        </div>
+        {/* ThemeSwitch — separate frame, right-aligned, aligned with landing logo height */}
+        <div className="mt-6 flex justify-end">
+          <ThemeSwitch />
         </div>
       </div>
     </header>
@@ -595,7 +596,7 @@ function HomePageInner() {
       <Nav />
 
       {/* ══ HERO — full-screen scene, content overlaid at bottom ══════════ */}
-      <section className="relative flex min-h-[100dvh] flex-col items-center justify-end pb-4 pt-20">
+      <section className="relative flex min-h-[100svh] flex-col items-center justify-end pb-4 pt-20">
         <div
           className={`absolute inset-0 z-[1] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
             ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
@@ -830,15 +831,15 @@ function HomePageInner() {
               )}
             </AnimatePresence>
 
-            {/* period row */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5">
+            {/* period row — grid forces all 4 on one line */}
+            <div className="grid grid-cols-4 gap-1">
               {PERIODS.map(({ label, value, requiresAuth }) => {
                 const locked = requiresAuth && !isLoggedIn;
                 return (
                   <button key={value}
                     onClick={() => !locked && setPeriodType(value as PeriodType)}
                     title={locked ? "Connect GitHub to unlock All time" : undefined}
-                    className={`${pillBase} inline-flex items-center gap-1 ${!locked && periodType === value ? pillOn : ""} ${locked ? "opacity-35 cursor-not-allowed" : !locked && periodType !== value ? pillOff : ""}`}>
+                    className={`${pillBase} inline-flex items-center justify-center gap-1 ${!locked && periodType === value ? pillOn : ""} ${locked ? "opacity-35 cursor-not-allowed" : !locked && periodType !== value ? pillOff : ""}`}>
                     {label}{locked && <LockIcon size={10} />}
                   </button>
                 );
