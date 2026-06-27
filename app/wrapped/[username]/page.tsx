@@ -19,6 +19,7 @@ import ShareModal         from "@/components/ui/ShareModal";
 import { SlideWatermark } from "@/components/ui/SlideWatermark";
 import { SlideErrorBoundary } from "@/components/ui/SlideErrorBoundary";
 import type { WrappedProfile, SlideId, SlideState } from "@/types/wrapped";
+import { LOADING_MESSAGES, NARRATIVE_MESSAGES, pickRandom } from "@/lib/loadingMessages";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 
 // Short chapter title per slide, used in the share caption.
@@ -103,6 +104,10 @@ function normalizeSlideState(state: SlideState, slides: SlideId[]): SlideState {
 
 // â”€â”€ loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LoadingScreen() {
+  // Pick one funny line per mount and keep it stable for the whole screen.
+  // suppressHydrationWarning: this client component is also SSR'd, so the
+  // server/client random picks intentionally differ on that one text node.
+  const [message] = useState(() => pickRandom(LOADING_MESSAGES));
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-5"
       style={{ background: "var(--space-deep)" }}>
@@ -114,8 +119,26 @@ function LoadingScreen() {
       </div>
       <div className="flex flex-col items-center gap-1">
         <span className="text-[13px] font-medium text-white/70">Loading your story</span>
-        <span className="text-[11px] text-zinc-600">Fetching from the voidâ€¦</span>
+        <span suppressHydrationWarning className="text-[11px] text-zinc-600">{message}</span>
       </div>
+    </div>
+  );
+}
+
+// â”€â”€ narrative loading indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Mounts only while the optional Groq narrative is generating, so the random
+// start + rotation reset each session and the interval is cleaned up on unmount.
+function NarrativeLoadingIndicator() {
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * NARRATIVE_MESSAGES.length));
+  useEffect(() => {
+    const id = setInterval(() => setIdx(i => (i + 1) % NARRATIVE_MESSAGES.length), 2200);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
+      style={{ backdropFilter: "blur(12px)" }}>
+      <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
+      <span className="text-[10px] text-zinc-500">{NARRATIVE_MESSAGES[idx]}</span>
     </div>
   );
 }
@@ -456,11 +479,7 @@ export default function WrappedPage() {
 
       {/* â”€â”€ narrative loading indicator â”€â”€ */}
       {narrativeLoading && (normalizedSlideState.current === "archetype" || normalizedSlideState.current === "share") && (
-        <div className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
-          style={{ backdropFilter: "blur(12px)" }}>
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
-          <span className="text-[10px] text-zinc-500">Generating storyâ€¦</span>
-        </div>
+        <NarrativeLoadingIndicator />
       )}
 
       <ShareModal

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import type { AiTone } from "@/types/wrapped";
 import { isValidGitHubUsername } from "@/lib/validation";
+import { LOADING_MESSAGES, pickRandom } from "@/lib/loadingMessages";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
 import SpaceBackground from "@/components/SpaceBackground";
@@ -515,6 +516,7 @@ function HomePageInner() {
   const [periodType, setPeriodType] = useState<PeriodType>("month");
   const [tone,       setTone]       = useState<AiTone>("funny");
   const [loading,    setLoading]    = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState("");
   const [error,      setError]      = useState<string | null>(null);
 
   const usernameTouched = manualUsername.length > 0;
@@ -528,6 +530,9 @@ function HomePageInner() {
       setError("That doesn't look like a valid GitHub username");
       return;
     }
+    // Show a funny line immediately — the GitHub + analyze round-trip below can
+    // take a few seconds and otherwise the UI looks idle.
+    setLoadingMsg(pickRandom(LOADING_MESSAGES));
     setLoading(true);
     setError(null);
     try {
@@ -782,6 +787,19 @@ function HomePageInner() {
                     ) : <>Generate →</>}
                   </button>
                 </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* loading line — funny feedback while GitHub + analyze run */}
+            <AnimatePresence>
+              {loading && (
+                <motion.p key="loading-msg"
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25, ease: EASE }}
+                  className="flex items-center justify-center gap-2 text-center text-[11px] font-medium text-violet-300/80">
+                  <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
+                  {loadingMsg}
+                </motion.p>
               )}
             </AnimatePresence>
 
