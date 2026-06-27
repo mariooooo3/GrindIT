@@ -596,16 +596,16 @@ function HomePageInner() {
       <Nav />
 
       {/* ══ HERO — full-screen scene, content overlaid at bottom ══════════ */}
-      <section className="relative flex min-h-[100svh] flex-col items-center justify-end pb-4 pt-20">
+      <section className="relative flex h-[100svh] flex-col items-center justify-end overflow-hidden pb-4 pt-20">
         <div
-          className={`absolute inset-0 z-[1] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+          className={`absolute inset-0 z-[1] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
             ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
             <WorldCupLanding isLoggedIn={isLoggedIn} />
         </div>
         <div
-          className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+          className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
             ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
@@ -620,7 +620,7 @@ function HomePageInner() {
           style={{ background: "linear-gradient(to bottom,color-mix(in oklab,var(--space-deep) 85%,transparent),transparent)" }} />
 
         {/* planets landing logo — above top fade, same visibility as planets theme */}
-        <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
+        <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
           <div className="flex items-center px-6 pt-[116px] sm:pt-9">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
