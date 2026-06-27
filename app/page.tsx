@@ -334,7 +334,7 @@ function Nav() {
           </a>
         </div>
         {/* floating glass pill — full width, no ThemeSwitch inside */}
-        <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
+        <div className="relative z-[1] flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
           <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
@@ -614,6 +614,7 @@ function HomePageInner() {
           className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
             ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
+          style={{ transitionDelay: ready && !worldCup && !animate ? "60ms" : "0ms" }}
         >
           <SpaceBackground />
           {/* Raw CSS switch — see globals.css .hero-mobile / .hero-desktop */}
