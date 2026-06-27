@@ -622,7 +622,7 @@ function HomePageInner() {
 
         {/* planets landing logo — above top fade, same visibility as planets theme */}
         <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
-          <div className="flex items-center px-6 pt-[88px] sm:pt-9">
+          <div className="flex items-center px-6 pt-[116px] sm:pt-9">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
               style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
