@@ -26,10 +26,10 @@ function Icon({ d, size = 13 }: { d: string; size?: number }) {
 }
 
 const ACTIONS = [
-  { id: "download", label: "Save",      icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
-  { id: "copy",     label: "Copy",      icon: "M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" },
-  { id: "x",        label: "Post on X", icon: "M4 4l16 16M20 4L4 20" },
-  { id: "linkedin", label: "LinkedIn",  icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
+  { id: "download", label: "Save",      accent: "#a78bfa", icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
+  { id: "copy",     label: "Copy",      accent: "#ffffff", icon: "M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" },
+  { id: "x",        label: "Post on X", accent: "#60a5fa", icon: "M4 4l16 16M20 4L4 20" },
+  { id: "linkedin", label: "LinkedIn",  accent: "#0a66c2", icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
 ] as const;
 
 function ScanLoader() {
@@ -323,21 +323,22 @@ export default function ShareModal({
 
             {/* ── action grid ── */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
-              {ACTIONS.map(({ id, label, icon }, i) => (
+              {ACTIONS.map(({ id, label, icon, accent }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
                   className="group flex flex-col items-center gap-[9px] rounded-[13px] py-3.5 disabled:pointer-events-none disabled:opacity-25"
-                  style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)" }}
+                  style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)",
+                           transition:"background .18s ease, border-color .18s ease" }}
                   initial={{ opacity:0, y:10 }}
                   animate={{ opacity:1, y:0 }}
                   transition={{ delay: 0.1 + i*0.055, duration:0.35, ease:SP }}
                   whileHover={{ y:-2 }} whileTap={{ scale:0.95 }}
-                  onMouseEnter={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.07)"; el.style.borderColor="rgba(255,255,255,.13)"; }}
+                  onMouseEnter={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.07)"; el.style.borderColor=`${accent}66`; }}
                   onMouseLeave={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.03)"; el.style.borderColor="rgba(255,255,255,.07)"; }}>
                   <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
-                       style={{ background:"rgba(255,255,255,.06)", color:"rgba(255,255,255,.45)" }}>
+                       style={{ background:`${accent}1f`, color:accent, boxShadow:`0 0 12px ${accent}33` }}>
                     <Icon d={icon} size={13} />
                   </div>
-                  <span style={{ fontSize:10, fontWeight:500, color:"rgba(255,255,255,.38)" }}>{label}</span>
+                  <span style={{ fontSize:10, fontWeight:600, color:"rgba(255,255,255,.82)" }}>{label}</span>
                 </motion.button>
               ))}
             </div>
