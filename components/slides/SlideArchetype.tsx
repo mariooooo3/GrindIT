@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes, SLIDE7_TAIL_NODES } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes, SLIDE7_TAIL_NODES } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
@@ -132,7 +132,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
       <Confetti sparse={sparse} />
       <ChapterHeadingAnchor n={7} title="The Reveal" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — disco ball + cats + dance floor */}
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
@@ -159,7 +159,6 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
           className="relative mt-10 w-[min(380px,92vw)] justify-self-center lg:absolute lg:left-1/2 lg:top-[8%] lg:mt-0 lg:-translate-x-1/2">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={7} title="The Reveal" />
-            <MobilePlanet color="#a855f7" />
           </div>
           <SlideCard accentColor={ACCENT}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
@@ -279,7 +278,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
           </SlideCard>
 
           {/* mobile: animated disco scene below the card (scroll to reveal) */}
-          <div className="mt-8 flex flex-col items-center lg:hidden">
+          <div className="hidden">
             <DiscoBall />
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="relative -mt-2 w-[min(320px,82vw)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}

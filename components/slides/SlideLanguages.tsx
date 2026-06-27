@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -247,7 +247,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
     <main className="relative min-h-full w-full overflow-hidden" style={{ background: "#080612", color: "white" }}>
       <Stars />
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
-      <div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-6 px-4 pb-10 pt-16 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
+      <div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-6 px-4 pb-10 pt-12 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
         {/* LEFT */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
@@ -259,7 +259,6 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
         <div className="order-1 flex flex-col items-center justify-center lg:order-2">
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={3} title="Dodging Bugs" />
-            <MobilePlanet color="#d6552a" />
           </div>
 
           <motion.div variants={stagger} initial="hidden" animate="show"
@@ -376,7 +375,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
           </motion.div>
 
           {/* mobile: animated scene below the card */}
-          <div className="mt-6 h-[380px] w-[min(380px,92vw)] lg:hidden">
+          <div className="hidden">
             <LeftScene />
           </div>
         </div>

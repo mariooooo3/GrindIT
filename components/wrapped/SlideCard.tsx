@@ -23,7 +23,7 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         ref={ref}
         data-share-card
         data-accent={accentColor}
-        className={`relative flex flex-col overflow-hidden rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(380px,92vw)] h-[min(580px,84vh)] ${className}`}
+        className={`relative flex flex-col overflow-hidden rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(380px,95vw)] h-[calc(100dvh-160px)] lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] ${className}`}
         style={{
           ...(sizeStyle?.width  && { width:  sizeStyle.width }),
           ...(sizeStyle?.height && { height: sizeStyle.height }),

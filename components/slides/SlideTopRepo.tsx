@@ -5,7 +5,7 @@ import { motion, useMotionValue, useTransform, animate, type MotionValue } from 
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -116,7 +116,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(closest-side, rgba(74,222,128,0.25), transparent)" }} />
       <Stars />
       <ChapterHeadingAnchor n={4} title="Home Base" />
-      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-16 lg:px-12 lg:py-8">
+      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-12 lg:px-12 lg:py-8">
         {/* LEFT — UFO invasion scene */}
         <div className="relative col-span-12 hidden lg:col-span-4 lg:block">
           <div className="relative h-full w-full">
@@ -148,7 +148,6 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         <div className="col-span-12 flex flex-col items-center justify-center lg:col-span-4">
           <div className="w-[min(400px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={4} title="Home Base" />
-            <MobilePlanet color="#7cff8a" />
           </div>
           <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full max-w-[380px]">
             <SlideCard accentColor={ACCENT} className="text-white">
@@ -267,7 +266,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
           </motion.div>
 
           {/* mobile: animated UFO scene below the card (scroll to reveal) */}
-          <div className="relative mt-6 h-[340px] w-[min(400px,92vw)] lg:hidden">
+          <div className="hidden">
             <motion.img src="/wrapped/slide4-ufo.png" alt="UFO"
               className="absolute left-1/2 top-[4%] w-[70%] -translate-x-1/2 select-none"
               style={{ x: ufoX, filter: "drop-shadow(0 20px 40px rgba(74,222,128,0.5))" }}

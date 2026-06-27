@@ -129,106 +129,111 @@ export function HeroScene() {
   }, [reduce]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 isolate overflow-hidden">
-      <Starfield />
+    <>
+      {/* Background layer: stars, nebula, trail — clipped, stays behind card (z-10) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Starfield />
 
-      {/* ── nebula aurora blobs ── */}
-      <div
-        className="absolute left-1/2 top-[38%] h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30"
-        style={{
-          background: "radial-gradient(ellipse at 40% 50%, oklch(0.55 0.25 295 / 0.5), transparent 68%)",
-          filter: "blur(48px)",
-          animation: "nebula-drift 22s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute left-[58%] top-[50%] h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20"
-        style={{
-          background: "radial-gradient(ellipse at 55% 45%, oklch(0.65 0.22 145 / 0.45), transparent 65%)",
-          filter: "blur(40px)",
-          animation: "nebula-drift 30s ease-in-out infinite reverse",
-        }}
-      />
-
-      {/* ── commit-graph branch lines ── */}
-      <svg className="absolute inset-0 h-full w-full opacity-[0.13]" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
-        <defs>
-          <linearGradient id="bg" x1="0" x2="1">
-            <stop offset="0"   stopColor="var(--violet-glow)" stopOpacity="0" />
-            <stop offset="0.5" stopColor="var(--violet-glow)" stopOpacity="0.55" />
-            <stop offset="1"   stopColor="var(--commit-green)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <g stroke="url(#bg)" strokeWidth="1" fill="none">
-          <path d="M-20 200 C200 180,320 260,520 240 S880 180,1100 220 S1380 260,1500 240"/>
-          <path d="M-20 720 C240 700,380 760,600 740 S960 700,1180 740 S1440 760,1500 740"/>
-          <path d="M200 0 C220 200,180 360,240 540 S280 800,260 920"/>
-          <path d="M1180 0 C1160 220,1200 380,1140 560 S1100 820,1120 920"/>
-        </g>
-        <g fill="var(--commit-green)">
-          <circle cx="520" cy="240" r="2.2"/><circle cx="880" cy="200" r="2.2"/>
-          <circle cx="600" cy="740" r="2.2"/><circle cx="240" cy="540" r="2.2"/>
-          <circle cx="1140" cy="560" r="2.2"/>
-        </g>
-      </svg>
-
-
-      {/* ── moon glow ── */}
-      <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)" }} />
-      <div className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.08), transparent 70%)", filter: "blur(12px)" }} />
-
-      {/* ── moon ── */}
-      <motion.div className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2" style={{ top: MOON_ANCHOR }}
-        animate={reduce ? undefined : { rotate: 360 }}
-        transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/moon.png" alt="" width={620} height={620}
-          className="h-[clamp(240px,32vw,460px)] w-[clamp(240px,32vw,460px)] select-none opacity-92"
-          style={{ filter: "drop-shadow(0 0 80px rgba(160,120,255,0.32)) drop-shadow(0 0 140px rgba(120,80,220,0.18))" }}
-          draggable={false}
+        {/* ── nebula aurora blobs ── */}
+        <div
+          className="absolute left-1/2 top-[38%] h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30"
+          style={{
+            background: "radial-gradient(ellipse at 40% 50%, oklch(0.55 0.25 295 / 0.5), transparent 68%)",
+            filter: "blur(48px)",
+            animation: "nebula-drift 22s ease-in-out infinite",
+          }}
         />
-      </motion.div>
+        <div
+          className="absolute left-[58%] top-[50%] h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(ellipse at 55% 45%, oklch(0.65 0.22 145 / 0.45), transparent 65%)",
+            filter: "blur(40px)",
+            animation: "nebula-drift 30s ease-in-out infinite reverse",
+          }}
+        />
 
-      {/* ── commit dots (rocket exhaust) — transform instead of left/top/margin ── */}
-      <div className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }}>
-        {dots.map(dot => (
-          <span key={dot.id} className="commit-dot absolute block rounded-full"
+        {/* ── commit-graph branch lines ── */}
+        <svg className="absolute inset-0 h-full w-full opacity-[0.13]" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
+          <defs>
+            <linearGradient id="bg" x1="0" x2="1">
+              <stop offset="0"   stopColor="var(--violet-glow)" stopOpacity="0" />
+              <stop offset="0.5" stopColor="var(--violet-glow)" stopOpacity="0.55" />
+              <stop offset="1"   stopColor="var(--commit-green)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <g stroke="url(#bg)" strokeWidth="1" fill="none">
+            <path d="M-20 200 C200 180,320 260,520 240 S880 180,1100 220 S1380 260,1500 240"/>
+            <path d="M-20 720 C240 700,380 760,600 740 S960 700,1180 740 S1440 760,1500 740"/>
+            <path d="M200 0 C220 200,180 360,240 540 S280 800,260 920"/>
+            <path d="M1180 0 C1160 220,1200 380,1140 560 S1100 820,1120 920"/>
+          </g>
+          <g fill="var(--commit-green)">
+            <circle cx="520" cy="240" r="2.2"/><circle cx="880" cy="200" r="2.2"/>
+            <circle cx="600" cy="740" r="2.2"/><circle cx="240" cy="540" r="2.2"/>
+            <circle cx="1140" cy="560" r="2.2"/>
+          </g>
+        </svg>
+
+        {/* ── moon glow ── */}
+        <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)" }} />
+        <div className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.08), transparent 70%)", filter: "blur(12px)" }} />
+
+        {/* ── commit dots (rocket exhaust trail) ── */}
+        <div className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }}>
+          {dots.map(dot => (
+            <span key={dot.id} className="commit-dot absolute block rounded-full"
+              style={{
+                width: 13, height: 13,
+                transform: `translate(calc(${dot.x}px - 50%), calc(${dot.y}px - 50%))`,
+                willChange: "transform, opacity",
+                background: "oklch(0.88 0.32 145)",
+                boxShadow: "0 0 14px 4px oklch(0.78 0.28 145 / 0.75), 0 0 6px 2px oklch(0.92 0.34 145 / 0.9)" }} />
+          ))}
+        </div>
+
+        {/* ── shooting stars ── */}
+        {shoots.map(s => (
+          <span key={s.id} className="shooting-star absolute block"
             style={{
-              width: 13, height: 13,
-              transform: `translate(calc(${dot.x}px - 50%), calc(${dot.y}px - 50%))`,
+              left: 0, top: 0,
+              width: 80, height: 1.5,
+              borderRadius: 2,
+              transform: `translate(${s.x}vw, ${s.y}vh) rotate(${s.angle}deg)`,
               willChange: "transform, opacity",
-              background: "oklch(0.88 0.32 145)",
-              boxShadow: "0 0 14px 4px oklch(0.78 0.28 145 / 0.75), 0 0 6px 2px oklch(0.92 0.34 145 / 0.9)" }} />
+              background: "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 50%, rgba(255,255,255,0))",
+              boxShadow: "0 0 6px rgba(255,255,255,0.4)",
+            }}
+          />
         ))}
       </div>
 
-      {/* ── shooting stars — transform instead of left/top ── */}
-      {shoots.map(s => (
-        <span key={s.id} className="shooting-star absolute block"
-          style={{
-            left: 0, top: 0,
-            width: 80, height: 1.5,
-            borderRadius: 2,
-            transform: `translate(${s.x}vw, ${s.y}vh) rotate(${s.angle}deg)`,
-            willChange: "transform, opacity",
-            background: "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 50%, rgba(255,255,255,0))",
-            boxShadow: "0 0 6px rgba(255,255,255,0.4)",
-          }}
-        />
-      ))}
+      {/* Foreground layer: planet + rocket at z-[51], above nav (z-50) and card (z-10), pointer-events-none keeps everything clickable */}
+      <div className="pointer-events-none absolute inset-0 z-[51]">
+        {/* ── moon ── */}
+        <motion.div className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2" style={{ top: MOON_ANCHOR }}
+          animate={reduce ? undefined : { rotate: 360 }}
+          transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/moon.png" alt="" width={620} height={620}
+            className="h-[clamp(240px,32vw,460px)] w-[clamp(240px,32vw,460px)] select-none opacity-92"
+            style={{ filter: "drop-shadow(0 0 80px rgba(160,120,255,0.32)) drop-shadow(0 0 140px rgba(120,80,220,0.18))" }}
+            draggable={false}
+          />
+        </motion.div>
 
-      {/* ── cat rocket ── */}
-      {reduce ? (
-        <div className="absolute left-1/2 z-30" style={{ top: MOON_ANCHOR, transform: `translate(-50%,-50%) translate(${ORBIT_RX}px,${ORBIT_RY*0.4}px)` }}>
-          <Rocket />
-        </div>
-      ) : (
-        <div ref={rocketRef} className="absolute left-1/2 z-30 will-change-transform" style={{ top: MOON_ANCHOR, transform: INITIAL_ROCKET_TRANSFORM }}>
-          <Rocket />
-        </div>
-      )}
-    </div>
+        {/* ── cat rocket ── */}
+        {reduce ? (
+          <div className="absolute left-1/2 z-30" style={{ top: MOON_ANCHOR, transform: `translate(-50%,-50%) translate(${ORBIT_RX}px,${ORBIT_RY*0.4}px)` }}>
+            <Rocket />
+          </div>
+        ) : (
+          <div ref={rocketRef} className="absolute left-1/2 z-30 will-change-transform" style={{ top: MOON_ANCHOR, transform: INITIAL_ROCKET_TRANSFORM }}>
+            <Rocket />
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
@@ -732,7 +732,7 @@ export default function SlideShare({
       <Stars />
       <ChapterHeadingAnchor n={8} title="Your Planet" />
 
-<div className="relative z-10 grid grid-cols-1 items-start gap-8 px-4 pb-6 pt-16 lg:min-h-screen lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
+<div className="relative z-10 grid grid-cols-1 items-start gap-8 px-4 pb-6 pt-12 lg:min-h-screen lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
         {/* LEFT — cat rocket bobbing */}
         <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
           <motion.div className="relative" animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
@@ -754,7 +754,6 @@ export default function SlideShare({
         >
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
-            <MobilePlanet color={palette.a} />
           </div>
           <SlideCard ref={cardRef} accentColor={palette.a} sizeStyle={{ width: "min(405px, 92vw)", height: "min(610px, 85vh)" }}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">

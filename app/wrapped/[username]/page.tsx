@@ -409,7 +409,7 @@ export default function WrappedPage() {
 
       {/* slide */}
       {/* mobile: inset-x-0 top-0 (no bottom) so height = content; progress bar flows right below; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 z-10 flex flex-col lg:inset-0 lg:block"
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:inset-0 lg:block"
         style={portraitScale !== 1 ? {
           transformOrigin: "center center",
           transform: `scale(${portraitScale})`,

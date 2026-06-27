@@ -34,6 +34,14 @@ body {
   .hero-desktop { display: block; }
 }
 
+/* Page-level mobile/desktop split — same breakpoint as hero scene. */
+.home-mobile { display: block; }
+.home-desktop { display: none; }
+@media (min-width: 1024px) {
+  .home-mobile { display: none; }
+  .home-desktop { display: block; }
+}
+
 /* WorldCup slides use the original pawCup scenes, but the live app card data.
    Each WC slide's center-card div carries data-wc-center-card so CSS can target
    it without fragile Tailwind class-string matching. */

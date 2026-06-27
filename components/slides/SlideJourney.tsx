@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
-import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
+import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -209,7 +209,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />
       <ChapterHeadingAnchor n={5} title="Refuel Stop" />
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-16 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
         {/* LEFT — gas station cat */}
         <div className="hidden h-[80vh] lg:block">
           <GasStationCat />
@@ -219,7 +219,6 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
         <div className="flex flex-col items-center justify-center">
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={5} title="Refuel Stop" />
-            <MobilePlanet color="#ffb627" />
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             className="w-[min(380px,92vw)]">
@@ -328,7 +327,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
           </motion.div>
 
           {/* mobile: animated scene below the card (scroll to reveal) */}
-          <div className="mt-6 h-[380px] w-[min(380px,92vw)] lg:hidden">
+          <div className="hidden">
             <GasStationCat />
           </div>
         </div>

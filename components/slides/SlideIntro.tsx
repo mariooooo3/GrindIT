@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
-import { PlanetStage, SlideShell, MobilePlanet, Rocket } from "@/components/wrapped/shared";
+import { PlanetStage, SlideShell, Rocket } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -378,12 +378,7 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   return (
     <SlideShell
       overlay={<ChapterHeadingAnchor n={1} title="Liftoff" />}
-      mobileHeader={
-        <>
-          <ChapterHeadingMobile n={1} title="Liftoff" />
-          <MobilePlanet color="#cbd5e1" />
-        </>
-      }
+      mobileHeader={<ChapterHeadingMobile n={1} title="Liftoff" />}
       mobileFooter={
         introVibeLine ? (
           <div className="mt-3 flex justify-center px-4">

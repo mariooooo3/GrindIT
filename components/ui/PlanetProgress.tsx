@@ -155,7 +155,7 @@ export default function PlanetProgress({
   const travelColor = colors[current] ?? "#a78bfa";
 
   return (
-    <nav aria-label="Wrapped journey" className="relative flex h-8 w-full items-center sm:h-10">
+    <nav aria-label="Wrapped journey" className="relative flex h-12 w-full items-center sm:h-10">
       {/* base path — the journey still ahead */}
       <div className="pointer-events-none absolute left-[24px] right-[24px] top-1/2 -translate-y-1/2 border-t border-dashed border-white/15 sm:left-[72px] sm:right-[72px]" />
       {/* traveled path — glowing trail filling up to the current planet */}
@@ -179,12 +179,12 @@ export default function PlanetProgress({
             onClick={() => onNavigate(i)}
             aria-label={`Go to planet ${i + 1}`}
             aria-current={current === i ? "step" : undefined}
-            className="relative z-10 grid h-8 w-8 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="relative z-10 grid h-10 w-10 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:h-8 sm:w-8"
           >
             <motion.span
               animate={current === i ? { scale: [1, 1.35, 1] } : { scale: 1 }}
               transition={current === i ? { repeat: Infinity, duration: 1.8 } : { duration: 0.2 }}
-              className="block h-[11px] w-[11px] rounded-full border border-white/20 sm:h-[18px] sm:w-[18px]"
+              className="block h-[16px] w-[16px] rounded-full border border-white/20 sm:h-[18px] sm:w-[18px]"
               style={{
                 background: colors[i] ?? "rgba(255,255,255,0.4)",
                 opacity: i <= current ? 1 : 0.35,
@@ -196,7 +196,7 @@ export default function PlanetProgress({
 
         <div className="pointer-events-none absolute left-[27px] right-[27px] top-0 sm:left-[88px] sm:right-[88px]">
           <motion.div
-            className="absolute -top-3 z-20 h-9 w-9 sm:-top-5 sm:h-[54px] sm:w-[54px]"
+            className="absolute -top-4 z-20 h-12 w-12 sm:-top-5 sm:h-[54px] sm:w-[54px]"
             animate={{ left: `${progress}%`, rotate: current % 2 ? 6 : -6 }}
             transition={{ type: "tween", duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
             style={{ x: "-50%", marginLeft: biasPx }}
