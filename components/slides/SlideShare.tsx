@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRef, useMemo, useSyncExternalStore } from "react";
+import { useRef, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { PlanetStage, Stars, MobilePlanet, RocketTailNodes } from "@/components/wrapped/shared";
@@ -9,6 +9,7 @@ import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 import type { ArchetypeId, WrappedProfile } from "@/types/wrapped";
 
 
@@ -663,6 +664,7 @@ export default function SlideShare({
   const ageLabel = formatGitHubAge(profile.metrics.githubAge);
   const wrappedLabel = formatWrappedLabel(profile.period.type);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [openBadge, setOpenBadge] = useState<{ badge: PopoverBadge; rect: DOMRect } | null>(null);
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -806,11 +808,15 @@ export default function SlideShare({
             <p className="mt-2 whitespace-pre-line text-sm italic leading-relaxed text-zinc-300">{narrativeText}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {badgesEarned.map((b) => (
-                <span key={b.id} className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm text-zinc-100 whitespace-nowrap"
+                <button key={b.id} type="button"
+                  onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
+                  aria-haspopup="dialog"
+                  aria-label={`${b.label} badge — show what it means`}
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44` }}>
                   <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
                   {b.label}
-                </span>
+                </button>
               ))}
             </div>
             <div className="mt-3 grid grid-cols-4 gap-1.5">
@@ -851,6 +857,11 @@ export default function SlideShare({
       </div>
 
     </main>
+    <BadgePopover
+      badge={openBadge?.badge ?? null}
+      anchor={openBadge?.rect ?? null}
+      onClose={() => setOpenBadge(null)}
+    />
     {mounted && showStartOver && createPortal(
       <motion.div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
         <button onClick={startOver} className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white">
