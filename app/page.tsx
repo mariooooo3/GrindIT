@@ -502,7 +502,7 @@ function StarPixelText({ onConnect, isLoggedIn }: { onConnect: () => void; isLog
   return (
     <div className="flex flex-col items-start gap-4 select-none">
       <style>{`@keyframes sf{0%,100%{opacity:.4}50%{opacity:1}}`}</style>
-      <div className="relative cursor-pointer" style={{ width: 280, height: 108 }}
+      <div className={`relative${!isLoggedIn ? " cursor-pointer" : ""}`} style={{ width: 280, height: 108 }}
         onClick={!isLoggedIn ? onConnect : undefined}
       >
         {PIXEL_STARS.map((st, i) => {
