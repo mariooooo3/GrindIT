@@ -382,17 +382,14 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
         <>
           <ChapterHeadingMobile n={1} title="Liftoff" />
           <MobilePlanet color="#cbd5e1" />
-          {introVibeLine && (
-            <div className="mb-2 flex justify-center">
-              <TransmissionLine message={introVibeLine} />
-            </div>
-          )}
         </>
       }
       mobileFooter={
-        <div className="relative mt-2 h-[300px] w-[min(380px,92vw)]">
-          <Rocket />
-        </div>
+        introVibeLine ? (
+          <div className="mt-3 flex justify-center px-4">
+            <TransmissionLine message={introVibeLine} />
+          </div>
+        ) : undefined
       }
       center={<ProfileCard flat={cardFlat} ageLabel={ageLabel} wrappedLabel={wrappedLabel} />}
       right={

@@ -102,7 +102,7 @@ function normalizeSlideState(state: SlideState, slides: SlideId[]): SlideState {
   };
 }
 
-// â”€â”€ loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ loading skeleton â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 function LoadingScreen() {
   // Pick one funny line per mount and keep it stable for the whole screen.
   // suppressHydrationWarning: this client component is also SSR'd, so the
@@ -125,7 +125,7 @@ function LoadingScreen() {
   );
 }
 
-// â”€â”€ narrative loading indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ narrative loading indicator â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 // Mounts only while the optional Groq narrative is generating, so the random
 // start + rotation reset each session and the interval is cleaned up on unmount.
 function NarrativeLoadingIndicator() {
@@ -143,7 +143,7 @@ function NarrativeLoadingIndicator() {
   );
 }
 
-// â”€â”€ close/x icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ close/x icon â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 function CloseIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
@@ -152,7 +152,7 @@ function CloseIcon() {
   );
 }
 
-// â”€â”€ share icon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ share icon â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 function ShareIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -162,11 +162,11 @@ function ShareIcon() {
   );
 }
 
-// â”€â”€ chevron icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ chevron icons â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 function ChevronLeft()  { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 function ChevronRight() { return <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden><path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 
-// â”€â”€ main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ main â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 export default function WrappedPage() {
   const router = useRouter();
   const { worldCup, ready, animate } = useTheme();
@@ -357,13 +357,8 @@ export default function WrappedPage() {
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden"
       style={{ background: "var(--space-deep)" }}
-      onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
-      onTouchEnd={e => {
-        const d = e.changedTouches[0].clientX - touchStartX.current;
-        if (d > 50) goPrev(); else if (d < -50) goNext();
-      }}
     >
-      {/* world cup decorative layer â€” renders behind all content */}
+      {/* world cup decorative layer â€" renders behind all content */}
       {/* ambient glow */}
       <div className={`pointer-events-none fixed inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && worldCup ? "opacity-0" : "opacity-100"}`}
         style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.12) 0%,transparent 65%)" }} />
@@ -371,19 +366,22 @@ export default function WrappedPage() {
       <div className={`pointer-events-none fixed inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && worldCup ? "opacity-0" : "opacity-[0.028]"}`}
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
-      {/* â”€â”€ top bar â”€â”€ */}
+      {/* â"€â"€ top bar â"€â"€ */}
       <div className="fixed inset-x-0 top-0 z-40 px-3 pt-3 pb-2 sm:px-5 sm:pt-4 sm:pb-3">
         <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* prev button */}
+          {/* prev button — desktop only */}
           <button onClick={goPrev}
-            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
+            className={`hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
             <ChevronLeft />
           </button>
 
-          {/* planet journey bar */}
-          <div className="flex-1">
+          {/* planet journey bar — desktop only */}
+          <div className="hidden lg:block flex-1">
             <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
           </div>
+
+          {/* mobile spacer */}
+          <div className="flex-1 lg:hidden" />
 
           {/* share button */}
           <button onClick={() => setShareOpen(true)} aria-label="Share this slide"
@@ -409,8 +407,9 @@ export default function WrappedPage() {
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
       </div>
 
-      {/* â”€â”€ slide â”€â”€ */}
-      <div ref={slideAreaRef} className="absolute inset-0 z-10"
+      {/* slide */}
+      {/* mobile: inset-x-0 top-0 (no bottom) so height = content; progress bar flows right below; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 z-10 flex flex-col lg:inset-0 lg:block"
         style={portraitScale !== 1 ? {
           transformOrigin: "center center",
           transform: `scale(${portraitScale})`,
@@ -419,48 +418,64 @@ export default function WrappedPage() {
           top: `${-(100 / portraitScale - 100) / 2}%`,
           left: `${-(100 / portraitScale - 100) / 2}%`,
         } : undefined}
+        onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={e => {
+          const d = e.changedTouches[0].clientX - touchStartX.current;
+          if (d > 50) goPrev(); else if (d < -50) goNext();
+        }}
       >
-        {/* capture-only logo — covered on screen by real top bar (z-40), visible in screenshot */}
+        {/* capture-only logo — desktop only; on mobile the real top-bar logo is used */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}
-          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] z-20 w-12 h-12 rounded-full"
+          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] z-20 w-12 h-12 rounded-full hidden lg:block"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
         <SlideWatermark />
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div key={normalizedSlideState.current} custom={direction}
-            variants={slideVariants} initial="enter" animate="center" exit="exit"
-            className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain lg:overflow-hidden">
-            <SlideErrorBoundary>
-            <div className="relative h-full w-full overflow-hidden">
-              <div
-                className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-                  ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
-                }`}
-              >
-                {normalizedSlideState.current === "share"
-                  ? <SlideShare profile={profile} showStartOver={!(ready && worldCup)} />
-                  : <CurrentSlide profile={profile} />}
-              </div>
-              <div
-                className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-                  ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
-                }`}
-              >
-                <div className="wc-pawcup-scene absolute inset-0">
-                  <WorldCupSlide index={normalizedSlideState.index} profile={profile} wcSpeech={wcSpeech} wcSpeechLoading={wcSpeechLoading} />
+        {/* slide content — natural height on mobile so progress bar flows right below; absolute inset-0 on desktop */}
+        <div className="overflow-hidden lg:absolute lg:inset-0">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div key={normalizedSlideState.current} custom={direction}
+              variants={slideVariants} initial="enter" animate="center" exit="exit"
+              className="w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:overflow-hidden">
+              <SlideErrorBoundary>
+              {/* on mobile: relative w-full so height comes from content; on desktop: h-full for absolute overlay system */}
+              <div className="relative w-full overflow-hidden lg:h-full">
+                {/* space theme — relative on mobile (gives height), absolute inset-0 on desktop */}
+                <div
+                  className={`relative w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                    ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+                  }`}
+                >
+                  {normalizedSlideState.current === "share"
+                    ? <SlideShare profile={profile} showStartOver={!(ready && worldCup)} />
+                    : <CurrentSlide profile={profile} />}
                 </div>
-                <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={normalizedSlideState.current}>
-                  {normalizedSlideState.current === "archetype"
-                    ? <SlideArchetype profile={profile} sparse />
-                    : normalizedSlideState.current === "share"
-                      ? <SlideShare profile={profile} showStartOver={false} />
-                      : <CurrentSlide profile={profile} />}
+                {/* WC theme — absolute overlay over space theme (works on both mobile and desktop) */}
+                <div
+                  className={`absolute inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                    ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+                  }`}
+                >
+                  <div className="wc-pawcup-scene absolute inset-0">
+                    <WorldCupSlide index={normalizedSlideState.index} profile={profile} wcSpeech={wcSpeech} wcSpeechLoading={wcSpeechLoading} />
+                  </div>
+                  <div className="wc-original-card-layer absolute inset-0 z-30" data-wc-slide={normalizedSlideState.current}>
+                    {normalizedSlideState.current === "archetype"
+                      ? <SlideArchetype profile={profile} sparse />
+                      : normalizedSlideState.current === "share"
+                        ? <SlideShare profile={profile} showStartOver={false} />
+                        : <CurrentSlide profile={profile} />}
+                  </div>
                 </div>
               </div>
-            </div>
-            </SlideErrorBoundary>
-          </motion.div>
-        </AnimatePresence>
+              </SlideErrorBoundary>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* mobile progress bar — flex-none, flows naturally below slide content */}
+        <div className="pointer-events-auto flex-none lg:hidden px-4 py-2.5">
+          <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
+        </div>
       </div>
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
@@ -477,7 +492,7 @@ export default function WrappedPage() {
         </button>
       </div>
 
-      {/* â”€â”€ narrative loading indicator â”€â”€ */}
+      {/* â"€â"€ narrative loading indicator â"€â"€ */}
       {narrativeLoading && (normalizedSlideState.current === "archetype" || normalizedSlideState.current === "share") && (
         <NarrativeLoadingIndicator />
       )}

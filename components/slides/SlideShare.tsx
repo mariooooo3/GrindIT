@@ -732,7 +732,7 @@ export default function SlideShare({
       <Stars />
       <ChapterHeadingAnchor n={8} title="Your Planet" />
 
-<div className="relative z-10 grid min-h-screen grid-cols-1 items-start gap-8 px-4 pb-16 pt-16 lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
+<div className="relative z-10 grid grid-cols-1 items-start gap-8 px-4 pb-6 pt-16 lg:min-h-screen lg:items-center lg:gap-4 lg:px-8 lg:py-16 lg:grid-cols-3">
         {/* LEFT — cat rocket bobbing */}
         <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
           <motion.div className="relative" animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
@@ -828,17 +828,35 @@ export default function SlideShare({
             </div>
           </SlideCard>
 
-          {/* mobile: animated scene below the card (scroll to reveal) */}
-          <div className="mt-6 flex justify-center lg:hidden">
-            <motion.div className="relative w-[min(220px,60vw)]"
-              animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/cat-rocket.png" alt="Cat astronaut" width={220} height={220}
-                className="block w-full select-none object-contain drop-shadow-[0_0_30px_rgba(167,139,250,0.35)]"
-                draggable={false} />
-              <RocketTailNodes scale={1.3} />
-            </motion.div>
-          </div>
+          {/* mobile: planet caption below the card */}
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 1.2 }}
+            className="mt-4 w-[min(405px,92vw)] lg:hidden"
+          >
+            <div className="rounded-[1.5rem] p-[2px]" style={{
+              background: `${palette.a}80`,
+              boxShadow: `0 0 28px ${palette.a}70, 0 0 56px ${palette.a}38, 0 10px 44px rgba(0,0,0,0.55)`,
+            }}>
+              <div className="rounded-[calc(1.5rem-2px)] px-4 py-3 text-center" style={{
+                background: `linear-gradient(160deg, rgba(5,3,18,0.97), rgba(10,6,26,0.95))`,
+                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.07)`,
+              }}>
+                <p className="text-[9px] uppercase tracking-[0.28em]" style={{ color: palette.a }}>
+                  {ARCHETYPE_PLANET_TYPES[profile.archetypeBlend.primary.id] ?? "Planet"}
+                </p>
+                <p className="mt-0.5 text-base italic" style={{ color: "rgba(255,255,255,0.92)", fontFamily: "serif" }}>@{flat.username}</p>
+                {shareCaption && (
+                  <>
+                    <div className="mx-auto my-2 h-px w-8"
+                      style={{ background: `linear-gradient(90deg, transparent, ${palette.a}75, transparent)` }} />
+                    <p className="text-[11px] leading-snug" style={{ color: "rgba(212,212,228,0.80)" }}>{shareCaption}</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* RIGHT — planet */}
