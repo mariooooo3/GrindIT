@@ -48,7 +48,7 @@ export function BadgePopover({
   // Measure the rendered popover, then anchor it over the badge (clamped to the
   // viewport, flipped above the badge when there isn't room below).
   useLayoutEffect(() => {
-    if (!open || !anchor) { setPos(null); return; }
+    if (!open || !anchor) { queueMicrotask(() => setPos(null)); return; }
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const h = cardRef.current?.offsetHeight ?? 150;

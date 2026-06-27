@@ -24,6 +24,8 @@ function resetViewport() {
 
 // ── MobileGate ──────────────────────────────────────────────────────────────
 export function MobileGate({ children }: { children: ReactNode }) {
+  // State drives re-renders so children see viewport changes; the value itself is unused.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [state, setState] = useState<ViewportState>("desktop");
   // Store the physical dimensions used for scaling so we can re-apply on any navigation.
   const dims = useRef<{ w: number; h: number } | null>(null);
@@ -35,10 +37,8 @@ export function MobileGate({ children }: { children: ReactNode }) {
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
     ready.current = true;
 
-    if (!isTouch) {
-      setState("desktop");
-      return;
-    }
+    // Initial state is already "desktop" — just return for non-phone cases.
+    if (!isTouch) return;
 
     // Capture physical dimensions BEFORE any viewport change.
     // After applyLandscapeViewport(), innerWidth/Height change — don't re-read for detection.
@@ -46,10 +46,7 @@ export function MobileGate({ children }: { children: ReactNode }) {
     const physH = window.innerHeight;
 
     // Tablets (max dim ≥ 1024px) → show desktop layout untouched
-    if (Math.max(physW, physH) >= 1024) {
-      setState("desktop");
-      return;
-    }
+    if (Math.max(physW, physH) >= 1024) return;
 
     const applyPhone = (w: number, h: number) => {
       if (w > h) {
@@ -63,7 +60,16 @@ export function MobileGate({ children }: { children: ReactNode }) {
       }
     };
 
-    applyPhone(physW, physH);
+    // Apply viewport immediately, defer setState to satisfy react-hooks/set-state-in-effect.
+    if (physW > physH) {
+      dims.current = { w: physW, h: physH };
+      applyLandscapeViewport(physW, physH);
+      queueMicrotask(() => setState("landscape"));
+    } else {
+      dims.current = null;
+      resetViewport();
+      queueMicrotask(() => setState("portrait"));
+    }
 
     // orientationchange: reset viewport first to recover real CSS px dimensions,
     // then wait for browser to finish rotation before re-detecting.

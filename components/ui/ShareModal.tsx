@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, type RefObject } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { captureElement, captureDesktopElement } from "@/lib/captureElement";
@@ -64,13 +64,12 @@ export default function ShareModal({
   const [preview,    setPreview]    = useState<string | null>(null);
   const [toast,      setToast]      = useState<string | null>(null);
   const [failed,     setFailed]     = useState(false);
-  const [mounted,    setMounted]    = useState(false);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [captureKey, setCaptureKey] = useState(0);
   const blobRef = useRef<Blob | null>(null);
 
   // inject CSS once
   useEffect(() => {
-    setMounted(true);
     const id = "__share-modal-css";
     if (document.getElementById(id)) return;
     const s = document.createElement("style");

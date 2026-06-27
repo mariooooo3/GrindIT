@@ -44,14 +44,10 @@ function subscribe(callback: () => void) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const worldCup = useSyncExternalStore(subscribe, getStoredWorldCup, () => false);
-  const [ready, setReady] = useState(false);
+  // True on client, false on server — replaces the old useEffect+setState pattern
+  // to satisfy react-hooks/set-state-in-effect.
+  const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [animate, setAnimate] = useState(false);
-
-  // Flip to the real client value as soon as hydration completes — before this,
-  // consumers should render the theme-neutral state, never the SSR-default guess.
-  useEffect(() => {
-    setReady(true);
-  }, []);
 
   // Enable opacity transitions only one frame after `ready`, so the first correct
   // reveal is an instant swap (no fade-in from the wrong theme). Later, user-initiated

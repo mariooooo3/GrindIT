@@ -276,7 +276,7 @@ export default function WrappedPage() {
   // theme matches what was already fetched (guards against the hydration correction
   // false→true firing an unnecessary second request on page refresh).
   const profileRef = useRef<WrappedProfile | null>(null);
-  profileRef.current = profile;
+  useEffect(() => { profileRef.current = profile; }, [profile]);
   const didInitTheme = useRef(false);
   useEffect(() => {
     if (!didInitTheme.current) { didInitTheme.current = true; return; }
