@@ -604,9 +604,9 @@ function HomePageInner() {
           }`}
         >
           <SpaceBackground />
-          {/* CSS-based switch: portrait phones (<1024px) get MobileHeroScene, desktop/landscape get HeroScene */}
-          <div className="block lg:hidden"><MobileHeroScene /></div>
-          <div className="hidden lg:block"><HeroScene /></div>
+          {/* Raw CSS switch — see globals.css .hero-mobile / .hero-desktop */}
+          <div className="hero-mobile"><MobileHeroScene /></div>
+          <div className="hero-desktop"><HeroScene /></div>
         </div>
 
         {/* top fade — covers nav area */}
