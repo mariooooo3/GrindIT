@@ -170,7 +170,7 @@ export function MobileHeroScene() {
   }, [reduce]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 isolate overflow-hidden">
+    <div className="pointer-events-none absolute inset-0" style={{ transform: "translateZ(0)" }}>
       {/* planet soft glow */}
       <div
         className="absolute left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full"
