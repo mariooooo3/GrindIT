@@ -9,6 +9,7 @@ import { isValidGitHubUsername } from "@/lib/validation";
 import { LOADING_MESSAGES, pickRandom } from "@/lib/loadingMessages";
 import AuthButton from "@/components/ui/AuthButton";
 import { HeroScene } from "@/components/HeroScene";
+import { MobileHeroScene } from "@/components/MobileHeroScene";
 import SpaceBackground from "@/components/SpaceBackground";
 import { useTheme } from "@/lib/theme-context";
 import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
@@ -307,22 +308,46 @@ function ThemeSwitch() {
 function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
-      <div className="mx-auto max-w-6xl px-3 pt-4 pointer-events-auto sm:px-5 sm:pt-5">
+      <div className="mx-auto max-w-6xl px-3 pt-3 pointer-events-auto sm:px-5 sm:pt-5">
+        {/* mobile-only tagline bar — above the main nav pill */}
+        <div
+          className="mb-1.5 flex items-center justify-between rounded-full border border-white/[0.07] bg-black/40 px-4 py-1.5 lg:hidden"
+          style={{ backdropFilter: "blur(20px) saturate(1.4)" }}
+        >
+          <span className="text-[13px] font-semibold tracking-[-0.01em] text-white/90">
+            Your GitHub story,{" "}
+            <span className="bg-clip-text text-transparent font-bold" style={{ backgroundImage: "linear-gradient(108deg,var(--silver),var(--violet-glow) 60%,var(--commit-green))" }}>
+              unwrapped.
+            </span>
+          </span>
+          <a
+            href="#features"
+            onClick={(e) => {
+              e.preventDefault();
+              const el = document.getElementById("features");
+              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + 20, behavior: "smooth" });
+              window.history.pushState(null, "", "#features");
+            }}
+            className="pointer-events-auto ml-3 shrink-0 rounded-full border border-violet-300/35 bg-violet-400/10 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-violet-200/90 transition-colors hover:bg-violet-400/20 hover:text-white"
+          >
+            How it works
+          </a>
+        </div>
         {/* floating glass pill */}
         <div className="relative flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
-          <Link href="/" className="relative z-10 flex items-center gap-1.5 sm:gap-2">
-            <div className="relative h-11 w-11 shrink-0 sm:h-[72px] sm:w-[72px]">
+          <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
+            <div className="relative h-8 w-8 shrink-0 sm:h-11 sm:w-11">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
-                className="h-11 w-11 rounded-xl object-cover select-none sm:h-[72px] sm:w-[72px] sm:rounded-2xl"
+                className="h-8 w-8 rounded-lg object-cover select-none sm:h-11 sm:w-11 sm:rounded-xl"
                 draggable={false} />
               <div className="hidden sm:block">
                 <CommitNodes />
               </div>
             </div>
-            <span className="text-[22px] font-black tracking-tight" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
+            <span className="text-[17px] font-black tracking-tight sm:text-[22px]" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
               <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
             </span>
           </Link>
@@ -584,7 +609,9 @@ function HomePageInner() {
           }`}
         >
           <SpaceBackground />
-          <HeroScene />
+          {/* Raw CSS switch — see globals.css .hero-mobile / .hero-desktop */}
+          <div className="hero-mobile"><MobileHeroScene /></div>
+          <div className="hero-desktop"><HeroScene /></div>
         </div>
 
         {/* top fade — covers nav area */}
@@ -593,7 +620,7 @@ function HomePageInner() {
 
         {/* planets landing logo — above top fade, same visibility as planets theme */}
         <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
-          <div className="flex items-center px-6 pt-9">
+          <div className="flex items-center px-6 pt-[116px] sm:pt-9">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
               style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
@@ -698,7 +725,7 @@ function HomePageInner() {
         <div className="relative z-10 mx-auto w-full max-w-xl px-5">
           <motion.div initial={{ opacity: 0, y: 14, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.2 }}
-            className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-5 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
+            className="relative flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/50 px-3 py-2 sm:px-5 sm:py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)]"
             style={{ backdropFilter: "blur(20px) saturate(1.6)" }}
           >
             <p className="text-center text-[12px] font-bold leading-snug text-zinc-200">
@@ -844,7 +871,7 @@ function HomePageInner() {
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════ */}
       <section
         id="features"
-        className="relative scroll-mt-28 px-5 py-32 transition-colors duration-700"
+        className="relative scroll-mt-28 px-5 py-12 md:py-32 transition-colors duration-700"
         style={{
           background: worldCup
             ? "linear-gradient(180deg, rgba(35,4,60,0.98) 0%, rgba(20,3,40,0.96) 22%, var(--space-deep) 68%)"
@@ -864,8 +891,8 @@ function HomePageInner() {
             viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE }}>
 
             {/* section title — outside the card */}
-            <div className="mb-10 text-center">
-              <h2 className="text-[32px] font-bold tracking-[-0.04em] text-white md:text-[40px]">
+            <div className="mb-6 text-center md:mb-10">
+              <h2 className="text-[26px] font-bold tracking-[-0.04em] text-white md:text-[40px]">
                 How it{" "}
                 <span className="bg-clip-text text-transparent"
                   style={{ backgroundImage: "linear-gradient(108deg, var(--violet-glow), var(--commit-green))" }}>

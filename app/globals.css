@@ -22,6 +22,15 @@ body {
   color: var(--foreground);
 }
 
+/* Hero scene switching: MobileHeroScene on phones, HeroScene on desktop/landscape.
+   Uses raw CSS media queries (not Tailwind) so it works reliably after OAuth redirects. */
+.hero-mobile { display: block; }
+.hero-desktop { display: none; }
+@media (min-width: 1024px) {
+  .hero-mobile { display: none; }
+  .hero-desktop { display: block; }
+}
+
 /* WorldCup slides use the original pawCup scenes, but the live app card data.
    Each WC slide's center-card div carries data-wc-center-card so CSS can target
    it without fragile Tailwind class-string matching. */
