@@ -378,8 +378,8 @@ function Nav() {
               </a>
             </div>
           </div>
-          {/* right: auth */}
-          <div className="relative z-10 flex flex-col items-center gap-1">
+          {/* right: auth — no z-index so dropdown z-50 escapes to header stacking context */}
+          <div className="relative flex flex-col items-center gap-1">
             <AuthButton />
             <div className="hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:flex">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
