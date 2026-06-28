@@ -389,7 +389,7 @@ export default function WrappedPage() {
           onClick={() => router.push("/")}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
           width={48} height={48}
-          className="absolute left-2 top-[4px] sm:left-4 sm:top-[8px] w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="absolute left-2 top-3 sm:left-4 sm:top-4 w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
       </div>
 
@@ -405,7 +405,7 @@ export default function WrappedPage() {
         {/* capture-only logo — desktop only; on mobile the real top-bar logo is used */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}
-          className="pointer-events-none absolute left-2 top-[4px] sm:left-4 sm:top-[8px] z-20 w-12 h-12 rounded-full hidden lg:block"
+          className="pointer-events-none absolute left-2 top-3 sm:left-4 sm:top-4 z-20 w-12 h-12 rounded-full hidden lg:block"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
         <SlideWatermark />
         {/* slide content — flex-1 min-h-0 on mobile so it fills the remaining space after the progress bar; absolute inset-0 on desktop */}
@@ -455,6 +455,9 @@ export default function WrappedPage() {
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
       </div>
+
+      {/* safe-area fill — covers the gap below 100dvh on iOS (home indicator zone) */}
+      <div className="fixed bottom-0 inset-x-0 z-50 lg:hidden" style={{ height: "env(safe-area-inset-bottom, 0px)", background: "#080612" }} />
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
       <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2">
