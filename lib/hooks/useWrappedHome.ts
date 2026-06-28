@@ -74,10 +74,14 @@ export function useWrappedHome() {
       if (!analyzeRes.ok) throw new Error("Analysis failed");
       const profile = await analyzeRes.json();
       sessionStorage.setItem("wrappedProfile", JSON.stringify({ ...profile, tone }));
+      // Keep `loading` true through the navigation: window.location.href triggers a
+      // full-page load, and the slides route shows its own LoadingScreen until the
+      // profile is read. Resetting loading here would briefly hide the "generating"
+      // message before the browser unloads, causing a visible flicker. We let the
+      // new page replace the overlay instead — it's removed only once off-screen.
       window.location.href = `/wrapped/${encodeURIComponent(username.trim())}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
       setLoading(false);
     }
   }, [username, periodType, tone, loading, isLoggedIn, usernameValid]);
