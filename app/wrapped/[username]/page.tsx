@@ -408,8 +408,8 @@ export default function WrappedPage() {
       </div>
 
       {/* slide */}
-      {/* mobile: inset-x-0 top-0 (no bottom) so height = content; progress bar flows right below; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:inset-0 lg:block"
+      {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
         style={portraitScale !== 1 ? {
           transformOrigin: "center center",
           transform: `scale(${portraitScale})`,
@@ -430,12 +430,12 @@ export default function WrappedPage() {
           className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] z-20 w-12 h-12 rounded-full hidden lg:block"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
         <SlideWatermark />
-        {/* slide content — natural height on mobile so progress bar flows right below; absolute inset-0 on desktop */}
-        <div className="overflow-hidden lg:absolute lg:inset-0">
+        {/* slide content — flex-1 min-h-0 on mobile so it fills the remaining space after the progress bar; absolute inset-0 on desktop */}
+        <div className="flex-1 min-h-0 overflow-hidden lg:absolute lg:inset-0">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div key={normalizedSlideState.current} custom={direction}
               variants={slideVariants} initial="enter" animate="center" exit="exit"
-              className="w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:overflow-hidden">
+              className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:h-auto lg:overflow-hidden">
               <SlideErrorBoundary>
               {/* on mobile: relative w-full so height comes from content; on desktop: h-full for absolute overlay system */}
               <div className="relative w-full overflow-hidden lg:h-full">
