@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MobileHeroScene } from "@/components/MobileHeroScene";
 import SpaceBackground from "@/components/SpaceBackground";
 import AuthButton from "@/components/ui/AuthButton";
-import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
+import WorldCupMobileBackground from "@/components/WorldCupMobileBackground";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 import { ThemeSwitch } from "./_theme-switch";
 import { HeroCard } from "./_hero-card";
@@ -82,32 +82,34 @@ export function MobileHomePage() {
       <MobileNav />
 
       <section className="relative flex flex-col items-center justify-end pb-4 pt-20" style={{ height: "var(--hero-height, 100svh)" }}>
-        {/* WorldCup overlay */}
-        <div
-          className={`absolute inset-0 z-[1] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-            ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
-        >
-          <WorldCupLanding isLoggedIn={false} />
+        {/* Theme background — switches between space and WorldCup */}
+        <div className="absolute inset-0">
+          <div
+            className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+              ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+            }`}
+            style={{ transitionDelay: ready && !worldCup && !animate ? "60ms" : "0ms" }}
+          >
+            <SpaceBackground />
+          </div>
+          <div
+            className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+              ready && worldCup ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
+          >
+            <WorldCupMobileBackground />
+          </div>
         </div>
 
-        {/* Space / mobile scene */}
-        <div
-          className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
-            ready && !worldCup ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
-          style={{ transitionDelay: ready && !worldCup && !animate ? "60ms" : "0ms" }}
-        >
-          <SpaceBackground />
-          <MobileHeroScene />
-        </div>
+        {/* Hero scene — space theme only */}
+        {!(ready && worldCup) && <MobileHeroScene />}
 
         {/* top fade */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36"
           style={{ background: "linear-gradient(to bottom,color-mix(in oklab,var(--space-deep) 85%,transparent),transparent)" }} />
 
         {/* landing logo */}
-        <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
+        <div className="pointer-events-none absolute top-0 left-0 right-0 z-[5]">
           <div className="flex items-center px-6 pt-[142px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
@@ -120,7 +122,7 @@ export function MobileHomePage() {
           className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-colors duration-700" : ""}`}
           style={{
             background: ready && worldCup
-              ? "linear-gradient(to top, rgba(35,4,60,0.98) 0%, rgba(45,5,80,0.88) 18%, rgba(70,20,130,0.50) 48%, rgba(100,40,170,0.18) 74%, transparent 100%)"
+              ? "linear-gradient(to top, rgba(6,14,8,0.98) 0%, rgba(8,16,10,0.90) 18%, rgba(10,22,12,0.55) 50%, rgba(12,28,14,0.18) 72%, transparent 100%)"
               : "linear-gradient(to top, rgba(26,8,45,0.98) 0%, rgba(26,8,45,0.90) 18%, rgba(54,20,86,0.55) 50%, rgba(74,24,112,0.18) 72%, transparent 100%)",
           }}
         />
