@@ -29,7 +29,6 @@ export function Stars({ count = 120 }: { count?: number }) {
             height: `${s.size}px`,
             opacity: s.opacity,
             animation: `twinkle-star ${s.duration}s ease-in-out ${s.delay}s infinite`,
-            willChange: "opacity",
             boxShadow: s.size > 1.4 ? "0 0 4px rgba(255,255,255,0.55)" : undefined,
           }}
         />
