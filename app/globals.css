@@ -89,14 +89,14 @@ body {
   transform: translateY(18px) !important;
 }
 
-.wc-original-card-layer[data-wc-slide="intro"] main > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+.wc-original-card-layer[data-wc-slide="intro"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="intro"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
   transform: translateY(10px) !important;
 }
-.wc-original-card-layer[data-wc-slide="archetype"] main > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+.wc-original-card-layer[data-wc-slide="archetype"] main > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer[data-wc-slide="archetype"] > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
   transform: translateY(20px) !important;
 }
 
@@ -138,9 +138,9 @@ body {
   display: none !important;
 }
 
-.wc-original-card-layer main > .relative.z-10.grid,
-.wc-original-card-layer > div > .relative.z-10.grid,
-.wc-original-card-layer > div > .relative.z-10.mx-auto.grid {
+.wc-original-card-layer main > .relative.z-10.lg\:grid,
+.wc-original-card-layer > div > .relative.z-10.lg\:grid,
+.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid {
   display: flex !important;
   min-height: 100dvh !important;
   height: 100dvh !important;
@@ -149,24 +149,24 @@ body {
   padding: 4rem 1rem 2rem !important;
 }
 
-.wc-original-card-layer main > .relative.z-10.grid > :not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.grid > :not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :not(:has([data-share-card])) {
+.wc-original-card-layer main > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.lg\:grid > :not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :not(:has([data-share-card])) {
   display: none !important;
 }
 
-.wc-original-card-layer main > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer > div > .relative.z-10.grid > :has([data-share-card]),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) {
+.wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) {
   display: flex !important;
   min-height: 0 !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-.wc-original-card-layer main > .relative.z-10.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
-.wc-original-card-layer > div > .relative.z-10.mx-auto.grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])) {
+.wc-original-card-layer main > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])),
+.wc-original-card-layer > div > .relative.z-10.mx-auto.lg\:grid > :has([data-share-card]) > :not([data-share-card]):not(:has([data-share-card])) {
   display: none !important;
 }
 
