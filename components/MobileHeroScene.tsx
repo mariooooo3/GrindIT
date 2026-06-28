@@ -112,7 +112,9 @@ function MobileRocket() {
         style={{ filter: "drop-shadow(0 0 28px rgba(190,160,255,0.75)) drop-shadow(0 20px 46px rgba(80,255,160,0.24))" }}
         draggable={false}
       />
-      <RocketCommitNodes />
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <RocketCommitNodes />
+      </div>
     </div>
   );
 }

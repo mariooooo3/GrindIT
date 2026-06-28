@@ -269,6 +269,12 @@ export default function WrappedPage() {
     }
   }, [worldCup, fetchNarrative, fetchWcSpeech]);
 
+  useEffect(() => {
+    const prev = document.body.style.background;
+    document.body.style.background = "#080612";
+    return () => { document.body.style.background = prev; };
+  }, []);
+
   const goNext = useCallback(() => {
     setSlideState(prev => {
       const currentState = normalizeSlideState(prev, activeSlides);
@@ -389,7 +395,7 @@ export default function WrappedPage() {
 
       {/* slide */}
       {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="fixed inset-0 z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:absolute lg:inset-0 lg:h-auto lg:block"
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
         onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={e => {
           const d = e.changedTouches[0].clientX - touchStartX.current;
