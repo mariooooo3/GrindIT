@@ -101,8 +101,14 @@ export function MobileHomePage() {
           </div>
         </div>
 
-        {/* Hero scene — space theme only */}
-        {!(ready && worldCup) && <MobileHeroScene />}
+        {/* Hero scene — space theme only, opacity-based to avoid bounding-box flash on mount */}
+        <div
+          className={`absolute inset-0 ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+            ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+        >
+          <MobileHeroScene />
+        </div>
 
         {/* top fade */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36"
@@ -117,14 +123,14 @@ export function MobileHomePage() {
           </div>
         </div>
 
-        {/* bottom fade */}
+        {/* bottom fade — two overlapping divs, each opacity-transitioned, avoids gradient flash */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%]"
+          style={{ background: "linear-gradient(to top, rgba(26,8,45,0.98) 0%, rgba(26,8,45,0.90) 18%, rgba(54,20,86,0.55) 50%, rgba(74,24,112,0.18) 72%, transparent 100%)" }} />
         <div
-          className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-colors duration-700" : ""}`}
-          style={{
-            background: ready && worldCup
-              ? "linear-gradient(to top, rgba(6,14,8,0.98) 0%, rgba(8,16,10,0.90) 18%, rgba(10,22,12,0.55) 50%, rgba(12,28,14,0.18) 72%, transparent 100%)"
-              : "linear-gradient(to top, rgba(26,8,45,0.98) 0%, rgba(26,8,45,0.90) 18%, rgba(54,20,86,0.55) 50%, rgba(74,24,112,0.18) 72%, transparent 100%)",
-          }}
+          className={`pointer-events-none absolute inset-x-0 bottom-0 h-[58%] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+            ready && worldCup ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ background: "linear-gradient(to top, rgba(6,14,8,0.98) 0%, rgba(8,16,10,0.90) 18%, rgba(10,22,12,0.55) 50%, rgba(12,28,14,0.18) 72%, transparent 100%)" }}
         />
 
         <HeroCard />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Image from "next/image";
 import stadium from "@/components/pawcup/assets/stadium.asset.json";
 import catMascot from "@/components/pawcup/assets/cat-mascot.asset.json";
 
@@ -72,13 +71,14 @@ export default function WorldCupMobileBackground() {
       {/* Cat mascot — centered, bottom, mobile-adapted */}
       <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 z-10"
         style={{ width: "min(75vw, 320px)" }}>
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={catMascot.url}
           alt=""
           width={1024}
           height={1024}
           className="w-full h-auto object-contain drop-shadow-[0_20px_32px_rgba(168,85,247,0.5)]"
-          unoptimized
+          draggable={false}
         />
       </div>
 
