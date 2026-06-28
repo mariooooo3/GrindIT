@@ -50,8 +50,9 @@ export default function RootLayout({
         <SessionProviderWrapper>
           <MobileGate>{children}</MobileGate>
         </SessionProviderWrapper>
-        <Analytics />
-        <SpeedInsights />
+        {/* debug=false silences the verbose dev-only console logs from both. */}
+        <Analytics debug={false} />
+        <SpeedInsights debug={false} />
       </body>
     </html>
   );

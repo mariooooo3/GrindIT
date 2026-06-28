@@ -11,12 +11,14 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  // va.vercel-scripts.com serves the Vercel Analytics + Speed Insights scripts.
+  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   // api.dicebear.com serves the fallback avatars used across the slides (P1-1).
   "img-src 'self' data: https://avatars.githubusercontent.com https://flagcdn.com https://api.dicebear.com",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws: wss:" : ""} https://avatars.githubusercontent.com https://flagcdn.com`,
+  // vitals.vercel-insights.com + va.vercel-scripts.com receive the analytics beacons.
+  `connect-src 'self'${isDev ? " ws: wss:" : ""} https://avatars.githubusercontent.com https://flagcdn.com https://va.vercel-scripts.com https://vitals.vercel-insights.com`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
