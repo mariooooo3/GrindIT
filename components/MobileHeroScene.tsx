@@ -95,6 +95,29 @@ function RocketCommitNodes() {
 function MobileRocket() {
   return (
     <div className="relative grid place-items-center" style={{ width: 88, height: 88 }}>
+      {/* Soft glow behind the rocket — radial gradients fade to transparent within
+          their own bounds, so (unlike a drop-shadow filter) they never create a
+          visible rectangular compositing-layer box on iOS. */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          width: 150,
+          height: 150,
+          background:
+            "radial-gradient(circle, rgba(190,160,255,0.55) 0%, rgba(190,160,255,0.18) 38%, transparent 68%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute left-1/2 rounded-full"
+        style={{
+          top: "78%",
+          width: 120,
+          height: 120,
+          transform: "translate(-50%, -10%)",
+          background:
+            "radial-gradient(circle, rgba(80,255,160,0.28) 0%, transparent 62%)",
+        }}
+      />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/cat-rocket.png"
@@ -102,7 +125,6 @@ function MobileRocket() {
         width={1024}
         height={1024}
         className="relative h-full w-full select-none object-contain"
-        style={{ filter: "drop-shadow(0 0 28px rgba(190,160,255,0.75)) drop-shadow(0 20px 46px rgba(80,255,160,0.24))" }}
         draggable={false}
       />
       <div className="pointer-events-none absolute inset-0 z-10">

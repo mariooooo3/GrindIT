@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { captureElement } from "@/lib/captureElement";
+import { captureElement, captureDesktopElement } from "@/lib/captureElement";
 
 type Scope = "card" | "slide";
 type ShareNav = Navigator & { canShare?: (d?: ShareData) => boolean; share?: (d: ShareData) => Promise<void> };
@@ -32,7 +32,28 @@ const ACTIONS = [
   { id: "linkedin", label: "LinkedIn",  accent: "#0a66c2", icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
 ] as const;
 
+// Funny render-flavoured copy, in the same spirit as the landing-page loader.
+const RENDER_MESSAGES = [
+  "Polishing your pixels...",
+  "Framing your masterpiece...",
+  "Bribing the GPU...",
+  "Summoning the screenshot gods...",
+  "Aligning every star...",
+  "Making it look expensive...",
+  "Adding a tasteful glow...",
+  "Convincing the card to pose...",
+  "Rendering at maximum smug...",
+  "Touching up your planet...",
+  "Negotiating with the pixels...",
+  "Applying main-character lighting...",
+] as const;
+
 function ScanLoader() {
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * RENDER_MESSAGES.length));
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % RENDER_MESSAGES.length), 1600);
+    return () => clearInterval(id);
+  }, []);
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden"
          style={{ background: "rgba(3,1,14,.9)" }}>
@@ -45,9 +66,21 @@ function ScanLoader() {
                style={{ background: "#7c3aed", animation: `sm-dot 1.5s ease-in-out ${i*0.18}s infinite` }} />
         ))}
       </div>
-      <span style={{ fontSize:9, letterSpacing:"0.28em", textTransform:"uppercase", color:"rgba(255,255,255,.18)" }}>
-        Rendering
-      </span>
+      <div className="h-4 overflow-hidden px-6 text-center">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={idx}
+            className="block"
+            style={{ fontSize:11, fontWeight:500, color:"rgba(196,181,253,.72)" }}
+            initial={{ opacity: 0, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -7 }}
+            transition={{ duration: 0.26, ease: SP }}
+          >
+            {RENDER_MESSAGES[idx]}
+          </motion.span>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -99,7 +132,13 @@ export default function ShareModal({
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     if (scope === "card") {
+      // Mobile: render the slide at desktop width in an off-screen iframe so the
+      // lg: layout fires, then crop to the card. Produces a card identical to the
+      // desktop slides (proper spacing/fonts) instead of the cramped mobile card.
+      if (isMobile)
+        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale });
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
       const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
@@ -168,53 +207,21 @@ export default function ShareModal({
   };
   const onDownload = async () => {
     const b = await getBlob();
-    if (!b) return;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
-    if (isMobile) {
-      const file = new File([b], filename, { type: "image/png" });
-      const nav = navigator as ShareNav;
-      if (nav.share && nav.canShare?.({ files: [file] })) {
-        try { await nav.share({ files: [file], title: "GitHub Wrapped" }); return; }
-        catch { /* user cancelled — fall through to regular download */ }
-      }
-    }
-    dl(b);
-    flash("Image saved.");
+    if (b) { dl(b); flash("Image saved."); }
   };
   const onCopy = async () => {
     const blob = await getBlob(); if (!blob) return;
     try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
     catch { dl(blob); flash("Saved instead."); }
   };
-  const onX = async () => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
-    if (isMobile) {
-      const b = await getBlob();
-      if (b) {
-        const file = new File([b], filename, { type: "image/png" });
-        const nav = navigator as ShareNav;
-        if (nav.share && nav.canShare?.({ files: [file] })) {
-          try { await nav.share({ files: [file], text: captionNative, title: "GitHub Wrapped" }); return; }
-          catch { /* user cancelled or share failed — fall through */ }
-        }
-      }
-    }
+  const onX = () => {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
-  const onLinkedIn = async () => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
-    if (isMobile) {
-      const b = await getBlob();
-      if (b) {
-        const file = new File([b], filename, { type: "image/png" });
-        const nav = navigator as ShareNav;
-        if (nav.share && nav.canShare?.({ files: [file] })) {
-          try { await nav.share({ files: [file], text: captionNative, title: "GitHub Wrapped" }); return; }
-          catch { /* user cancelled or share failed — fall through */ }
-        }
-      }
-    }
-    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
+  const onLinkedIn = () => {
+    // LinkedIn dropped prefilled-text sharing; share-offsite reliably opens the
+    // composer with the grindit.dev link preview (the feed/?shareActive route
+    // silently fails to create a post on mobile).
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://www.grindit.dev")}`, "_blank", "noopener");
   };
   const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
 
