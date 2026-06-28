@@ -189,6 +189,7 @@ export default function ShareModal({
       {open && (
         <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
           onClick={onClose}>
 
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,.82)", backdropFilter: "blur(20px)" }} />
@@ -205,10 +206,15 @@ export default function ShareModal({
               background: "linear-gradient(168deg,#0d0822 0%,#070419 52%,#040213 100%)",
               animation: "sm-glow 4.5s ease-in-out infinite",
             }}
-            initial={{ scale: 0.91, y: 22, opacity: 0 }}
-            animate={{ scale: 1,    y: 0,  opacity: 1 }}
-            exit={{    scale: 0.94, y: 10, opacity: 0 }}
-            transition={{ duration: 0.26, ease: SP }}
+            initial={{ scale: 0.88, y: 28, opacity: 0, filter: "blur(8px)" }}
+            animate={{ scale: 1,    y: 0,  opacity: 1, filter: "blur(0px)" }}
+            exit={{    scale: 0.93, y: 12, opacity: 0, filter: "blur(4px)" }}
+            transition={{
+              scale:   { type: "spring", stiffness: 380, damping: 30, mass: 0.85 },
+              y:       { type: "spring", stiffness: 380, damping: 30, mass: 0.85 },
+              opacity: { duration: 0.22, ease: "easeOut" },
+              filter:  { duration: 0.2, ease: "easeOut" },
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* top hairline */}
@@ -217,9 +223,10 @@ export default function ShareModal({
 
             {/* close */}
             <motion.button onClick={onClose} aria-label="Close"
-              className="absolute right-3.5 top-3.5 z-20 flex h-7 w-7 items-center justify-center rounded-full"
-              style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.08)", color:"rgba(255,255,255,.22)" }}
-              whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}
+              className="absolute right-3.5 top-3.5 z-20 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full"
+              style={{ background:"rgba(255,255,255,.10)", border:"1px solid rgba(255,255,255,.22)", color:"rgba(255,255,255,.65)" }}
+              whileHover={{ scale: 1.12, background:"rgba(255,255,255,.18)", color:"rgba(255,255,255,.9)" }}
+              whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 440, damping: 24 }}>
               <Icon d="M6 6l12 12M18 6L6 18" size={11} />
             </motion.button>
@@ -297,13 +304,16 @@ export default function ShareModal({
                        transition: "transform 0.22s cubic-bezier(0.32,0.72,0,1)",
                      }} />
                 {(["card","slide"] as Scope[]).map((val) => (
-                  <button key={val} onClick={() => setScope(val)}
-                    className="relative z-10 flex-1 py-[7px] text-center"
+                  <motion.button key={val} onClick={() => setScope(val)}
+                    className="relative z-10 flex-1 cursor-pointer py-[7px] text-center"
                     style={{ fontSize:11, fontWeight:500,
                              color: scope === val ? "#c4b5fd" : "rgba(255,255,255,.28)",
-                             transition: "color 0.18s ease" }}>
+                             transition: "color 0.18s ease" }}
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.93 }}
+                    transition={{ type: "spring", stiffness: 440, damping: 28 }}>
                     {val === "card" ? "Card" : "Full slide"}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -312,7 +322,7 @@ export default function ShareModal({
             {canNativeShare && (
               <div className="mt-3 px-4">
                 <motion.button onClick={onNative} disabled={busy}
-                  className="flex w-full items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:opacity-35"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-35"
                   style={{ background:"linear-gradient(130deg,#5b21b6,#7c3aed,#6d28d9)" }}
                   whileHover={{ scale:1.01 }} whileTap={{ scale:0.975 }}
                   transition={{ type:"spring", stiffness:400, damping:26 }}>
@@ -326,15 +336,13 @@ export default function ShareModal({
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
               {ACTIONS.map(({ id, label, icon, accent }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
-                  className="group flex flex-col items-center gap-[9px] rounded-[13px] py-3.5 disabled:pointer-events-none disabled:opacity-25"
-                  style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)",
-                           transition:"background .18s ease, border-color .18s ease" }}
-                  initial={{ opacity:0, y:10 }}
-                  animate={{ opacity:1, y:0 }}
-                  transition={{ delay: 0.1 + i*0.055, duration:0.35, ease:SP }}
-                  whileHover={{ y:-2 }} whileTap={{ scale:0.95 }}
-                  onMouseEnter={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.07)"; el.style.borderColor=`${accent}66`; }}
-                  onMouseLeave={(e) => { const el = e.currentTarget; el.style.background="rgba(255,255,255,.03)"; el.style.borderColor="rgba(255,255,255,.07)"; }}>
+                  className="group flex flex-col cursor-pointer items-center gap-[9px] rounded-[13px] py-3.5 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-25"
+                  style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)" }}
+                  initial={{ opacity:0, y:14, scale: 0.95 }}
+                  animate={{ opacity:1, y:0,  scale: 1 }}
+                  transition={{ delay: 0.08 + i*0.04, type: "spring", stiffness: 360, damping: 28 }}
+                  whileHover={{ y:-3, scale: 1.03, background: "rgba(255,255,255,.07)", borderColor: `${accent}66` }}
+                  whileTap={{ scale: 0.93 }}>
                   <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
                        style={{ background:`${accent}1f`, color:accent, boxShadow:`0 0 12px ${accent}33` }}>
                     <Icon d={icon} size={13} />

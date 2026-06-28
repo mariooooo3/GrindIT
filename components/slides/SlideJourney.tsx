@@ -13,8 +13,8 @@ const ACCENT = "#fbbf24";
 
 function GasStationCat() {
   return (
-    <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.4, duration: 1.1, ease: "easeOut" }}
+    <motion.div initial={{ opacity: 0, x: -48 }} animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.15 }}
       className="relative h-full w-full">
       <motion.div className="absolute inset-0 flex items-center justify-center"
         animate={{ y: [0, -10, 0] }}
@@ -90,8 +90,8 @@ function CountUp({ value, className }: { value: number; className?: string }) {
 
 function GasPlanet() {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.5, duration: 1.2, ease: "easeOut" }}
+    <motion.div initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9, delay: 0.18 }}
       className="relative flex h-full w-full items-center justify-center">
       <div className="absolute h-[460px] w-[460px] rounded-full"
         style={{ background: "radial-gradient(circle, rgba(255,200,60,0.35), rgba(255,140,0,0.1) 45%, transparent 70%)", filter: "blur(20px)" }} />
@@ -171,10 +171,19 @@ function Heatmap({ values, hotMonth, periodStart, periodEnd }: {
         const intensity = v / max;
         const isHot = hotMonth.length > 0 && fullMonths[i] === hotMonth;
         return (
-          <div key={i} className="flex flex-1 flex-col items-center gap-1">
-            <motion.div initial={{ height: 2, opacity: 0.3 }} animate={{ height: 4 + intensity * 22, opacity: 0.4 + intensity * 0.6 }}
-              transition={{ delay: 1.2 + i * 0.04, duration: 0.6 }} className="w-full rounded-sm"
-              style={{ background: isHot ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : `rgba(255,200,80,${0.15 + intensity * 0.45})`, boxShadow: isHot ? "0 0 10px rgba(255,180,30,0.6)" : "none" }} />
+          <div key={i} className="flex flex-1 flex-col items-end gap-1">
+            <motion.div
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 0.4 + intensity * 0.6 }}
+              transition={{ delay: 1.1 + i * 0.035, type: "spring", stiffness: 260, damping: 22 }}
+              className="w-full rounded-sm"
+              style={{
+                height: 4 + intensity * 22,
+                transformOrigin: "bottom",
+                background: isHot ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : `rgba(255,200,80,${0.15 + intensity * 0.45})`,
+                boxShadow: isHot ? "0 0 10px rgba(255,180,30,0.6)" : "none",
+                willChange: "transform, opacity",
+              }} />
             <span className="text-[8px] text-white/40">{months[i]}</span>
           </div>
         );
@@ -266,10 +275,18 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
                   const max = Math.max(...flat.hourDistribution, 1);
                   const isPeak = h === flat.peakHour;
                   return (
-                    <motion.div key={h} initial={{ height: 0 }} animate={{ height: `${Math.max(6, (v / max) * 100)}%` }}
-                      transition={{ delay: 0.8 + h * 0.015, duration: 0.5 }}
+                    <motion.div key={h}
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ delay: 0.75 + h * 0.013, type: "spring", stiffness: 300, damping: 24 }}
                       className="flex-1 rounded-sm"
-                      style={{ background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : "rgba(255,200,80,0.22)", boxShadow: isPeak ? "0 0 8px rgba(255,180,30,0.6)" : "none" }} />
+                      style={{
+                        height: `${Math.max(6, (v / max) * 100)}%`,
+                        transformOrigin: "bottom",
+                        background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : "rgba(255,200,80,0.22)",
+                        boxShadow: isPeak ? "0 0 8px rgba(255,180,30,0.6)" : "none",
+                        willChange: "transform",
+                      }} />
                   );
                 })}
               </div>
@@ -286,10 +303,18 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
                   const isWeekend = day === "Sat" || day === "Sun";
                   return (
                     <div key={day} className="flex flex-1 flex-col items-center gap-0.5">
-                      <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(8, (v / dayMax) * 100)}%` }}
-                        transition={{ delay: 0.9 + DAY_KEYS.indexOf(day) * 0.04, duration: 0.5 }}
+                      <motion.div
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ delay: 0.85 + DAY_KEYS.indexOf(day) * 0.04, type: "spring", stiffness: 280, damping: 22 }}
                         className="w-full rounded-sm"
-                        style={{ background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : isWeekend ? "rgba(255,200,80,0.35)" : "rgba(255,200,80,0.20)", boxShadow: isPeak ? "0 0 6px rgba(255,180,30,0.5)" : "none" }} />
+                        style={{
+                          height: `${Math.max(8, (v / dayMax) * 100)}%`,
+                          transformOrigin: "bottom",
+                          background: isPeak ? "linear-gradient(180deg,#ffd84d,#ff9a1f)" : isWeekend ? "rgba(255,200,80,0.35)" : "rgba(255,200,80,0.20)",
+                          boxShadow: isPeak ? "0 0 6px rgba(255,180,30,0.5)" : "none",
+                          willChange: "transform",
+                        }} />
                       <span className="text-[7px] text-white/35">{day[0]}</span>
                     </div>
                   );

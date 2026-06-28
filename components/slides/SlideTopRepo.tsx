@@ -96,7 +96,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
     : "—";
   const starred = flat.mostStarredRepo;
   const showStarred = !!starred && starred.name !== top?.name;
-  const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
+  const fadeUp = { initial: { opacity: 0, y: 18, scale: 0.97 as number }, animate: { opacity: 1, y: 0, scale: 1 as number } };
 
   const ufoX = useMotionValue(0);
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
           <div className="w-[min(400px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={4} title="Home Base" />
           </div>
-          <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
+          <motion.div {...fadeUp} transition={{ type: "spring", stiffness: 280, damping: 30, mass: 0.85, delay: 0.1 }} className="flex flex-col flex-1 min-h-0 w-full max-w-[380px] lg:mt-6">
             <SlideCard accentColor={ACCENT} compact className="text-white">
               <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
                 <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
@@ -289,8 +289,8 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         </div>
 
         {/* RIGHT — full round planet */}
-        <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.1, ease: "easeOut" }}
+        <motion.div initial={{ opacity: 0, x: 48 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.08 }}
           className="relative col-span-12 hidden overflow-hidden lg:col-span-4 lg:block">
           <PlanetStage>
           <div className="relative flex h-[520px] w-[520px] items-center justify-center">

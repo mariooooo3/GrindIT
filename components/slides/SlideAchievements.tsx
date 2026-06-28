@@ -42,7 +42,7 @@ function StarRating({ count }: { count: number }) {
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((i) => (
         <motion.div key={i} initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }}
-          transition={{ delay: 1.6 + i * 0.08, type: "spring", stiffness: 220, damping: 14 }}>
+          transition={{ delay: 1.4 + i * 0.06, type: "spring", stiffness: 280, damping: 18 }}>
           <StarIcon filled={i <= count} />
         </motion.div>
       ))}
@@ -76,8 +76,8 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8 lg:py-8">
         {/* LEFT — cats & rockets crew */}
-        <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        <motion.div initial={{ opacity: 0, x: -48 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9 }}
           className="relative hidden h-full items-center justify-center lg:flex">
           <motion.div animate={{ y: [0, -14, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
@@ -94,8 +94,8 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         </motion.div>
 
         {/* CENTER — glass card */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.85, delay: 0.12 }}
           className="flex flex-1 min-h-0 flex-col items-center w-full lg:flex-none lg:justify-self-center lg:max-w-[380px]">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={6} title="Trophy Haul" />
@@ -140,12 +140,14 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
               {hasUnlocked ? (
                 <div className="flex flex-col gap-2">
                   {topTrophies.map((t, i) => (
-                    <motion.button key={t.label} type="button" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.06 }}
+                    <motion.button key={t.label} type="button"
+                      initial={{ opacity: 0, x: -12, scale: 0.97 }} animate={{ opacity: 1, x: 0, scale: 1 }}
+                      transition={{ delay: 0.9 + i * 0.055, type: "spring", stiffness: 340, damping: 28 }}
                       onClick={(e) => setOpenBadge({ badge: { id: t.label, label: t.label, icon: t.icon, color: t.color, explanation: t.reason }, rect: e.currentTarget.getBoundingClientRect() })}
                       aria-haspopup="dialog"
                       aria-label={`${t.label} trophy — show details`}
-                      className="flex items-center gap-3 rounded-xl border px-3 py-1.5 text-left transition-transform duration-150 hover:scale-[1.02] cursor-pointer"
-                      style={{ borderColor: `${t.color}40`, background: `${t.color}10` }}>
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-1.5 text-left transition-colors duration-150 hover:brightness-110"
+                      style={{ borderColor: `${t.color}40`, background: `${t.color}10`, touchAction: "manipulation" }}>
                       <span style={{ color: t.color, filter: `drop-shadow(0 0 6px ${t.color}88)` }}>
                         <Glyph name={t.icon as GlyphName} size={26} />
                       </span>
@@ -198,8 +200,8 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         </motion.div>
 
         {/* RIGHT — yarn planet */}
-        <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        <motion.div initial={{ opacity: 0, x: 48 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.05 }}
           className="relative hidden h-full items-center justify-center overflow-hidden lg:flex">
           <PlanetStage className="lg:translate-x-8">
           <div className="relative h-[560px] w-[560px]">

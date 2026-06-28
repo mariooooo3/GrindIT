@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MobileHeroScene } from "@/components/MobileHeroScene";
 import SpaceBackground from "@/components/SpaceBackground";
@@ -8,11 +9,51 @@ import WorldCupMobileBackground from "@/components/WorldCupMobileBackground";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 import { ThemeSwitch } from "./_theme-switch";
 import { HeroCard } from "./_hero-card";
-import { FeaturesSection, HomeFooter } from "./_features";
+import { HowItWorksModal, HomeFooter } from "./_features";
 import { useHome } from "./HomeContext";
 
+// ── Blinking commit-branch nodes on the logo ────────────────────────────
+const BRANCH_NODES = [
+  { x: "70.0%", y: "27.0%" },
+  { x: "80.6%", y: "15.3%" },
+  { x: "86.1%", y: "26.4%" },
+];
+
+function CommitNodes() {
+  const [lit, setLit] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const flash = () => {
+      const idx = Math.floor(Math.random() * BRANCH_NODES.length);
+      setLit(prev => new Set([...prev, idx]));
+      setTimeout(() => setLit(prev => { const n = new Set(prev); n.delete(idx); return n; }), 280 + Math.random() * 320);
+      t = setTimeout(flash, 550 + Math.random() * 1300);
+    };
+    t = setTimeout(flash, 800 + Math.random() * 600);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <>
+      {BRANCH_NODES.map((node, i) => (
+        <span key={i} className="pointer-events-none absolute rounded-full"
+          style={{
+            left: node.x, top: node.y,
+            width: 5, height: 5,
+            transform: "translate(-50%, -50%)",
+            background: lit.has(i) ? "oklch(0.88 0.32 145)" : "transparent",
+            boxShadow: lit.has(i)
+              ? "0 0 8px 2px oklch(0.78 0.28 145 / 0.85), 0 0 3px 1px oklch(0.92 0.36 145)"
+              : "none",
+            transition: "background 0.12s ease, box-shadow 0.12s ease",
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 // ── Mobile Nav ────────────────────────────────────────────────────────────
-function MobileNav() {
+function MobileNav({ onHowItWorks }: { onHowItWorks: () => void }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
       <div className="mx-auto max-w-6xl px-3 pt-3 pointer-events-auto sm:px-5 sm:pt-5">
@@ -27,29 +68,24 @@ function MobileNav() {
               unwrapped.
             </span>
           </span>
-          <a
-            href="#features"
-            onClick={(e) => {
-              e.preventDefault();
-              const el = document.getElementById("features");
-              if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + 20, behavior: "smooth" });
-              window.history.pushState(null, "", "#features");
-            }}
-            className="pointer-events-auto ml-3 shrink-0 rounded-full border border-violet-300/35 bg-violet-400/10 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-violet-200/90 transition-colors hover:bg-violet-400/20 hover:text-white"
+          <button
+            onClick={onHowItWorks}
+            className="pointer-events-auto ml-3 shrink-0 cursor-pointer rounded-full border border-violet-300/35 bg-violet-400/10 px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-violet-200/90 transition-colors hover:bg-violet-400/20 hover:text-white"
           >
             How it works
-          </a>
+          </button>
         </div>
         {/* floating glass pill — with Developer Recap badge below auth */}
         <div className="relative z-[1] flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo */}
-          <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
+          <Link href="/" className="relative z-10 flex cursor-default items-center gap-1 sm:gap-2">
             <div className="relative h-8 w-8 shrink-0 sm:h-11 sm:w-11">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
                 className="h-8 w-8 rounded-lg object-cover select-none sm:h-11 sm:w-11 sm:rounded-xl"
                 draggable={false} />
+              <CommitNodes />
             </div>
             <span className="text-[17px] font-black tracking-tight sm:text-[22px]" style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 0 24px rgba(139,92,246,0.35)" }}>
               <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
@@ -76,14 +112,16 @@ function MobileNav() {
 // ── Mobile page ───────────────────────────────────────────────────────────
 export function MobileHomePage() {
   const { worldCup, ready, animate } = useHome();
+  const [howOpen, setHowOpen] = useState(false);
 
   return (
-    <main className="relative overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>
-      <MobileNav />
+    <main className="relative h-[100svh] overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>
+      <MobileNav onHowItWorks={() => setHowOpen(true)} />
 
       <section className="relative flex flex-col items-center justify-end pb-4 pt-20" style={{ height: "var(--hero-height, 100svh)" }}>
         {/* Theme background — WC always visible underneath; Space fades in on top */}
-        <div className="absolute inset-0">
+        {/* isolate creates a stacking context so z-10/z-20 inside WC don't escape above SpaceBackground */}
+        <div className="absolute inset-0 isolate">
           <WorldCupMobileBackground />
         </div>
         <div
@@ -124,8 +162,7 @@ export function MobileHomePage() {
         <HeroCard />
       </section>
 
-      <FeaturesSection />
-      <HomeFooter />
+      <HowItWorksModal open={howOpen} onClose={() => setHowOpen(false)} />
     </main>
   );
 }

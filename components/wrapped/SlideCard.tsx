@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 
 type SlideCardProps = {
   accentColor: string;
@@ -20,11 +21,11 @@ type SlideCardProps = {
 export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
   function SlideCard({ accentColor, className = "", compact = false, sizeStyle, children }, ref) {
     return (
-      <div
+      <motion.div
         ref={ref}
         data-share-card
         data-accent={accentColor}
-        className={`relative flex flex-col overflow-hidden rounded-2xl lg:rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(300px,84vw)] h-auto min-h-[65dvh] max-h-[76dvh] lg:min-h-0 lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none ${className}`}
+        className={`relative flex flex-col overflow-hidden rounded-2xl lg:rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(300px,84vw)] h-auto min-h-[65dvh] max-h-[76dvh] lg:min-h-0 lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none select-none cursor-default ${className}`}
         style={{
           ...(sizeStyle?.width  && { width:  sizeStyle.width }),
           ...(sizeStyle?.height && { height: sizeStyle.height }),
@@ -34,6 +35,9 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
           border: `1px solid ${accentColor}2e`,
           boxShadow: `0 28px 70px -16px ${accentColor}4a, 0 0 0 1px ${accentColor}26, inset 0 1px 0 rgba(255,255,255,0.06)`,
         }}
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0,  scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 32, mass: 0.85, delay: 0.08 }}
       >
         {/* top accent bar */}
         <div
@@ -61,7 +65,7 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
             background: `linear-gradient(90deg, transparent, ${accentColor}55, transparent)`,
           }}
         />
-      </div>
+      </motion.div>
     );
   },
 );

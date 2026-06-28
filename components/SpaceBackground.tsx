@@ -74,6 +74,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
           background: `radial-gradient(circle, ${glow}0.22) 0%, ${glow}0) 70%)`,
           animation: "sb-nebula 16s ease-in-out infinite",
           contain: "strict",
+          willChange: "transform, opacity",
         }}
       />
       <div
@@ -82,6 +83,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
           background: `radial-gradient(circle, ${glow}0.16) 0%, ${glow}0.06) 50%, rgba(0,0,0,0) 75%)`,
           animation: "sb-nebula 22s ease-in-out infinite reverse",
           contain: "strict",
+          willChange: "transform, opacity",
         }}
       />
       <div
@@ -103,9 +105,9 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
             width: `${star.size}px`,
             height: `${star.size}px`,
             opacity: star.opacity,
-            boxShadow:
-              star.size > 1 ? "0 0 4px rgba(196,181,253,0.8)" : undefined,
+            boxShadow: star.size > 1 ? "0 0 4px rgba(196,181,253,0.7)" : undefined,
             animation: `sb-twinkle ${star.duration} ease-in-out ${star.delay} infinite`,
+            willChange: "opacity",
           }}
         />
       ))}
@@ -119,6 +121,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
           width: "70px",
           height: "70px",
           animation: "sb-float-a 14s ease-in-out infinite",
+          willChange: "transform",
         }}
       >
         <div
@@ -139,6 +142,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
           width: "140px",
           height: "140px",
           animation: "sb-float-b 18s ease-in-out infinite",
+          willChange: "transform",
         }}
       >
         <div
@@ -159,6 +163,7 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
           width: "36px",
           height: "36px",
           animation: "sb-float-c 12s ease-in-out infinite",
+          willChange: "transform",
         }}
       >
         <div
@@ -172,24 +177,24 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
 
       <style>{`
         @keyframes sb-twinkle {
-          0%, 100% { opacity: 0.25; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.25); }
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
         }
         @keyframes sb-float-a {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(8px, 14px); }
+          0%, 100% { transform: translate3d(0, 0, 0); }
+          50% { transform: translate3d(8px, 14px, 0); }
         }
         @keyframes sb-float-b {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(-14px, -18px); }
+          0%, 100% { transform: translate3d(0, 0, 0); }
+          50% { transform: translate3d(-14px, -18px, 0); }
         }
         @keyframes sb-float-c {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(-6px, 10px); }
+          0%, 100% { transform: translate3d(0, 0, 0); }
+          50% { transform: translate3d(-6px, 10px, 0); }
         }
         @keyframes sb-nebula {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
-          50% { transform: translate(10px, -10px) scale(1.05); opacity: 1; }
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.9; }
+          50% { transform: translate3d(10px, -10px, 0) scale(1.05); opacity: 1; }
         }
       `}</style>
     </div>

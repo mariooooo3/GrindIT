@@ -251,8 +251,8 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
       <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
         {/* LEFT */}
-        <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        <motion.div initial={{ opacity: 0, x: -48 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9 }}
           className="relative hidden h-[640px] lg:order-1 lg:block">
           <LeftScene />
         </motion.div>
@@ -383,8 +383,8 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
         </div>
 
         {/* RIGHT */}
-        <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        <motion.div initial={{ opacity: 0, x: 48 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.08 }}
           className="relative hidden order-3 lg:block">
           <PlanetStage>
             {hasLangs ? <LanguagePlanet langs={langs} /> : <Planet />}

@@ -176,7 +176,7 @@ export function ThemeSwitch() {
       onClick={handleToggle}
       aria-label={worldCup ? "Switch to space theme" : "Switch to World Cup theme"}
       title={worldCup ? "Click to switch to space theme" : "Monthly theme · World Cup — click to activate"}
-      className={`group relative flex items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:gap-1.5 sm:py-1 sm:pl-2 sm:pr-3 ${
+      className={`group relative flex cursor-pointer items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:gap-1.5 sm:py-1 sm:pl-2 sm:pr-3 ${
         worldCup
           ? "border-violet-400/50 bg-violet-950/50 hover:border-violet-300/70 hover:bg-violet-950/70"
           : "border-white/[0.12] bg-black/40 hover:border-emerald-300/40 hover:bg-zinc-900/70"
@@ -230,6 +230,9 @@ export function ThemeSwitch() {
           <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
         </>
       )}
+      <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[9px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+        {worldCup ? "Switch to space theme" : "Switch to World Cup theme"}
+      </span>
     </button>
   );
 }

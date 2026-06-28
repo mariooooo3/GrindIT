@@ -88,8 +88,8 @@ export default function PlanetProgress({
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-fuchsia-400"
             animate={{ width: `${progress}%` }}
-            transition={{ type: "tween", duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-            style={{ boxShadow: "0 0 16px rgba(250,204,21,0.35)" }}
+            transition={{ type: "spring", stiffness: 180, damping: 28, mass: 0.9 }}
+            style={{ boxShadow: "0 0 16px rgba(250,204,21,0.35)", willChange: "width" }}
           />
         </div>
 
@@ -98,13 +98,16 @@ export default function PlanetProgress({
             const active = current === i;
             const done = i <= current;
             return (
-              <button
+              <motion.button
                 key={i}
                 type="button"
                 onClick={() => onNavigate(i)}
                 aria-label={`Go to match event ${i + 1}`}
                 aria-current={active ? "step" : undefined}
-                className="relative z-10 grid h-7 w-7 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 sm:h-9 sm:w-9"
+                className="relative z-10 grid h-7 w-7 place-items-center rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 sm:h-9 sm:w-9"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.88 }}
+                transition={{ type: "spring", stiffness: 440, damping: 22 }}
               >
                 <motion.span
                   animate={active ? { scale: [1, 1.08, 1] } : { scale: 1 }}
@@ -128,7 +131,7 @@ export default function PlanetProgress({
                 >
                   {String(i + 1).padStart(2, "0")}
                 </motion.span>
-              </button>
+              </motion.button>
             );
           })}
 
@@ -136,12 +139,13 @@ export default function PlanetProgress({
             <motion.div
               className="absolute -top-[9px] z-20 sm:-top-[11px]"
               animate={{ left: `${progress}%` }}
-              transition={{ type: "tween", duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ type: "spring", stiffness: 220, damping: 32, mass: 0.8 }}
               style={{ x: "-50%" }}
             >
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                style={{ willChange: "transform" }}
               >
                 <WorldCupBall size={32} glow />
               </motion.div>
@@ -163,43 +167,48 @@ export default function PlanetProgress({
         <motion.div
           className="absolute left-0 top-0 h-[2px] -translate-y-1/2 rounded-full"
           animate={{ width: `${progress}%` }}
-          transition={{ type: "tween", duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+          transition={{ type: "spring", stiffness: 180, damping: 28, mass: 0.9 }}
           style={{
             background: `linear-gradient(90deg, ${travelColor}55, ${travelColor})`,
             boxShadow: `0 0 12px ${travelColor}aa`,
+            willChange: "width",
           }}
         />
       </div>
 
       <div className="relative flex w-full items-center justify-between px-[18px] sm:px-[72px]">
         {Array.from({ length: total }).map((_, i) => (
-          <button
+          <motion.button
             key={i}
             type="button"
             onClick={() => onNavigate(i)}
             aria-label={`Go to planet ${i + 1}`}
             aria-current={current === i ? "step" : undefined}
-            className="relative z-10 grid h-10 w-10 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:h-8 sm:w-8"
+            className="relative z-10 grid h-10 w-10 place-items-center rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:h-8 sm:w-8"
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.85 }}
+            transition={{ type: "spring", stiffness: 440, damping: 22 }}
           >
             <motion.span
               animate={current === i ? { scale: [1, 1.35, 1] } : { scale: 1 }}
-              transition={current === i ? { repeat: Infinity, duration: 1.8 } : { duration: 0.2 }}
+              transition={current === i ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" } : { type: "spring", stiffness: 400, damping: 24 }}
               className="block h-[16px] w-[16px] rounded-full border border-white/20 sm:h-[18px] sm:w-[18px]"
               style={{
                 background: colors[i] ?? "rgba(255,255,255,0.4)",
                 opacity: i <= current ? 1 : 0.35,
                 boxShadow: current === i ? `0 0 14px 3px ${colors[i] ?? "#a78bfa"}` : "none",
+                willChange: "transform",
               }}
             />
-          </button>
+          </motion.button>
         ))}
 
         <div className="pointer-events-none absolute left-[27px] right-[27px] top-0 sm:left-[88px] sm:right-[88px]">
           <motion.div
             className="absolute -top-4 z-20 h-12 w-12 sm:-top-5 sm:h-[54px] sm:w-[54px]"
             animate={{ left: `${progress}%`, rotate: current % 2 ? 6 : -6 }}
-            transition={{ type: "tween", duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-            style={{ x: "-50%", marginLeft: biasPx }}
+            transition={{ type: "spring", stiffness: 220, damping: 32, mass: 0.8 }}
+            style={{ x: "-50%", marginLeft: biasPx, willChange: "left, transform" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
