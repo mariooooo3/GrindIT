@@ -111,12 +111,12 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
   }, [ufoX]);
 
   return (
-    <div className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+    <div className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute -left-40 top-1/3 h-[500px] w-[500px] rounded-full opacity-40"
         style={{ background: "radial-gradient(closest-side, rgba(74,222,128,0.25), transparent)" }} />
       <Stars />
       <ChapterHeadingAnchor n={4} title="Home Base" />
-      <div className="relative z-10 grid min-h-screen grid-cols-12 gap-4 px-4 pb-10 pt-12 lg:px-12 lg:py-8">
+      <div className="relative z-10 flex h-full flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-12 lg:gap-4 lg:px-12 lg:py-8">
         {/* LEFT — UFO invasion scene */}
         <div className="relative col-span-12 hidden lg:col-span-4 lg:block">
           <div className="relative h-full w-full">
@@ -145,12 +145,12 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
         </div>
 
         {/* CENTER */}
-        <div className="col-span-12 flex flex-col items-center justify-center lg:col-span-4">
+        <div className="flex flex-1 min-h-0 flex-col items-center w-full lg:col-span-4 lg:justify-center">
           <div className="w-[min(400px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={4} title="Home Base" />
           </div>
-          <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="w-full max-w-[380px]">
-            <SlideCard accentColor={ACCENT} className="text-white">
+          <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }} className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
+            <SlideCard accentColor={ACCENT} compact className="text-white">
               <div className="absolute top-4 right-4 z-20 pointer-events-none">
                 <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>

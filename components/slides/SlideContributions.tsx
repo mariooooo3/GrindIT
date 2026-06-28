@@ -237,10 +237,10 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
   }, [hasPRs]);
 
   return (
-    <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+    <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <Stars />
       <ChapterHeadingAnchor n={2} title="The Chase" />
-      <div className="relative z-10 grid min-h-screen grid-cols-1 gap-6 px-4 pb-10 pt-12 lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
+      <div className="relative z-10 flex h-full flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
         {/* LEFT — chase scene */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           className="hidden flex-col items-start justify-center lg:flex">
@@ -249,14 +249,14 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
         </motion.div>
 
         {/* CENTER */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center">
           <div className="w-[min(400px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={2} title="The Chase" />
           </div>
 
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-            className="w-full max-w-[380px]">
-            <SlideCard accentColor={ACCENT} className="text-white">
+            className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
+            <SlideCard accentColor={ACCENT} compact className="text-white">
               <div className="absolute top-4 right-4 z-20 pointer-events-none">
                 <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                   <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>

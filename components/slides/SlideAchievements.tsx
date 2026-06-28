@@ -66,13 +66,13 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
   return (
     <>
-    <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+    <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute -left-40 top-1/3 size-[600px] rounded-full bg-fuchsia-600/10 blur-[140px]" />
       <div className="pointer-events-none absolute -right-40 bottom-0 size-[700px] rounded-full bg-purple-700/15 blur-[160px]" />
       <Stars />
       <ChapterHeadingAnchor n={6} title="Trophy Haul" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-8 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8 lg:py-8">
         {/* LEFT — cats & rockets crew */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
@@ -94,11 +94,11 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className="relative w-full max-w-[380px] justify-self-center">
+          className="flex flex-1 min-h-0 flex-col items-center w-full lg:flex-none lg:justify-self-center lg:max-w-[380px]">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={6} title="Trophy Haul" />
           </div>
-          <SlideCard accentColor={ACCENT}>
+          <SlideCard accentColor={ACCENT} compact>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>

@@ -186,26 +186,6 @@ export default function WrappedPage() {
   const slideAreaRef = useRef<HTMLDivElement>(null);
   const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
-  // Portrait phone detection — scale landscape slides to fit portrait width
-  const [portraitScale, setPortraitScale] = useState(1);
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      if (w < h && w < 768) {
-        setPortraitScale(w / h);
-      } else {
-        setPortraitScale(1);
-      }
-    };
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("orientationchange", update);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", update);
-    };
-  }, []);
 
   const fetchNarrative = useCallback(async (p: WrappedProfile, wc: boolean) => {
     setNarrativeLoading(true);
@@ -289,6 +269,12 @@ export default function WrappedPage() {
     }
   }, [worldCup, fetchNarrative, fetchWcSpeech]);
 
+  useEffect(() => {
+    const prev = document.body.style.background;
+    document.body.style.background = "#080612";
+    return () => { document.body.style.background = prev; };
+  }, []);
+
   const goNext = useCallback(() => {
     setSlideState(prev => {
       const currentState = normalizeSlideState(prev, activeSlides);
@@ -356,7 +342,7 @@ export default function WrappedPage() {
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden"
-      style={{ background: "var(--space-deep)" }}
+      style={{ background: "#080612" }}
     >
       {/* world cup decorative layer â€" renders behind all content */}
       {/* ambient glow */}
@@ -403,21 +389,13 @@ export default function WrappedPage() {
           onClick={() => router.push("/")}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
           width={48} height={48}
-          className="absolute left-2 top-[62px] sm:left-4 sm:top-[66px] w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="absolute left-2 top-3 sm:left-4 sm:top-4 w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
       </div>
 
       {/* slide */}
       {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
-        style={portraitScale !== 1 ? {
-          transformOrigin: "center center",
-          transform: `scale(${portraitScale})`,
-          width: `${100 / portraitScale}%`,
-          height: `${100 / portraitScale}%`,
-          top: `${-(100 / portraitScale - 100) / 2}%`,
-          left: `${-(100 / portraitScale - 100) / 2}%`,
-        } : undefined}
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
         onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={e => {
           const d = e.changedTouches[0].clientX - touchStartX.current;
@@ -427,21 +405,21 @@ export default function WrappedPage() {
         {/* capture-only logo — desktop only; on mobile the real top-bar logo is used */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}
-          className="pointer-events-none absolute left-2 top-[62px] sm:left-4 sm:top-[66px] z-20 w-12 h-12 rounded-full hidden lg:block"
+          className="pointer-events-none absolute left-2 top-3 sm:left-4 sm:top-4 z-20 w-12 h-12 rounded-full hidden lg:block"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
         <SlideWatermark />
-        {/* slide content — flex-1 min-h-0 on mobile so it fills the remaining space after the progress bar; absolute inset-0 on desktop */}
-        <div className="flex-1 min-h-0 overflow-hidden lg:absolute lg:inset-0">
+        {/* slide content — absolute inset-0 so slide bg fills the full 100dvh including the progress bar zone */}
+        <div className="absolute inset-0 overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div key={normalizedSlideState.current} custom={direction}
               variants={slideVariants} initial="enter" animate="center" exit="exit"
               className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:h-auto lg:overflow-hidden">
               <SlideErrorBoundary>
-              {/* on mobile: relative w-full so height comes from content; on desktop: h-full for absolute overlay system */}
-              <div className="relative w-full overflow-hidden lg:h-full">
-                {/* space theme — relative on mobile (gives height), absolute inset-0 on desktop */}
+              {/* h-full propagates the constrained height through to slide <main>/SlideShell so they fill the screen */}
+              <div className="relative h-full w-full overflow-hidden">
+                {/* space theme — h-full on mobile fills the container; absolute inset-0 on desktop */}
                 <div
-                  className={`relative w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                  className={`relative h-full w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
                     ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                   }`}
                 >
@@ -472,8 +450,12 @@ export default function WrappedPage() {
           </AnimatePresence>
         </div>
 
-        {/* mobile progress bar — flex-none, flows naturally below slide content */}
-        <div className="pointer-events-auto flex-none lg:hidden px-4 py-2.5">
+        {/* mobile progress bar — absolute at bottom, gradient bg blends seamlessly into slide */}
+        <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
+          style={{
+            paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
+            background: "linear-gradient(to bottom, transparent, #080612 38%)",
+          }}>
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
       </div>

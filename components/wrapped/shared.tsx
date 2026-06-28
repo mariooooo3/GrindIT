@@ -282,7 +282,7 @@ export function SlideShell({
   mobileFooter?: ReactNode;
 }) {
   return (
-    <div className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "var(--slide-bg, #080612)" }}>
+    <div className="relative h-full lg:h-auto lg:min-h-full w-full overflow-hidden text-white" style={{ background: "var(--slide-bg, #080612)" }}>
       <div className="slide-stars-bg"><Stars /></div>
       {overlay}
       {/* violet nebula glow behind right column */}
@@ -290,8 +290,8 @@ export function SlideShell({
         className="slide-nebula-glow pointer-events-none absolute -right-40 top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
         style={{ background: "radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 60%)" }}
       />
-      {/* responsive grid — single column on mobile, 3 columns on desktop */}
-      <div className="relative z-10 mx-auto grid max-w-[1500px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-12 lg:min-h-screen lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:px-6 lg:py-12">
+      {/* mobile: flex column filling full slide height; desktop: 3-column grid */}
+      <div className="relative z-10 mx-auto max-w-[1500px] flex h-full flex-col px-4 pt-4 lg:grid lg:h-auto lg:min-h-screen lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:gap-4 lg:px-6 lg:py-12">
         {/* LEFT — Rocket + optional chapter title (desktop only) */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
@@ -313,11 +313,11 @@ export function SlideShell({
             </motion.div>
           )}
         </motion.div>
-        {/* CENTER */}
-        <div className="flex min-h-0 flex-col items-center justify-center">
-          {mobileHeader && <div className="lg:hidden">{mobileHeader}</div>}
+        {/* CENTER — flex-1 on mobile (fills all remaining height), normal grid col on desktop */}
+        <div className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center">
+          {mobileHeader && <div className="flex-none lg:hidden">{mobileHeader}</div>}
           {center}
-          {mobileFooter && <div className="lg:hidden">{mobileFooter}</div>}
+          {mobileFooter && <div className="flex-none w-full pb-1 lg:hidden">{mobileFooter}</div>}
         </div>
         {/* RIGHT — planet (desktop only) */}
         <motion.div

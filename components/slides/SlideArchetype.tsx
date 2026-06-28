@@ -125,14 +125,14 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
 
   return (
     <>
-    <main className="relative min-h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+    <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 85% 70%, rgba(34,211,238,0.15), transparent 60%), radial-gradient(40% 40% at 70% 20%, rgba(255,62,165,0.12), transparent 60%)" }} />
       <Stars />
       <Confetti sparse={sparse} />
       <ChapterHeadingAnchor n={7} title="The Reveal" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 items-start gap-8 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-16 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8 lg:py-16">
         {/* LEFT — disco ball + cats + dance floor */}
         <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
@@ -156,11 +156,11 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         {/* CENTER — glass card */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
-          className="relative mt-10 w-[min(380px,92vw)] justify-self-center lg:absolute lg:left-1/2 lg:top-[8%] lg:mt-0 lg:-translate-x-1/2">
+          className="flex flex-1 min-h-0 flex-col items-center w-full lg:flex-none lg:w-[min(380px,92vw)] lg:justify-self-center lg:absolute lg:left-1/2 lg:top-[8%] lg:mt-0 lg:-translate-x-1/2">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={7} title="The Reveal" />
           </div>
-          <SlideCard accentColor={ACCENT}>
+          <SlideCard accentColor={ACCENT} compact>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>

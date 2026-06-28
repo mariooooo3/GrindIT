@@ -40,10 +40,10 @@ function MobileNav() {
             How it works
           </a>
         </div>
-        {/* floating glass pill — no center tagline, no Developer Recap badge */}
-        <div className="relative z-[1] flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
+        {/* floating glass pill — with Developer Recap badge below auth */}
+        <div className="relative z-[1] flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
-          {/* left: logo — no CommitNodes on mobile */}
+          {/* left: logo */}
           <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
             <div className="relative h-8 w-8 shrink-0 sm:h-11 sm:w-11">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,9 +55,13 @@ function MobileNav() {
               <span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>G</span>rind<span style={{ color: "var(--violet-glow)", textShadow: "0 0 18px var(--violet-glow)" }}>IT</span>
             </span>
           </Link>
-          {/* right: auth only */}
-          <div className="relative">
+          {/* right: auth + developer recap badge */}
+          <div className="flex flex-col items-center gap-1">
             <AuthButton />
+            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--commit-green)" }} />
+              Developer Recap · Any Period
+            </div>
           </div>
         </div>
         {/* ThemeSwitch — separate frame, right-aligned */}
@@ -104,7 +108,7 @@ export function MobileHomePage() {
 
         {/* landing logo */}
         <div className={`pointer-events-none absolute top-0 left-0 right-0 z-[5] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${ready && !worldCup ? "opacity-100" : "opacity-0"}`}>
-          <div className="flex items-center px-6 pt-[116px]">
+          <div className="flex items-center px-6 pt-[142px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo.url} alt="GrindIT" width={48} height={48} className="w-12 h-12 rounded-full bg-white/10 backdrop-blur p-1"
               style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />

@@ -204,25 +204,25 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
   const peakDay = DAY_KEYS.reduce((a, b) => (flat.commitsByWeekday[a] ?? 0) >= (flat.commitsByWeekday[b] ?? 0) ? a : b);
 
   return (
-    <main className="relative min-h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
+    <main className="relative h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />
       <ChapterHeadingAnchor n={5} title="Refuel Stop" />
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1600px] grid-cols-1 items-start gap-6 px-4 pb-10 pt-12 lg:items-center lg:px-8 lg:py-12 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8 lg:py-12">
         {/* LEFT — gas station cat */}
         <div className="hidden h-[80vh] lg:block">
           <GasStationCat />
         </div>
 
         {/* CENTER */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center">
           <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={5} title="Refuel Stop" />
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
-            className="w-[min(380px,92vw)]">
-            <SlideCard accentColor={ACCENT} className="text-white">
+            className="flex flex-col flex-1 min-h-0 w-[min(380px,92vw)]">
+            <SlideCard accentColor={ACCENT} compact className="text-white">
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>G</span>rind<span style={{ color: ACCENT, textShadow: `0 0 14px ${ACCENT}aa` }}>IT</span>
