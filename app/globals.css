@@ -28,7 +28,7 @@ body {
 /* Mobile card content zoom — shrinks all elements inside the card proportionally on phones */
 @media (max-width: 1023px) {
   .slide-card-content {
-    zoom: 0.82;
+    zoom: 0.76;
   }
 }
 
