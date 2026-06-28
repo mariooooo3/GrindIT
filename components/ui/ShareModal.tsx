@@ -36,12 +36,11 @@ function Icon({ d, size = 13 }: { d: string; size?: number }) {
 
 const ACTIONS = [
   { id: "download", label: "Save",      accent: "#a78bfa", icon: "M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2M7 10l5 5 5-5M12 15V3" },
-  { id: "copy",     label: "Copy",      accent: "#ffffff", icon: "M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" },
   { id: "x",        label: "Post on X", accent: "#60a5fa", icon: "M4 4l16 16M20 4L4 20" },
   { id: "linkedin", label: "LinkedIn",  accent: "#0a66c2", icon: "M4 4h16v16H4zM8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4" },
 ] as const;
 
-// Native-share action, shown inline in the mobile grid (desktop uses the full-width button).
+// Native-share action, shown first in the action grid (mobile and desktop).
 const SHARE_ACTION = { id: "share", label: "Share", accent: "#a78bfa", icon: "M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" } as const;
 
 // Funny render-flavoured copy, in the same spirit as the landing-page loader.
@@ -236,11 +235,6 @@ export default function ShareModal({
     const b = await getBlob();
     if (b) { dl(b); flash("Image saved."); }
   };
-  const onCopy = async () => {
-    const blob = await getBlob(); if (!blob) return;
-    try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
-    catch { dl(blob); flash("Saved instead."); }
-  };
   const onX = async () => {
     // Desktop: auto-download the image first so it's ready to attach in the composer.
     // Mobile: X handles the deep link well, no download needed.
@@ -255,14 +249,15 @@ export default function ShareModal({
     if (!isMobile) { const b = await getBlob(); if (b) dl(b); }
     window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
-  const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn, share: onNative };
+  const handlers: Record<string, () => void> = { download: onDownload, x: onX, linkedin: onLinkedIn, share: onNative };
 
-  // Mobile drops Save (web can't write to the gallery) and instead shows the native
-  // Share button inline next to Copy / X / LinkedIn. Desktop keeps Save + the
-  // full-width Share button above (when supported).
+  // Share leads the grid on both modes. Mobile keeps only Share + X (LinkedIn just
+  // deep-links without posting, and the web can't save to the gallery so no Save).
+  // Desktop shows Share, Save, X, LinkedIn.
+  const shareLead = canNativeShare ? [SHARE_ACTION] : [];
   const gridActions = isMobile
-    ? [...ACTIONS.filter((a) => a.id !== "download"), ...(canNativeShare ? [SHARE_ACTION] : [])]
-    : ACTIONS;
+    ? [...shareLead, ...ACTIONS.filter((a) => a.id === "x")]
+    : [...shareLead, ...ACTIONS];
 
   if (!mounted) return null;
 
@@ -400,23 +395,9 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* native share — full-width on desktop; on mobile it lives in the grid */}
-            {canNativeShare && !isMobile && (
-              <div className="mt-3 px-4">
-                <motion.button onClick={onNative} disabled={busy}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-full py-2.5 text-[12px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-35"
-                  style={{ background:"linear-gradient(130deg,#5b21b6,#7c3aed,#6d28d9)" }}
-                  whileHover={{ scale:1.01 }} whileTap={{ scale:0.975 }}
-                  transition={{ type:"spring", stiffness:400, damping:26 }}>
-                  <Icon d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" />
-                  Share…
-                </motion.button>
-              </div>
-            )}
-
             {/* ── action grid ── */}
-            {/* Mobile: drop the Save button (web can't write to the gallery); the
-                native Share… button above handles saving to Photos. */}
+            {/* Share leads (handles saving to Photos via the OS sheet). Mobile shows
+                Share + X only; desktop shows Share, Save, X, LinkedIn. */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
               {gridActions.map(({ id, label, icon, accent }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
