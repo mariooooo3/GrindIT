@@ -50,7 +50,7 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         />
 
         {/* scrollable content area */}
-        <div className="relative flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-3 pt-3 lg:px-5 lg:pb-5 lg:pt-5">
+        <div className="slide-card-content relative flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-3 pt-3 lg:px-5 lg:pb-5 lg:pt-5">
           {children}
         </div>
 

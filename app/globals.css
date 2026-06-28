@@ -25,6 +25,13 @@ body {
   color: var(--foreground);
 }
 
+/* Mobile card content zoom — shrinks all elements inside the card proportionally on phones */
+@media (max-width: 1023px) {
+  .slide-card-content {
+    zoom: 0.82;
+  }
+}
+
 /* Slow spin for planet — CSS animation avoids Framer Motion layer-promotion flash on iOS */
 @keyframes planet-spin { to { transform: rotate(360deg); } }
 
