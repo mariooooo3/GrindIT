@@ -752,10 +752,10 @@ export default function SlideShare({
           transition={{ duration: 0.9, delay: 0.5 }}
           className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center"
         >
-          <div className="w-[min(380px,92vw)] lg:hidden">
+          <div className="w-[92%] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
           </div>
-          <SlideCard ref={cardRef} accentColor={palette.a} compact sizeStyle={{ width: "min(405px, 92vw)" }}>
+          <SlideCard ref={cardRef} accentColor={palette.a} compact sizeStyle={{ width: "92%" }}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>G</span>rind<span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>IT</span>
@@ -832,7 +832,7 @@ export default function SlideShare({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.2 }}
-            className="flex-none mt-3 w-[min(405px,92vw)] lg:hidden"
+            className="flex-none mt-3 w-[92%] lg:hidden"
           >
             <div className="rounded-[1.5rem] p-[2px]" style={{
               background: `${palette.a}80`,
