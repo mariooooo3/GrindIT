@@ -94,14 +94,7 @@ function RocketCommitNodes() {
 
 function MobileRocket() {
   return (
-    <div className="relative grid place-items-center rounded-full" style={{ width: 88, height: 88 }}>
-      <div
-        className="absolute inset-[8%] rounded-full blur-xl opacity-75"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--commit-green) 40%, transparent), transparent 60%)",
-        }}
-      />
+    <div className="relative grid place-items-center" style={{ width: 88, height: 88 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/cat-rocket.png"

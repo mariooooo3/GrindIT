@@ -86,24 +86,23 @@ export default function ShareModal({
   }, [open]);
 
   const canNativeShare = typeof navigator !== "undefined" && typeof (navigator as ShareNav).canShare === "function";
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
-  const recapUrl = `${appUrl}/wrapped/${username}`;
-  const caption  = worldCup
-    ? `@${username} at the World Cup ⚽🐾\n\nMake yours:\n${recapUrl}\n\n#WorldCup #GrindIT`
-    : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱\n\nMake yours:\n${recapUrl}\n\n#GrindIT`;
+  const caption = `Make yours:\n\nhttps://www.grindit.dev`;
   const filename = `github-wrapped-${username}-${scope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     if (scope === "card") {
+      if (isMobile)
+        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale });
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
       const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
       const wrapperBg = `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
       return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
     }
-    if (typeof window !== "undefined" && window.innerWidth < 1024)
+    if (isMobile)
       return await captureDesktopElement(slide, { cropToSelector: null, scale });
     return await captureElement(slide, { scale });
   }, [scope, slideRef]);
@@ -164,21 +163,55 @@ export default function ShareModal({
       try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); } catch { /* cancelled */ }
     } else { dl(blob); flash("Downloaded instead."); }
   };
-  const onDownload = async () => { const b = await getBlob(); if (b) { dl(b); flash("Image saved."); } };
+  const onDownload = async () => {
+    const b = await getBlob();
+    if (!b) return;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (isMobile) {
+      const file = new File([b], filename, { type: "image/png" });
+      const nav = navigator as ShareNav;
+      if (nav.share && nav.canShare?.({ files: [file] })) {
+        try { await nav.share({ files: [file], title: "GitHub Wrapped" }); return; }
+        catch { /* user cancelled — fall through to regular download */ }
+      }
+    }
+    dl(b);
+    flash("Image saved.");
+  };
   const onCopy = async () => {
     const blob = await getBlob(); if (!blob) return;
     try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
     catch { dl(blob); flash("Saved instead."); }
   };
   const onX = async () => {
-    const b = await getBlob(); if (b) dl(b);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (isMobile) {
+      const b = await getBlob();
+      if (b) {
+        const file = new File([b], filename, { type: "image/png" });
+        const nav = navigator as ShareNav;
+        if (nav.share && nav.canShare?.({ files: [file] })) {
+          try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); return; }
+          catch { /* user cancelled or share failed — fall through */ }
+        }
+      }
+    }
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(caption)}`, "_blank", "noopener");
-    flash("Image saved — attach in X.");
   };
   const onLinkedIn = async () => {
-    const b = await getBlob(); if (b) dl(b);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (isMobile) {
+      const b = await getBlob();
+      if (b) {
+        const file = new File([b], filename, { type: "image/png" });
+        const nav = navigator as ShareNav;
+        if (nav.share && nav.canShare?.({ files: [file] })) {
+          try { await nav.share({ files: [file], text: caption, title: "GitHub Wrapped" }); return; }
+          catch { /* user cancelled or share failed — fall through */ }
+        }
+      }
+    }
     window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(caption)}`, "_blank", "noopener");
-    flash("Image saved — attach in LinkedIn.");
   };
   const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
 
