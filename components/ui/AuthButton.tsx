@@ -81,7 +81,7 @@ function AccountMenu({ name, image }: { name: string; image?: string | null }) {
         onClick={() => setOpen(v => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`group flex items-center gap-2 rounded-full border py-1 pl-1.5 pr-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] ${
+        className={`group flex cursor-pointer items-center gap-2 rounded-full border py-1 pl-1.5 pr-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] ${
           open
             ? "border-violet-300/55 bg-violet-500/[0.14]"
             : "border-white/[0.14] bg-black/40 hover:border-violet-300/40 hover:bg-violet-500/[0.08]"
@@ -112,7 +112,7 @@ function AccountMenu({ name, image }: { name: string; image?: string | null }) {
             <button
               role="menuitem"
               onClick={() => { setOpen(false); switchAccount(); }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[12.5px] font-medium text-zinc-300 transition-colors hover:bg-violet-500/[0.16] hover:text-white"
+              className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[12.5px] font-medium text-zinc-300 transition-colors hover:bg-violet-500/[0.16] hover:text-white"
             >
               <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-lg bg-violet-500/15 text-violet-300 transition-colors group-hover:bg-violet-500/25 group-hover:text-violet-200">
                 <SwitchIcon />
@@ -123,7 +123,7 @@ function AccountMenu({ name, image }: { name: string; image?: string | null }) {
             <button
               role="menuitem"
               onClick={() => { setOpen(false); signOut({ redirect: false }); }}
-              className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[12.5px] font-medium text-zinc-300 transition-colors hover:bg-red-500/[0.14] hover:text-white"
+              className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[12.5px] font-medium text-zinc-300 transition-colors hover:bg-red-500/[0.14] hover:text-white"
             >
               <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-lg bg-white/[0.06] text-zinc-400 transition-colors group-hover:bg-red-500/20 group-hover:text-red-300">
                 <LogoutIcon />
@@ -154,16 +154,21 @@ export default function AuthButton() {
       )}
 
       {status === "unauthenticated" && (
-        <motion.button key="unauthenticated" {...fade}
-          onClick={() => signIn("github", { callbackUrl: authCallbackUrl() })}
-          className="whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] sm:px-5"
-          style={{
-            background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
-            boxShadow: "0 4px 18px -4px color-mix(in oklab,var(--violet-glow) 60%,transparent), inset 0 1px 0 rgba(255,255,255,0.18)",
-          }}
-        >
-          Connect GitHub
-        </motion.button>
+        <motion.div key="unauthenticated" {...fade} className="group relative">
+          <motion.button
+            onClick={() => signIn("github", { callbackUrl: authCallbackUrl() })}
+            className="cursor-pointer whitespace-nowrap rounded-full px-3.5 py-2 text-[12px] font-semibold text-white transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] sm:px-5"
+            style={{
+              background: "linear-gradient(118deg,var(--violet-glow),color-mix(in oklab,var(--violet-glow) 65%,var(--commit-green)))",
+              boxShadow: "0 4px 18px -4px color-mix(in oklab,var(--violet-glow) 60%,transparent), inset 0 1px 0 rgba(255,255,255,0.18)",
+            }}
+          >
+            Connect GitHub
+          </motion.button>
+          <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[9px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+            Unlock All time stats
+          </span>
+        </motion.div>
       )}
     </AnimatePresence>
   );

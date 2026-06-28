@@ -82,9 +82,36 @@ const SLIDE_COMPONENTS: Record<SlideId, ComponentType<{ profile: WrappedProfile 
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 const slideVariants = {
-  enter:  (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
-  center: { x: 0, opacity: 1, transition: { duration: 0.45, ease: EASE } },
-  exit:   (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0, transition: { duration: 0.3, ease: EASE } }),
+  enter: (dir: number) => ({
+    x: dir > 0 ? "100%" : "-100%",
+    opacity: 0,
+    scale: 0.96,
+    filter: "blur(6px)",
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      x:      { type: "spring" as const, stiffness: 280, damping: 36, mass: 0.9 },
+      opacity: { duration: 0.28, ease: "easeOut" as const },
+      scale:   { type: "spring" as const, stiffness: 340, damping: 38 },
+      filter:  { duration: 0.22, ease: "easeOut" as const },
+    },
+  },
+  exit: (dir: number) => ({
+    x: dir > 0 ? "-100%" : "100%",
+    opacity: 0,
+    scale: 0.96,
+    filter: "blur(4px)",
+    transition: {
+      x:      { type: "spring" as const, stiffness: 320, damping: 38, mass: 0.85 },
+      opacity: { duration: 0.18, ease: "easeIn" as const },
+      scale:   { duration: 0.2, ease: "easeIn" as const },
+      filter:  { duration: 0.15, ease: "easeIn" as const },
+    },
+  }),
 };
 
 function normalizeSlideState(state: SlideState, slides: SlideId[]): SlideState {
@@ -106,22 +133,39 @@ function normalizeSlideState(state: SlideState, slides: SlideId[]): SlideState {
 
 // â"€â"€ loading skeleton â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 function LoadingScreen() {
-  // Pick one funny line per mount and keep it stable for the whole screen.
-  // suppressHydrationWarning: this client component is also SSR'd, so the
-  // server/client random picks intentionally differ on that one text node.
-  const [message] = useState(() => pickRandom(LOADING_MESSAGES));
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    setIdx(Math.floor(Math.random() * LOADING_MESSAGES.length));
+    const id = setInterval(() => setIdx(i => (i + 1) % LOADING_MESSAGES.length), 2400);
+    return () => clearInterval(id);
+  }, []);
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-5"
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6"
       style={{ background: "var(--space-deep)" }}>
       {/* pulsing orbit ring */}
-      <div className="relative h-14 w-14">
-        <div className="absolute inset-0 rounded-full border border-white/10 animate-ping" style={{ animationDuration: "1.6s" }} />
-        <div className="absolute inset-[5px] rounded-full border border-violet-500/30" />
-        <div className="absolute inset-[10px] rounded-full bg-violet-500/10 blur-sm" />
+      <div className="relative h-16 w-16">
+        <div className="absolute inset-0 rounded-full border border-violet-400/20 animate-ping" style={{ animationDuration: "1.6s", willChange: "opacity, transform" }} />
+        <div className="absolute inset-0 rounded-full border border-violet-400/10 animate-ping" style={{ animationDuration: "2.6s", animationDelay: "0.8s", willChange: "opacity, transform" }} />
+        <div className="absolute inset-[5px] rounded-full border border-violet-500/40" />
+        <div className="absolute inset-[10px] rounded-full bg-violet-500/20 blur-md" />
+        <div className="absolute inset-[14px] rounded-full bg-violet-400/30" style={{ boxShadow: "0 0 16px 4px rgba(139,92,246,0.35)" }} />
       </div>
-      <div className="flex flex-col items-center gap-1">
-        <span className="text-[13px] font-medium text-white/70">Loading your story</span>
-        <span suppressHydrationWarning className="text-[11px] text-zinc-600">{message}</span>
+      <div className="flex flex-col items-center gap-2 text-center px-6">
+        <span className="text-[15px] font-semibold text-white/85 tracking-[-0.01em]">Loading your story</span>
+        <div className="h-5 overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={idx}
+              className="block text-[12px] font-medium text-violet-300/70"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            >
+              {LOADING_MESSAGES[idx]}
+            </motion.span>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
@@ -137,11 +181,20 @@ function NarrativeLoadingIndicator() {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
-      style={{ backdropFilter: "blur(12px)" }}>
-      <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--violet-glow)" }} />
+    <motion.div
+      className="pointer-events-none fixed bottom-10 right-5 z-30 flex items-center gap-2 rounded-full border border-white/[0.07] bg-black/40 px-3 py-1.5"
+      style={{ backdropFilter: "blur(12px)" }}
+      initial={{ opacity: 0, y: 8, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 6, scale: 0.94 }}
+      transition={{ type: "spring", stiffness: 380, damping: 28 }}>
+      <motion.span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: "var(--violet-glow)" }}
+        animate={{ opacity: [1, 0.3, 1], scale: [1, 0.7, 1] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} />
       <span className="text-[10px] text-zinc-500">{NARRATIVE_MESSAGES[idx]}</span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -372,7 +425,7 @@ export default function WrappedPage() {
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* prev button — desktop only */}
           <button onClick={goPrev}
-            className={`hidden lg:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
+            className={`hidden lg:flex h-9 w-9 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
             <ChevronLeft />
           </button>
 
@@ -385,27 +438,48 @@ export default function WrappedPage() {
           <div className="flex-1 lg:hidden" />
 
           {/* share button */}
-          <button onClick={() => setShareOpen(true)} aria-label="Share this slide"
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-violet-300/55 bg-violet-500/28 text-white shadow-[0_8px_24px_rgba(76,29,149,0.35)] backdrop-blur-md transition-all duration-200 hover:border-violet-200/80 hover:bg-violet-500/40">
-            <ShareIcon />
-          </button>
+          <div className="group relative flex-shrink-0">
+            <motion.button onClick={() => setShareOpen(true)} aria-label="Share this slide"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-violet-300/55 bg-violet-500/28 text-white shadow-[0_8px_24px_rgba(76,29,149,0.35)] backdrop-blur-md"
+              whileHover={{ scale: 1.12, backgroundColor: "rgba(109,40,217,0.48)", borderColor: "rgba(196,181,253,0.85)" }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: "spring", stiffness: 420, damping: 26 }}>
+              <ShareIcon />
+            </motion.button>
+            <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+              Share
+            </span>
+          </div>
 
           {/* close button */}
-          <button onClick={() => router.push("/")}
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md transition-all duration-200 hover:border-white/35 hover:bg-black/70 hover:text-white">
-            <CloseIcon />
-          </button>
+          <div className="group relative flex-shrink-0">
+            <motion.button onClick={() => router.push("/")} aria-label="Back to home"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/55 text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.32)] backdrop-blur-md"
+              whileHover={{ scale: 1.12, backgroundColor: "rgba(0,0,0,0.72)", borderColor: "rgba(255,255,255,0.38)" }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: "spring", stiffness: 420, damping: 26 }}>
+              <CloseIcon />
+            </motion.button>
+            <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+              Close
+            </span>
+          </div>
         </div>
 
         {/* Logo fixed below back arrow — pt-3(12px)+h-9(36px)+gap(6px)=54px; sm:pt-4(16px)+h-9(36px)+gap(6px)=58px */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logo.url} alt="GrindIT"
-          role="button" aria-label="Back to home" tabIndex={0}
-          onClick={() => router.push("/")}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
-          width={48} height={48}
-          className="absolute left-2 top-3 sm:left-4 sm:top-4 w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
-          style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+        <div className="group absolute left-2 top-3 sm:left-4 sm:top-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logo.url} alt="GrindIT"
+            role="button" aria-label="Back to home" tabIndex={0}
+            onClick={() => router.push("/")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
+            width={48} height={48}
+            className="block w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 bg-[#080612]"
+            style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+          <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+            GrindIT
+          </span>
+        </div>
       </div>
 
       {/* slide */}
@@ -418,16 +492,17 @@ export default function WrappedPage() {
         }}
       >
         {/* capture-only logo — desktop only; on mobile the real top-bar logo is used */}
+        {/* No boxShadow here — the interactive logo (z-40 top bar) already provides the ring glow on screen. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT" width={48} height={48}
-          className="pointer-events-none absolute left-2 top-3 sm:left-4 sm:top-4 z-20 w-12 h-12 rounded-full hidden lg:block"
-          style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+          className="pointer-events-none absolute left-2 top-3 sm:left-4 sm:top-4 z-20 w-12 h-12 rounded-full hidden lg:block bg-[#080612]" />
         <SlideWatermark />
         {/* slide content — absolute inset-0 so slide bg fills the full 100dvh including the progress bar zone */}
         <div className="absolute inset-0 overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div key={normalizedSlideState.current} custom={direction}
               variants={slideVariants} initial="enter" animate="center" exit="exit"
+              style={{ willChange: "transform, opacity, filter" }}
               className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:h-auto lg:overflow-hidden">
               <SlideErrorBoundary>
               {/* h-full propagates the constrained height through to slide <main>/SlideShell so they fill the screen */}
@@ -490,22 +565,40 @@ export default function WrappedPage() {
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
       <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2">
-        <button onClick={goPrev} aria-label="Previous slide"
-          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${normalizedSlideState.index === 0 ? "invisible" : ""}`}
-          style={{ backdropFilter: "blur(8px)" }}>
-          <ChevronLeft />
-        </button>
-        <button onClick={goNext} aria-label="Next slide"
-          className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm transition active:scale-90 ${normalizedSlideState.index >= normalizedSlideState.total - 1 ? "invisible" : ""}`}
-          style={{ backdropFilter: "blur(8px)" }}>
-          <ChevronRight />
-        </button>
+        <div className={`group relative pointer-events-auto ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
+          <motion.button onClick={goPrev} aria-label="Previous slide"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm"
+            style={{ backdropFilter: "blur(8px)" }}
+            whileHover={{ scale: 1.12, borderColor: "rgba(255,255,255,0.35)", backgroundColor: "rgba(0,0,0,0.65)", color: "rgba(255,255,255,0.95)" }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ type: "spring", stiffness: 420, damping: 26 }}>
+            <ChevronLeft />
+          </motion.button>
+          <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+            Previous
+          </span>
+        </div>
+        <div className={`group relative pointer-events-auto ${normalizedSlideState.index >= normalizedSlideState.total - 1 ? "invisible" : ""}`}>
+          <motion.button onClick={goNext} aria-label="Next slide"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm"
+            style={{ backdropFilter: "blur(8px)" }}
+            whileHover={{ scale: 1.12, borderColor: "rgba(255,255,255,0.35)", backgroundColor: "rgba(0,0,0,0.65)", color: "rgba(255,255,255,0.95)" }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ type: "spring", stiffness: 420, damping: 26 }}>
+            <ChevronRight />
+          </motion.button>
+          <span className="pointer-events-none absolute right-full top-1/2 z-50 mr-2 -translate-y-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+            Next
+          </span>
+        </div>
       </div>
 
       {/* â"€â"€ narrative loading indicator â"€â"€ */}
-      {narrativeLoading && (normalizedSlideState.current === "archetype" || normalizedSlideState.current === "share") && (
-        <NarrativeLoadingIndicator />
-      )}
+      <AnimatePresence>
+        {narrativeLoading && (normalizedSlideState.current === "archetype" || normalizedSlideState.current === "share") && (
+          <NarrativeLoadingIndicator key="narrative-loader" />
+        )}
+      </AnimatePresence>
 
       <ShareModal
         open={shareOpen}

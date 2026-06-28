@@ -512,9 +512,9 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 
       {/* ── planet — spring entry animation ── */}
       <motion.div
-        initial={{ scale: 0.82, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        initial={{ scale: 0.78, opacity: 0, y: 12 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 240, damping: 28, mass: 0.9, delay: 0.06 }}
         style={{ position: "relative", zIndex: 15 }}>
         <div className="relative overflow-hidden rounded-full" style={{ width: 300, height: 300 }}>
 
@@ -680,8 +680,8 @@ function Planet({ spec, caption }: { spec: PlanetSpec; caption?: string }) {
 
       {/* ── caption — double-bezel card with archetype badge ── */}
       <motion.div className="mx-auto mt-4 w-[min(320px,85%)]"
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, ease: [0.22, 1, 0.36, 1] }}>
+        initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28, mass: 0.85, delay: 1.0 }}>
         {/* outer shell */}
         <div className="rounded-[1.5rem] p-[2px]" style={{
           background: `${archColor}80`,
@@ -800,7 +800,7 @@ export default function SlideShare({
 
 <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-3 lg:items-center lg:gap-4 lg:px-8 lg:py-16">
         {/* LEFT — cat rocket bobbing */}
-        <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
+        <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -48 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.1 }}>
           <motion.div className="relative" animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -813,9 +813,9 @@ export default function SlideShare({
 
         {/* CENTER — share card */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.5 }}
+          initial={{ opacity: 0, y: 26, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.85, delay: 0.22 }}
           className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center"
         >
           <div className="w-[min(380px,92vw)] lg:hidden">
@@ -870,8 +870,8 @@ export default function SlideShare({
                   onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                   aria-haspopup="dialog"
                   aria-label={`${b.label} badge — show what it means`}
-                  className="inline-flex cursor-pointer items-center gap-0.5 lg:gap-1.5 rounded-full border px-2 py-0.5 lg:px-3.5 lg:py-1.5 text-[10px] lg:text-sm text-zinc-100 whitespace-nowrap transition-transform duration-150 hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                  style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44` }}>
+                  className="inline-flex cursor-pointer items-center gap-0.5 lg:gap-1.5 rounded-full border px-2 py-0.5 lg:px-3.5 lg:py-1.5 text-[10px] lg:text-sm text-zinc-100 whitespace-nowrap transition-colors duration-150 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44`, touchAction: "manipulation" }}>
                   <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
                   {b.label}
                 </button>
@@ -954,13 +954,18 @@ export default function SlideShare({
     />
     {mounted && showStartOver && createPortal(
       <motion.div className="hidden lg:flex fixed bottom-6 left-1/2 z-[60] -translate-x-1/2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
-        <button onClick={startOver} className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white">
+        <div className="group relative">
+        <button onClick={startOver} className="flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm font-medium text-white/70 shadow-[0_4px_24px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
           </svg>
           Start over
         </button>
+        <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[9px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+          Back to home
+        </span>
+        </div>
       </motion.div>,
       document.body
     )}

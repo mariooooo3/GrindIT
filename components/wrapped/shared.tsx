@@ -28,12 +28,13 @@ export function Stars({ count = 120 }: { count?: number }) {
             width: `${s.size}px`,
             height: `${s.size}px`,
             opacity: s.opacity,
-            animation: `twinkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
-            boxShadow: "0 0 4px rgba(255,255,255,0.6)",
+            animation: `twinkle-star ${s.duration}s ease-in-out ${s.delay}s infinite`,
+            willChange: "opacity",
+            boxShadow: s.size > 1.4 ? "0 0 4px rgba(255,255,255,0.55)" : undefined,
           }}
         />
       ))}
-      <style>{`@keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.1)} }`}</style>
+      <style>{`@keyframes twinkle-star { 0%,100%{opacity:1} 50%{opacity:0.06} }`}</style>
     </div>
   );
 }

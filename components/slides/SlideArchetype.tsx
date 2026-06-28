@@ -136,8 +136,8 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:px-8 lg:py-16">
         {/* LEFT — disco ball + cats + dance floor */}
-        <motion.div initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+        <motion.div initial={{ opacity: 0, x: -56 }} animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 220, damping: 30, mass: 0.9, delay: 0.1 }}
           className="relative hidden items-center justify-center lg:flex">
           <div className="relative flex w-[88%] max-w-[360px] flex-col items-center lg:-translate-x-28">
             <DiscoBall />
@@ -156,8 +156,8 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         </motion.div>
 
         {/* CENTER — glass card */}
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
+        <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.85, delay: 0.2 }}
           className="flex flex-1 min-h-0 flex-col items-center w-full lg:flex-none lg:w-[min(380px,92vw)] lg:justify-self-center lg:absolute lg:left-1/2 lg:top-[8%] lg:mt-0 lg:-translate-x-1/2">
           <div className="lg:hidden">
             <ChapterHeadingMobile n={7} title="The Reveal" />
@@ -227,12 +227,12 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
                         onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                         aria-haspopup="dialog"
                         aria-label={`${b.label} badge — show what it means`}
-                        className="flex flex-col items-center gap-1.5 rounded-xl p-2 text-left transition-all"
+                        className="flex flex-col cursor-pointer items-center gap-1.5 rounded-xl p-2 text-left transition-colors duration-150 hover:brightness-110"
                         style={{
                           background: `${b.color}10`,
                           border: `1px solid ${b.color}${isTop ? "55" : "28"}`,
                           boxShadow: isTop ? `0 0 18px ${b.color}44, inset 0 0 12px ${b.color}18` : undefined,
-                          cursor: "pointer",
+                          touchAction: "manipulation",
                         }}>
                         <span style={{ color: b.color, filter: `drop-shadow(0 0 5px ${b.color}88)` }}>
                           <Glyph name={b.icon as GlyphName} size={22} />
@@ -293,8 +293,8 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
         </motion.div>
 
         {/* RIGHT — party planet with pulsing rays */}
-        <motion.div initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.35, ease: "easeOut" }}
+        <motion.div initial={{ opacity: 0, x: 56, scale: 0.94 }} animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9, delay: 0.15 }}
           className="pointer-events-none absolute right-[-10px] top-[28%] hidden overflow-visible lg:block">
           <PlanetStage className="!h-auto !w-auto !pt-0">
           <div className="relative h-[460px] w-[460px]">

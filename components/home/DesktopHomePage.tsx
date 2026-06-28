@@ -11,7 +11,7 @@ import { WorldCupLanding } from "@/components/pawcup/WorldCupTheme";
 import logo from "@/components/pawcup/assets/logo3.asset.json";
 import { ThemeSwitch } from "./_theme-switch";
 import { HeroCard } from "./_hero-card";
-import { FeaturesSection, HomeFooter } from "./_features";
+import { HowItWorksModal, HomeFooter } from "./_features";
 import { useHome } from "./HomeContext";
 import { authCallbackUrl } from "@/lib/hooks/useWrappedHome";
 
@@ -169,7 +169,7 @@ function StarPixelText({ onConnect, isLoggedIn }: { onConnect: () => void; isLog
 }
 
 // ── Desktop Nav ───────────────────────────────────────────────────────────
-function DesktopNav() {
+function DesktopNav({ onHowItWorks }: { onHowItWorks: () => void }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
       <div className="mx-auto max-w-6xl px-3 pt-3 pointer-events-auto sm:px-5 sm:pt-5">
@@ -177,7 +177,7 @@ function DesktopNav() {
         <div className="relative z-[1] flex items-center justify-between rounded-full border border-white/[0.08] bg-black/50 px-4 py-1.5 shadow-[0_0_0_1px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.07)] sm:px-5"
           style={{ backdropFilter: "blur(20px) saturate(1.6)" }}>
           {/* left: logo with commit nodes */}
-          <Link href="/" className="relative z-10 flex items-center gap-1 sm:gap-2">
+          <Link href="/" className="relative z-10 flex cursor-default items-center gap-1 sm:gap-2">
             <div className="relative h-8 w-8 shrink-0 sm:h-[72px] sm:w-[72px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo1.png" alt="GitHub Wrapped" width={72} height={72}
@@ -199,21 +199,12 @@ function DesktopNav() {
                   unwrapped.
                 </span>
               </span>
-              <a
-                href="#features"
-                onClick={(event) => {
-                  event.preventDefault();
-                  const el = document.getElementById("features");
-                  if (el) {
-                    const y = el.getBoundingClientRect().top + window.scrollY + 20;
-                    window.scrollTo({ top: y, behavior: "smooth" });
-                  }
-                  window.history.pushState(null, "", "#features");
-                }}
-                className="pointer-events-auto rounded-full border border-violet-300/30 bg-white/[0.06] px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-300/80 shadow-[0_6px_18px_-12px_rgba(167,139,250,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/50 hover:bg-violet-400/[0.16] hover:text-white hover:shadow-[0_10px_24px_-14px_rgba(167,139,250,1),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.96]"
+              <button
+                onClick={onHowItWorks}
+                className="pointer-events-auto cursor-pointer rounded-full border border-violet-300/30 bg-white/[0.06] px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-300/80 shadow-[0_6px_18px_-12px_rgba(167,139,250,0.85),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/50 hover:bg-violet-400/[0.16] hover:text-white hover:shadow-[0_10px_24px_-14px_rgba(167,139,250,1),inset_0_1px_0_rgba(255,255,255,0.16)] active:translate-y-0 active:scale-[0.96]"
               >
                 How it works
-              </a>
+              </button>
             </div>
           </div>
           {/* right: auth + badge + ThemeSwitch */}
@@ -236,10 +227,11 @@ function DesktopNav() {
 // ── Desktop page ──────────────────────────────────────────────────────────
 export function DesktopHomePage() {
   const { worldCup, ready, animate, isLoggedIn } = useHome();
+  const [howOpen, setHowOpen] = useState(false);
 
   return (
-    <main className="relative overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>
-      <DesktopNav />
+    <main className="relative h-[100svh] overflow-hidden text-white" style={{ background: "var(--space-deep)" }}>
+      <DesktopNav onHowItWorks={() => setHowOpen(true)} />
 
       <section className="relative flex flex-col items-center justify-end pb-4 pt-20" style={{ height: "var(--hero-height, 100svh)" }}>
         {/* WorldCup overlay */}
@@ -356,8 +348,7 @@ export function DesktopHomePage() {
         <HeroCard />
       </section>
 
-      <FeaturesSection />
-      <HomeFooter />
+      <HowItWorksModal open={howOpen} onClose={() => setHowOpen(false)} />
     </main>
   );
 }

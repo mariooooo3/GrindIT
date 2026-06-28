@@ -146,8 +146,8 @@ function Counter({ to, duration = 2 }: { to: number; duration?: number }) {
 }
 
 const cardItem = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
+  hidden: { opacity: 0, y: 14, scale: 0.98 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 300, damping: 28, mass: 0.8 } },
 };
 
 function StatBox({ label, value, accent }: { label: string; value: number | string; accent: string }) {

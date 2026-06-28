@@ -262,12 +262,12 @@ body {
 }
 .moon-rotate { animation: moon-rotate 240s linear infinite; will-change: transform; }
 
-/* ── star twinkle ── */
+/* ── star twinkle — opacity-only so the browser composites on GPU without layout ── */
 @keyframes twinkle {
-  0%, 100% { opacity: 1;    transform: scale(1); }
-  50%       { opacity: 0.12; transform: scale(0.65); }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.08; }
 }
-.star-twinkle { animation: twinkle var(--tw-dur, 3s) ease-in-out infinite; }
+.star-twinkle { animation: twinkle var(--tw-dur, 3s) ease-in-out infinite; will-change: opacity; }
 
 /* ── commit dot (rocket trail) ── */
 @keyframes commit-fade {
@@ -347,4 +347,29 @@ body {
   0%,100% { transform: translate(0,0)     scale(1); }
   33%      { transform: translate(24px,-16px) scale(1.05); }
   66%      { transform: translate(-16px,20px) scale(0.97); }
+}
+.nebula-drift { will-change: transform; }
+
+/* ── slide content fade-up — CSS alternative to Framer for lightweight stagger ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── reduced motion: keep layout animations but eliminate decorative ones ── */
+@media (prefers-reduced-motion: reduce) {
+  .star-twinkle,
+  .moon-rotate,
+  .tv-float,
+  .tv-led,
+  .tv-scanline-a,
+  .tv-scanline-b,
+  .tv-scanline-c,
+  .tv-sweep,
+  .tv-static-overlay,
+  .commit-dot,
+  .shooting-star {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

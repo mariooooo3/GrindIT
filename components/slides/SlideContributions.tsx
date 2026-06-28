@@ -244,7 +244,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
       <ChapterHeadingAnchor n={2} title="The Chase" />
       <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
         {/* LEFT — chase scene */}
-        <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
+        <motion.div initial={{ opacity: 0, x: -48 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9 }}
           className="hidden flex-col items-start justify-center lg:flex">
           <ChaseScene merged={showMerged} />
           <p className="mt-4 max-w-xs text-sm text-white/50">A cat in a cardboard rocket, chasing pull requests through the void.</p>
@@ -257,7 +257,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
           </div>
 
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-col flex-1 min-h-0 w-full max-w-[380px]">
+            className="flex flex-col flex-1 min-h-0 w-full max-w-[380px] lg:mt-6">
             <SlideCard accentColor={ACCENT} compact className="text-white">
               <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 pointer-events-none">
                 <span className="text-[15px] lg:text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
@@ -381,7 +381,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
         </div>
 
         {/* RIGHT */}
-        <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.2 }}
+        <motion.div initial={{ opacity: 0, x: 48 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.9, delay: 0.08 }}
           className="relative hidden lg:block">
           <PlanetStage>
             <Planet />
