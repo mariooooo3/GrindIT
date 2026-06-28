@@ -291,7 +291,7 @@ export function SlideShell({
         style={{ background: "radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 60%)" }}
       />
       {/* mobile: flex column filling full slide height; desktop: 3-column grid */}
-      <div className="relative z-10 mx-auto max-w-[1500px] flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:h-auto lg:min-h-screen lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:gap-4 lg:px-6 lg:py-12">
+      <div className="relative z-10 mx-auto max-w-[1500px] flex h-full flex-col px-4 pt-4 lg:grid lg:h-auto lg:min-h-screen lg:grid-cols-[0.7fr_minmax(320px,1fr)_0.7fr] lg:items-stretch lg:gap-4 lg:px-6 lg:py-12">
         {/* LEFT — Rocket + optional chapter title (desktop only) */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}

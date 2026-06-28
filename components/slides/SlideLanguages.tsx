@@ -247,7 +247,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
     <main className="relative h-full w-full overflow-hidden" style={{ background: "#080612", color: "white" }}>
       <Stars />
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
-      <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
+      <div className="relative z-10 flex h-full flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
         {/* LEFT */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}

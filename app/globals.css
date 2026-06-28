@@ -4,8 +4,8 @@
   --background: #0a0a0a;
   --foreground: #ededed;
   --app-h: 100dvh;
-  --card-max-h: calc(100dvh * 0.62);
-  --card-max-h-compact: calc(100dvh * 0.56);
+  --card-max-h: calc(100dvh * 0.65);
+  --card-max-h-compact: calc(100dvh * 0.60);
   --space-deep: oklch(0.10 0.025 280);
   --space-mid:  oklch(0.16 0.03  280);
   --violet-glow: oklch(0.72 0.18 295);

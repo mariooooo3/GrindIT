@@ -263,8 +263,8 @@ export default function WrappedPage() {
       const h = window.innerHeight;
       document.documentElement.style.setProperty("--app-h", `${h}px`);
       // percentage-based card heights so the card proportion is consistent on any phone
-      document.documentElement.style.setProperty("--card-max-h", `${Math.floor(h * 0.62)}px`);
-      document.documentElement.style.setProperty("--card-max-h-compact", `${Math.floor(h * 0.56)}px`);
+      document.documentElement.style.setProperty("--card-max-h", `${Math.floor(h * 0.65)}px`);
+      document.documentElement.style.setProperty("--card-max-h-compact", `${Math.floor(h * 0.60)}px`);
     };
     update();
     window.addEventListener("resize", update);
@@ -467,7 +467,7 @@ export default function WrappedPage() {
         <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
           style={{
             paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
-            background: "linear-gradient(to bottom, transparent, #080612 38%)",
+            background: "linear-gradient(to bottom, transparent, #080612 70%)",
           }}>
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
