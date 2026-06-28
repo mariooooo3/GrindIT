@@ -499,7 +499,7 @@ export async function captureDesktopElement(
     await waitForImages(clone);
     // Brief settle for layout/paint after fonts+images are ready. Kept short — the
     // fonts.ready and image waits above already cover the slow parts.
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 60));
 
     // Fix clone elements — same logic as captureElement but without restore bookkeeping
     const nodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];

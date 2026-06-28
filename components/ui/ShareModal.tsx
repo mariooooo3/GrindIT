@@ -43,20 +43,20 @@ const ACTIONS = [
 // Native-share action, shown first in the action grid (mobile and desktop).
 const SHARE_ACTION = { id: "share", label: "Share", accent: "#a78bfa", icon: "M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13" } as const;
 
-// Funny render-flavoured copy, in the same spirit as the landing-page loader.
+// Funny git/GitHub-flavoured copy, in the same spirit as the landing-page loader.
 const RENDER_MESSAGES = [
-  "Polishing your pixels...",
-  "Framing your masterpiece...",
-  "Bribing the GPU...",
-  "Summoning the screenshot gods...",
-  "Aligning every star...",
-  "Making it look expensive...",
-  "Adding a tasteful glow...",
-  "Convincing the card to pose...",
-  "Rendering at maximum smug...",
-  "Touching up your planet...",
-  "Negotiating with the pixels...",
-  "Applying main-character lighting...",
+  "git commit -m 'looks expensive'...",
+  "Force-pushing your pixels...",
+  "Squashing commits into one flex...",
+  "Resolving merge conflicts with your ego...",
+  "Cherry-picking the best pixels...",
+  "Staging your whole personality...",
+  "Rebasing onto main-character energy...",
+  "Bribing the CI to stay green...",
+  "git blame: still your fault, but prettier...",
+  "Fetching origin/clout...",
+  "Stashing your humility...",
+  "Pushing to origin/legend...",
 ] as const;
 
 function ScanLoader() {
@@ -152,8 +152,11 @@ export default function ShareModal({
       // Mobile: render the slide at desktop width in an off-screen iframe so the
       // lg: layout fires, then crop to the card. Produces a card identical to the
       // desktop slides (proper spacing/fonts) instead of the cramped mobile card.
+      // Cap the scale at 2.0 on mobile: the off-screen render is a full 1440×900
+      // and we only keep the cropped card, so 2.5 quadruples raster cost for no
+      // visible gain on a share-sized image. 2.0 is noticeably faster, still crisp.
       if (isMobile)
-        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale });
+        return await captureDesktopElement(slide, { cropToSelector: "[data-share-card]", scale: Math.min(scale, 2) });
       const card = document.querySelector("[data-share-card]") as HTMLElement | null;
       if (!card) return null;
       const accent    = (card as HTMLElement & { dataset: DOMStringMap }).dataset.accent ?? "#a78bfa";
