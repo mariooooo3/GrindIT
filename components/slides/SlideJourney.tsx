@@ -7,6 +7,7 @@ import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wra
 import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 
 const ACCENT = "#fbbf24";
 
@@ -205,6 +206,7 @@ export default function SlideJourney({ profile }: { profile: WrappedProfile }) {
 
   return (
     <main className="relative h-full w-full overflow-hidden text-white" style={{ background: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,180,30,0.10), transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(255,120,0,0.12), transparent 55%)" }} />
       <Stars />

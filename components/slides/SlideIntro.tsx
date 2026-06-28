@@ -6,6 +6,7 @@ import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { PlanetStage, SlideShell } from "@/components/wrapped/shared";
+import SpaceBackground from "@/components/SpaceBackground";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 
@@ -152,14 +153,14 @@ const cardItem = {
 function StatBox({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
     <div
-      className="rounded-lg px-1.5 py-1 lg:px-2.5 lg:py-2"
+      className="rounded-md px-1 py-1 lg:px-2.5 lg:py-2"
       style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}28` }}
     >
-      <div className="text-[8px] uppercase tracking-[0.15em]" style={{ color: `${ACCENT}70` }}>
+      <div className="text-[7px] uppercase tracking-[0.1em]" style={{ color: `${ACCENT}70` }}>
         {label}
       </div>
       <div
-        className="text-sm lg:text-xl font-bold tabular-nums"
+        className="text-xs lg:text-xl font-bold tabular-nums mt-0.5"
         style={{ color: accent, textShadow: `0 0 12px ${accent}80` }}
       >
         {value}
@@ -248,9 +249,11 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
           </div>
         </motion.div>
 
-        <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
-          <StatBox label="Current streak" value={`${flat.currentStreak}d`} accent="#f97316" />
-          <StatBox label="Longest streak" value={`${flat.longestStreak}d`} accent="#a78bfa" />
+        <motion.div variants={cardItem} className="mt-2 grid grid-cols-4 gap-1">
+          <StatBox label="Streak" value={`${flat.currentStreak}d`} accent="#f97316" />
+          <StatBox label="Best" value={`${flat.longestStreak}d`} accent="#a78bfa" />
+          <StatBox label="Repos" value={flat.ownedRepos} accent="#22d3ee" />
+          <StatBox label="PRs" value={flat.prsMerged} accent="#4ade80" />
         </motion.div>
 
         <motion.div variants={cardItem} className="mt-2">
@@ -273,11 +276,6 @@ function ProfileCard({ flat, ageLabel, wrappedLabel }: { flat: Flat; ageLabel: s
               </div>
             ))}
           </div>
-        </motion.div>
-
-        <motion.div variants={cardItem} className="mt-2 grid grid-cols-2 gap-2">
-          <StatBox label="Repos" value={flat.ownedRepos} accent="#22d3ee" />
-          <StatBox label="PRs merged" value={flat.prsMerged} accent="#4ade80" />
         </motion.div>
       </SlideCard>
     </motion.div>
@@ -378,6 +376,7 @@ export default function SlideIntro({ profile }: { profile: WrappedProfile }) {
   return (
     <SlideShell
       overlay={<ChapterHeadingAnchor n={1} title="Liftoff" />}
+      mobileBg={<SpaceBackground accent={ACCENT} />}
       mobileHeader={<ChapterHeadingMobile n={1} title="Liftoff" />}
       mobileFooter={
         introVibeLine ? (

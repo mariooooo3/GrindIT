@@ -10,7 +10,6 @@ type Star = {
 };
 
 function makeStars(count: number, seed = 1): Star[] {
-  // Simple seeded PRNG so SSR/CSR match
   let s = seed;
   const rand = () => {
     s = (s * 9301 + 49297) % 233280;
@@ -26,8 +25,32 @@ function makeStars(count: number, seed = 1): Star[] {
   }));
 }
 
-export default function SpaceBackground() {
+function hexToRgb(hex: string) {
+  const h = hex.replace("#", "");
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+}
+
+function lighten(hex: string, t = 0.45): string {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${Math.round(r + (255 - r) * t)},${Math.round(g + (255 - g) * t)},${Math.round(b + (255 - b) * t)})`;
+}
+
+function darken(hex: string, t = 0.72): string {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${Math.round(r * (1 - t))},${Math.round(g * (1 - t))},${Math.round(b * (1 - t))})`;
+}
+
+export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: string }) {
   const stars = useMemo(() => makeStars(110, 7), []);
+  const light = lighten(accent);
+  const mid   = accent;
+  const dark  = darken(accent);
+  const { r, g, b } = hexToRgb(accent);
+  const glow  = `rgba(${r},${g},${b},`;
 
   return (
     <div
@@ -44,12 +67,11 @@ export default function SpaceBackground() {
         }}
       />
 
-      {/* Soft violet nebula glows (kept away from vertical middle 60%) */}
+      {/* Soft nebula glows tinted with accent */}
       <div
         className="absolute -left-24 -top-24 h-[60vw] w-[60vw] rounded-full blur-3xl"
         style={{
-          background:
-            "radial-gradient(circle, rgba(139,92,246,0.28) 0%, rgba(139,92,246,0) 70%)",
+          background: `radial-gradient(circle, ${glow}0.22) 0%, ${glow}0) 70%)`,
           animation: "sb-nebula 16s ease-in-out infinite",
           contain: "strict",
         }}
@@ -57,8 +79,7 @@ export default function SpaceBackground() {
       <div
         className="absolute -right-32 bottom-[-10%] h-[70vw] w-[70vw] rounded-full blur-3xl"
         style={{
-          background:
-            "radial-gradient(circle, rgba(168,85,247,0.22) 0%, rgba(76,29,149,0.08) 50%, rgba(0,0,0,0) 75%)",
+          background: `radial-gradient(circle, ${glow}0.16) 0%, ${glow}0.06) 50%, rgba(0,0,0,0) 75%)`,
           animation: "sb-nebula 22s ease-in-out infinite reverse",
           contain: "strict",
         }}
@@ -66,8 +87,7 @@ export default function SpaceBackground() {
       <div
         className="absolute left-1/2 top-1/2 h-[120vw] w-[120vw] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-40"
         style={{
-          background:
-            "radial-gradient(circle, rgba(91,33,182,0.18) 0%, rgba(8,8,16,0) 65%)",
+          background: `radial-gradient(circle, ${glow}0.14) 0%, rgba(8,8,16,0) 65%)`,
           contain: "strict",
         }}
       />
@@ -94,8 +114,8 @@ export default function SpaceBackground() {
       <div
         className="absolute"
         style={{
-          top: "8%",
-          left: "10%",
+          top: "14%",
+          left: "3%",
           width: "70px",
           height: "70px",
           animation: "sb-float-a 14s ease-in-out infinite",
@@ -104,10 +124,8 @@ export default function SpaceBackground() {
         <div
           className="h-full w-full rounded-full"
           style={{
-            background:
-              "radial-gradient(circle at 30% 30%, #c4b5fd 0%, #7c3aed 45%, #2e1065 100%)",
-            boxShadow:
-              "0 0 40px 8px rgba(139,92,246,0.45), inset -6px -10px 20px rgba(0,0,0,0.55)",
+            background: `radial-gradient(circle at 30% 30%, ${light} 0%, ${mid} 45%, ${dark} 100%)`,
+            boxShadow: `0 0 40px 8px ${glow}0.4), inset -6px -10px 20px rgba(0,0,0,0.55)`,
           }}
         />
       </div>
@@ -126,10 +144,8 @@ export default function SpaceBackground() {
         <div
           className="h-full w-full rounded-full"
           style={{
-            background:
-              "radial-gradient(circle at 35% 30%, #a78bfa 0%, #6d28d9 50%, #1e1b4b 100%)",
-            boxShadow:
-              "0 0 60px 14px rgba(124,58,237,0.45), inset -10px -16px 32px rgba(0,0,0,0.6)",
+            background: `radial-gradient(circle at 35% 30%, ${lighten(accent, 0.3)} 0%, ${mid} 50%, ${darken(accent, 0.8)} 100%)`,
+            boxShadow: `0 0 60px 14px ${glow}0.4), inset -10px -16px 32px rgba(0,0,0,0.6)`,
           }}
         />
       </div>
@@ -138,8 +154,8 @@ export default function SpaceBackground() {
       <div
         className="absolute"
         style={{
-          top: "14%",
-          right: "12%",
+          top: "20%",
+          right: "3%",
           width: "36px",
           height: "36px",
           animation: "sb-float-c 12s ease-in-out infinite",
@@ -148,10 +164,8 @@ export default function SpaceBackground() {
         <div
           className="h-full w-full rounded-full"
           style={{
-            background:
-              "radial-gradient(circle at 30% 30%, #ddd6fe 0%, #8b5cf6 55%, #3b0764 100%)",
-            boxShadow:
-              "0 0 24px 5px rgba(167,139,250,0.5), inset -3px -5px 10px rgba(0,0,0,0.55)",
+            background: `radial-gradient(circle at 30% 30%, ${lighten(accent, 0.55)} 0%, ${mid} 55%, ${dark} 100%)`,
+            boxShadow: `0 0 24px 5px ${glow}0.45), inset -3px -5px 10px rgba(0,0,0,0.55)`,
           }}
         />
       </div>

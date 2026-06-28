@@ -7,6 +7,7 @@ import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wra
 import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 
 const ACCENT = "#f87171";
 
@@ -245,6 +246,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
 
   return (
     <main className="relative h-full w-full overflow-hidden" style={{ background: "#080612", color: "white" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <Stars />
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
       <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">

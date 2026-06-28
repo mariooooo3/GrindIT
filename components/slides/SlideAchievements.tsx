@@ -8,6 +8,7 @@ import { PlanetStage, Stars, RocketTailNodes, SLIDE6_TAIL_NODES } from "@/compon
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 
 const ACCENT = "#e879f9";
@@ -67,6 +68,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
   return (
     <>
     <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <div className="pointer-events-none absolute -left-40 top-1/3 size-[600px] rounded-full bg-fuchsia-600/10 blur-[140px]" />
       <div className="pointer-events-none absolute -right-40 bottom-0 size-[700px] rounded-full bg-purple-700/15 blur-[160px]" />
       <Stars />

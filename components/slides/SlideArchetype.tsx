@@ -8,6 +8,7 @@ import { PlanetStage, Stars, RocketTailNodes, SLIDE7_TAIL_NODES } from "@/compon
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 
 const ACCENT = "#c084fc";
@@ -126,6 +127,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
   return (
     <>
     <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(60% 50% at 20% 30%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 85% 70%, rgba(34,211,238,0.15), transparent 60%), radial-gradient(40% 40% at 70% 20%, rgba(255,62,165,0.12), transparent 60%)" }} />
       <Stars />

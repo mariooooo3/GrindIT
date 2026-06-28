@@ -8,6 +8,7 @@ import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wra
 import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 
 const ACCENT = "#34d399";
 
@@ -112,6 +113,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <div className="pointer-events-none absolute -left-40 top-1/3 h-[500px] w-[500px] rounded-full opacity-40"
         style={{ background: "radial-gradient(closest-side, rgba(74,222,128,0.25), transparent)" }} />
       <Stars />

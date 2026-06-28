@@ -9,6 +9,7 @@ import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { Glyph, type GlyphName } from "@/components/wrapped/TrophyIcons";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 import { BadgePopover, type PopoverBadge } from "@/components/wrapped/BadgePopover";
 import type { ArchetypeId, WrappedProfile } from "@/types/wrapped";
 
@@ -727,6 +728,7 @@ export default function SlideShare({
   return (
     <>
     <main className="relative h-full overflow-hidden" style={{ backgroundColor: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={palette.a} /></div>
       <div className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(ellipse at 15% 80%, rgba(120,80,200,0.18), transparent 60%)" }} />
       <Stars />

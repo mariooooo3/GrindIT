@@ -7,6 +7,7 @@ import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wra
 import { PlanetStage, Stars, RocketTailNodes } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
+import SpaceBackground from "@/components/SpaceBackground";
 
 const ACCENT = "#fb923c";
 
@@ -238,6 +239,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
 
   return (
     <main className="relative h-full w-full overflow-hidden text-white" style={{ backgroundColor: "#080612" }}>
+      <div className="pointer-events-none absolute inset-0 z-0 lg:hidden"><SpaceBackground accent={ACCENT} /></div>
       <Stars />
       <ChapterHeadingAnchor n={2} title="The Chase" />
       <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-3 lg:gap-4 lg:px-12 lg:py-10">
