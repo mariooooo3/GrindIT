@@ -160,6 +160,30 @@ body {
   display: none !important;
 }
 
+/* ── TV float (CSS, off main thread) ── */
+@keyframes tv-float {
+  0%, 100% { transform: translateY(-50%); }
+  50%      { transform: translateY(calc(-50% - 10px)); }
+}
+.tv-float { animation: tv-float 7s ease-in-out infinite; will-change: transform; }
+
+/* ── TV LED colour cycle ── */
+@keyframes tv-led {
+  0%,33%  { background: #4ade80; box-shadow: 0 0 6px 2px rgba(74,222,128,0.75); }
+  46%     { background: #facc15; box-shadow: 0 0 6px 2px rgba(250,204,21,0.75); }
+  50%,75% { background: #ef4444; box-shadow: 0 0 6px 2px rgba(239,68,68,0.75); }
+  82%     { background: #facc15; box-shadow: 0 0 6px 2px rgba(250,204,21,0.75); }
+  90%,100%{ background: #4ade80; box-shadow: 0 0 6px 2px rgba(74,222,128,0.75); }
+}
+.tv-led { animation: tv-led 8s ease-in-out infinite; }
+
+/* ── moon rotation (CSS, off main thread) ── */
+@keyframes moon-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.moon-rotate { animation: moon-rotate 240s linear infinite; will-change: transform; }
+
 /* ── star twinkle ── */
 @keyframes twinkle {
   0%, 100% { opacity: 1;    transform: scale(1); }
@@ -182,6 +206,63 @@ body {
   100% { opacity: 0;   transform: translateX(220px) translateY(110px); }
 }
 .shooting-star { animation: shoot 0.75s cubic-bezier(0.32,0.72,0,1) forwards; }
+
+/* ── TV signal CSS animations (compositor-thread, no JS) ── */
+@keyframes tv-scanline-a {
+  0%,33%  { opacity: 0; }
+  36%     { opacity: 1; }
+  38%     { opacity: 0; }
+  41%     { opacity: 1; }
+  44%,75% { opacity: 0; }
+  79%     { opacity: 1; }
+  83%,100%{ opacity: 0; }
+}
+.tv-scanline-a { animation: tv-scanline-a 8s linear infinite; will-change: opacity; }
+
+@keyframes tv-scanline-b {
+  0%,34%  { opacity: 0; }
+  36%,38% { opacity: 0; }
+  38%     { opacity: 1; }
+  40%     { opacity: 0; }
+  43%     { opacity: 1; }
+  45%,76% { opacity: 0; }
+  80%     { opacity: 0.8; }
+  84%,100%{ opacity: 0; }
+}
+.tv-scanline-b { animation: tv-scanline-b 8s linear infinite; will-change: opacity; }
+
+@keyframes tv-scanline-c {
+  0%,35%  { opacity: 0; }
+  40%     { opacity: 0.9; }
+  43%     { opacity: 1; }
+  46%,77% { opacity: 0; }
+  81%     { opacity: 0.7; }
+  85%,100%{ opacity: 0; }
+}
+.tv-scanline-c { animation: tv-scanline-c 8s linear infinite; will-change: opacity; }
+
+@keyframes tv-sweep {
+  0%,33%  { top: 5%;  opacity: 0; }
+  37%     { top: 5%;  opacity: 0; }
+  40%     { top: 40%; opacity: 1; }
+  44%     { top: 80%; opacity: 1; }
+  46%     { top: 105%;opacity: 0.3; }
+  48%,75% { top: 105%;opacity: 0; }
+  81%     { top: 55%; opacity: 0.7; }
+  100%    { top: 5%;  opacity: 0; }
+}
+.tv-sweep { animation: tv-sweep 8s linear infinite; will-change: top, opacity; }
+
+@keyframes tv-static {
+  0%,44%  { opacity: 0; }
+  48%     { opacity: 0.7; }
+  75%     { opacity: 0.7; }
+  78%     { opacity: 0.5; }
+  82%     { opacity: 0; }
+  84%     { opacity: 0.35; }
+  87%,100%{ opacity: 0; }
+}
+.tv-static-overlay { animation: tv-static 8s linear infinite; will-change: opacity; }
 
 /* ── nebula pulse ── */
 @keyframes nebula-drift {

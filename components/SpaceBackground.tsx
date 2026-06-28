@@ -51,6 +51,7 @@ export default function SpaceBackground() {
           background:
             "radial-gradient(circle, rgba(139,92,246,0.28) 0%, rgba(139,92,246,0) 70%)",
           animation: "sb-nebula 16s ease-in-out infinite",
+          contain: "strict",
         }}
       />
       <div
@@ -59,6 +60,7 @@ export default function SpaceBackground() {
           background:
             "radial-gradient(circle, rgba(168,85,247,0.22) 0%, rgba(76,29,149,0.08) 50%, rgba(0,0,0,0) 75%)",
           animation: "sb-nebula 22s ease-in-out infinite reverse",
+          contain: "strict",
         }}
       />
       <div
@@ -66,6 +68,7 @@ export default function SpaceBackground() {
         style={{
           background:
             "radial-gradient(circle, rgba(91,33,182,0.18) 0%, rgba(8,8,16,0) 65%)",
+          contain: "strict",
         }}
       />
 

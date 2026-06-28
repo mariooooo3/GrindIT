@@ -98,6 +98,60 @@ function SoccerBallMark({ className = "h-7 w-7 sm:h-8 sm:w-8" }: { className?: s
   );
 }
 
+function RocketMark({ className = "h-7 w-7 sm:h-8 sm:w-8" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
+      <defs>
+        <linearGradient id="rktBody" x1="32" y1="6" x2="32" y2="50" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#e0d6ff" />
+          <stop offset="0.5" stopColor="#a78bfa" />
+          <stop offset="1" stopColor="#6d28d9" />
+        </linearGradient>
+        <linearGradient id="rktFlame" x1="32" y1="46" x2="32" y2="62" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#fbbf24" />
+          <stop offset="0.5" stopColor="#f97316" />
+          <stop offset="1" stopColor="#ef4444" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* body */}
+      <path d="M32 6 C 26 16 24 28 24 40 L 40 40 C 40 28 38 16 32 6 Z" fill="url(#rktBody)" />
+      {/* nose shine */}
+      <path d="M32 6 C 29 14 28 24 28 36 L 32 36 C 32 24 31 14 32 6 Z" fill="#ede9fe" opacity="0.5" />
+      {/* window */}
+      <circle cx="32" cy="24" r="5" fill="#0f172a" />
+      <circle cx="32" cy="24" r="5" fill="none" stroke="#c4b5fd" strokeWidth="1.2" />
+      <ellipse cx="30.5" cy="22.5" rx="1.5" ry="1" fill="#e0e7ff" opacity="0.6" transform="rotate(-20 30.5 22.5)" />
+      {/* fins */}
+      <path d="M24 34 L 17 44 L 24 42 Z" fill="#8b5cf6" />
+      <path d="M40 34 L 47 44 L 40 42 Z" fill="#8b5cf6" />
+      {/* flame */}
+      <path d="M27 40 Q 30 52 32 58 Q 34 52 37 40 Z" fill="url(#rktFlame)" />
+      {/* stars */}
+      <circle cx="12" cy="14" r="1.2" fill="#4ade80" opacity="0.8" />
+      <circle cx="52" cy="20" r="0.9" fill="#c4b5fd" opacity="0.7" />
+      <circle cx="50" cy="38" r="1" fill="#4ade80" opacity="0.6" />
+      <circle cx="14" cy="32" r="0.8" fill="#c4b5fd" opacity="0.5" />
+    </svg>
+  );
+}
+
+function PlanetMark({ className = "h-7 w-7 sm:h-8 sm:w-8" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
+      <defs>
+        <radialGradient id="plGrad" cx="38%" cy="32%" r="65%">
+          <stop offset="0" stopColor="#c4b5fd" />
+          <stop offset="0.6" stopColor="#7c3aed" />
+          <stop offset="1" stopColor="#2e1065" />
+        </radialGradient>
+      </defs>
+      <circle cx="32" cy="32" r="18" fill="url(#plGrad)" />
+      <ellipse cx="32" cy="32" rx="30" ry="8" fill="none" stroke="#a78bfa" strokeWidth="2" opacity="0.5" transform="rotate(-20 32 32)" />
+      <ellipse cx="27" cy="26" rx="4" ry="2.5" fill="#ede9fe" opacity="0.35" transform="rotate(-25 27 26)" />
+    </svg>
+  );
+}
+
 export function ThemeSwitch() {
   const { worldCup, toggleWorldCup } = useTheme();
   const [boosted, setBoosted] = useState(false);
@@ -120,35 +174,62 @@ export function ThemeSwitch() {
     <button
       type="button"
       onClick={handleToggle}
-      aria-label={worldCup ? "Switch to normal theme" : "Switch to World Cup theme"}
-      title={worldCup ? "World Cup theme active — click to switch back" : "Monthly theme · World Cup — click to activate"}
+      aria-label={worldCup ? "Switch to space theme" : "Switch to World Cup theme"}
+      title={worldCup ? "Click to switch to space theme" : "Monthly theme · World Cup — click to activate"}
       className={`group relative flex items-center gap-1 rounded-full border py-0.5 pl-1.5 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-0.5 active:scale-[0.97] sm:gap-1.5 sm:py-1 sm:pl-2 sm:pr-3 ${
         worldCup
-          ? "border-amber-400/50 bg-amber-950/50 hover:border-amber-300/70 hover:bg-amber-950/70"
+          ? "border-violet-400/50 bg-violet-950/50 hover:border-violet-300/70 hover:bg-violet-950/70"
           : "border-white/[0.12] bg-black/40 hover:border-emerald-300/40 hover:bg-zinc-900/70"
       }`}
       style={{ backdropFilter: "blur(12px)" }}
     >
-      <span className="grid place-items-center">
-        <TrophyMark />
-      </span>
-      <motion.span
-        className="grid place-items-center"
-        animate={{ rotate: 360, scale: boosted ? [1, 1.12, 1] : 1 }}
-        transition={{
-          rotate: { duration: boosted ? 1.7 : 7, repeat: Infinity, ease: "linear" },
-          scale: { duration: 0.95, ease: [0.22, 1, 0.36, 1] },
-        }}
-      >
-        <SoccerBallMark />
-      </motion.span>
-      <span className="flex flex-col items-start leading-none">
-        <span className={`text-[7px] font-bold uppercase tracking-[0.14em] transition-colors sm:text-[8px] sm:tracking-[0.16em] ${worldCup ? "text-amber-400/80 group-hover:text-amber-300" : "text-zinc-500 group-hover:text-emerald-300/70"}`}>Theme</span>
-        <span className={`text-[9px] font-semibold tracking-[-0.01em] transition-colors sm:text-[11px] ${worldCup ? "text-amber-200" : "text-white/90"}`}>
-          World Cup
-        </span>
-      </span>
-      <span className={`pointer-events-none absolute inset-0 rounded-full transition-colors duration-500 ${worldCup ? "bg-amber-300/[0.08]" : "bg-emerald-300/0 group-hover:bg-emerald-300/[0.06]"}`} />
+      {worldCup ? (
+        <>
+          <span className="grid place-items-center">
+            <RocketMark />
+          </span>
+          <motion.span
+            className="grid place-items-center"
+            animate={{ rotate: 360, scale: boosted ? [1, 1.12, 1] : 1 }}
+            transition={{
+              rotate: { duration: boosted ? 1.7 : 20, repeat: Infinity, ease: "linear" },
+              scale: { duration: 0.95, ease: [0.22, 1, 0.36, 1] },
+            }}
+          >
+            <PlanetMark />
+          </motion.span>
+          <span className="flex flex-col items-start leading-none">
+            <span className="text-[7px] font-bold uppercase tracking-[0.14em] text-violet-400/80 transition-colors group-hover:text-violet-300 sm:text-[8px] sm:tracking-[0.16em]">Theme</span>
+            <span className="text-[9px] font-semibold tracking-[-0.01em] text-violet-200 transition-colors sm:text-[11px]">
+              Space
+            </span>
+          </span>
+          <span className="pointer-events-none absolute inset-0 rounded-full bg-violet-300/[0.06] transition-colors duration-500 group-hover:bg-violet-300/[0.12]" />
+        </>
+      ) : (
+        <>
+          <span className="grid place-items-center">
+            <TrophyMark />
+          </span>
+          <motion.span
+            className="grid place-items-center"
+            animate={{ rotate: 360, scale: boosted ? [1, 1.12, 1] : 1 }}
+            transition={{
+              rotate: { duration: boosted ? 1.7 : 7, repeat: Infinity, ease: "linear" },
+              scale: { duration: 0.95, ease: [0.22, 1, 0.36, 1] },
+            }}
+          >
+            <SoccerBallMark />
+          </motion.span>
+          <span className="flex flex-col items-start leading-none">
+            <span className="text-[7px] font-bold uppercase tracking-[0.14em] text-zinc-500 transition-colors group-hover:text-emerald-300/70 sm:text-[8px] sm:tracking-[0.16em]">Theme</span>
+            <span className="text-[9px] font-semibold tracking-[-0.01em] text-white/90 transition-colors sm:text-[11px]">
+              World Cup
+            </span>
+          </span>
+          <span className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/0 transition-colors duration-500 group-hover:bg-emerald-300/[0.06]" />
+        </>
+      )}
     </button>
   );
 }
