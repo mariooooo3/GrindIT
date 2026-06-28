@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
 import { mapToFlat, formatGitHubAge, formatWrappedLabel } from "@/components/wrapped/flatProfile";
 import { buildFallbackNarrative } from "@/lib/fallbackNarrative";
-import { PlanetStage, SlideShell, Rocket } from "@/components/wrapped/shared";
+import { PlanetStage, SlideShell } from "@/components/wrapped/shared";
 import { ChapterHeadingAnchor, ChapterHeadingMobile } from "@/components/ui/ChapterHeading";
 import { SlideCard } from "@/components/wrapped/SlideCard";
 

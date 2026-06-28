@@ -64,51 +64,33 @@ function CommitNodes() {
 function TVSignal() {
   return (
     <div className="relative overflow-hidden rounded-[0.55rem]">
-      <video src="/vid2.mp4" autoPlay loop muted playsInline className="block w-full" />
+      <video src="/vid2.mp4" autoPlay loop muted playsInline
+        className="block w-full"
+        style={{ willChange: "auto", transform: "translateZ(0)" }} />
 
       <div className="pointer-events-none absolute inset-0 z-10"
         style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.045) 3px, rgba(0,0,0,0.045) 4px)" }} />
       <div className="pointer-events-none absolute inset-0 z-20"
         style={{ background: "radial-gradient(ellipse at 32% 18%, rgba(255,255,255,0.07), transparent 52%)" }} />
 
-      <motion.div className="pointer-events-none absolute inset-x-0 z-30 h-[3px]"
-        style={{ top: "22%", background: "rgba(255,255,255,1)" }}
-        animate={{ opacity: [0,0,1,0,1,0,0,1,0,0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear",
-          times: [0,0.33,0.36,0.38,0.41,0.44,0.75,0.79,0.83,1] }} />
+      <div className="pointer-events-none absolute inset-x-0 z-30 h-[3px] tv-scanline-a"
+        style={{ top: "22%", background: "rgba(255,255,255,1)" }} />
 
-      <motion.div className="pointer-events-none absolute inset-x-0 z-30 h-[3px]"
-        style={{ top: "61%", background: "rgba(200,220,255,1)" }}
-        animate={{ opacity: [0,0,0,1,0,1,0,0,0.8,0,0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear",
-          times: [0,0.34,0.36,0.38,0.40,0.43,0.45,0.76,0.80,0.84,1] }} />
+      <div className="pointer-events-none absolute inset-x-0 z-30 h-[3px] tv-scanline-b"
+        style={{ top: "61%", background: "rgba(200,220,255,1)" }} />
 
-      <motion.div className="pointer-events-none absolute inset-x-0 z-30 h-[5px]"
-        style={{ top: "42%", background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))" }}
-        animate={{ opacity: [0,0,0,0.9,1,0,0,0.7,0,0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear",
-          times: [0,0.35,0.38,0.40,0.43,0.46,0.77,0.81,0.85,1] }} />
+      <div className="pointer-events-none absolute inset-x-0 z-30 h-[5px] tv-scanline-c"
+        style={{ top: "42%", background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))" }} />
 
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 z-[31]"
-        style={{ height: 20, background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.5) 60%, transparent)" }}
-        animate={{
-          top:     ["5%", "5%", "5%", "40%",  "80%",  "105%", "105%", "5%",  "55%", "5%"],
-          opacity: [0,    0,    0,    1,       1,      0.3,    0,      0,     0.7,   0],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear",
-          times: [0,0.33,0.37,0.40,0.44,0.46,0.48,0.75,0.81,1] }} />
+      <div className="pointer-events-none absolute inset-x-0 z-[31] tv-sweep"
+        style={{ height: 20, background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.5) 60%, transparent)" }} />
 
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-[35]"
+      {/* Static noise overlay — replaces expensive animated backdropFilter */}
+      <div className="pointer-events-none absolute inset-0 z-[35] tv-static-overlay"
         style={{
-          backdropFilter: "blur(16px) brightness(1.4) contrast(0.4) saturate(0.15)",
-          WebkitBackdropFilter: "blur(16px) brightness(1.4) contrast(0.4) saturate(0.15)",
           background: "repeating-linear-gradient(0deg, rgba(220,220,220,0.08) 0px, rgba(220,220,220,0.08) 1px, transparent 1px, transparent 4px)",
-        }}
-        animate={{ opacity: [0,0,0,1,1,0.7,0,0.5,0,0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear",
-          times: [0,0.44,0.46,0.48,0.75,0.78,0.82,0.84,0.87,1] }} />
+          mixBlendMode: "screen",
+        }} />
     </div>
   );
 }
@@ -304,11 +286,9 @@ export function DesktopHomePage() {
         />
 
         {/* TV decoration — right side, xl only */}
-        {ready && !worldCup && <motion.div
-          className="pointer-events-none absolute right-10 top-[54%] z-[5] -translate-y-1/2 xl:block hidden"
+        {ready && !worldCup && <div
+          className="pointer-events-none absolute right-10 top-[54%] z-[5] xl:block hidden tv-float"
           style={{ width: "min(21vw, 270px)" }}
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
         >
           <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[3rem] blur-3xl"
             style={{ background: "radial-gradient(ellipse at center, rgba(139,92,246,0.45) 0%, rgba(74,222,128,0.18) 55%, transparent 75%)", opacity: 0.7 }} />
@@ -338,13 +318,7 @@ export function DesktopHomePage() {
             </div>
             <div className="mt-2 flex items-center justify-between px-1.5">
               <div className="flex items-center gap-1.5">
-                <motion.span className="block h-1.5 w-1.5 rounded-full"
-                  animate={{
-                    background: ["#4ade80","#4ade80","#facc15","#ef4444","#ef4444","#facc15","#4ade80","#4ade80"],
-                    boxShadow: ["0 0 6px 2px rgba(74,222,128,0.75)","0 0 6px 2px rgba(74,222,128,0.75)","0 0 6px 2px rgba(250,204,21,0.75)","0 0 6px 2px rgba(239,68,68,0.75)","0 0 6px 2px rgba(239,68,68,0.75)","0 0 6px 2px rgba(250,204,21,0.75)","0 0 6px 2px rgba(74,222,128,0.75)","0 0 6px 2px rgba(74,222,128,0.75)"],
-                  }}
-                  transition={{ duration: 8, times: [0,0.33,0.46,0.50,0.75,0.82,0.90,1], repeat: Infinity, ease: "easeInOut" }}
-                />
+                <span className="block h-1.5 w-1.5 rounded-full tv-led" />
                 <span className="text-[6px] font-bold uppercase tracking-[0.14em]"
                   style={{ color: "rgba(139,92,246,0.55)", fontFamily: "monospace" }}>SPACE·1</span>
               </div>
@@ -366,7 +340,7 @@ export function DesktopHomePage() {
             <div className="h-[5px] w-20 rounded-full"
               style={{ background: "linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.5) 30%, rgba(74,222,128,0.35) 70%, transparent 100%)", boxShadow: "0 0 14px 2px rgba(139,92,246,0.35)" }} />
           </div>
-        </motion.div>}
+        </div>}
 
         {/* StarPixelText — left center, lg only */}
         {ready && !worldCup && <motion.div

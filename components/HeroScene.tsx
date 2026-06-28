@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { memo, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 const ORBIT_RX = 185;
 const ORBIT_RY = 125;
@@ -13,9 +13,6 @@ const INITIAL_ROCKET_TRANSFORM = `translate(-50%,-50%) translate(${ORBIT_RX}px,0
 const DOT_EMIT_MS   = 380;
 const DOT_MAX       = 4;
 const DOT_LIFETIME  = 1400;
-
-type CommitDot = { id: number; x: number; y: number; born: number };
-type ShootingStar = { id: number; x: number; y: number; angle: number };
 
 function shortestAngleDelta(from: number, to: number) {
   return ((((to - from) % 360) + 540) % 360) - 180;
@@ -74,14 +71,15 @@ const STAR_DATA = (() => {
 export function HeroScene() {
   const reduce    = useReducedMotion();
   const rocketRef = useRef<HTMLDivElement>(null);
-  const [dots,   setDots]   = useState<CommitDot[]>([]);
-  const [shoots, setShoots] = useState<ShootingStar[]>([]);
+  const dotsRef   = useRef<HTMLDivElement>(null);
+  const shootsRef = useRef<HTMLDivElement>(null);
 
-  // ── orbit rAF loop ──────────────────────────────────────────────────────
+  // ── orbit rAF loop — pure DOM, no React state ──────────────────────────
   useEffect(() => {
     if (reduce) return;
     const start = performance.now();
-    let lastEmit = 0, raf = 0, dotId = 0, smoothRot = 0, hasRot = false;
+    let lastEmit = 0, raf = 0, smoothRot = 0, hasRot = false;
+    const activeDots: { el: HTMLSpanElement; born: number }[] = [];
 
     const tick = (now: number) => {
       const p  = orbitPos(now - start);
@@ -94,35 +92,46 @@ export function HeroScene() {
         el.style.transform = `translate(-50%,-50%) translate(${p.x}px,${p.y}px) rotate(${smoothRot + bank}deg)`;
         el.style.zIndex    = p.behind ? "25" : "35";
       }
-      if (now - lastEmit > DOT_EMIT_MS) {
+      // emit commit dots via DOM
+      if (now - lastEmit > DOT_EMIT_MS && dotsRef.current) {
         lastEmit = now;
-        setDots(prev => {
-          const alive = prev.filter(d => now - d.born < DOT_LIFETIME);
-          const next  = [...alive, { id: ++dotId, x: p.x - p.ux * TAIL_OFFSET, y: p.y - p.uy * TAIL_OFFSET, born: now }];
-          return next.length > DOT_MAX ? next.slice(-DOT_MAX) : next;
-        });
+        const dot = document.createElement("span");
+        dot.className = "commit-dot absolute block rounded-full";
+        const dx = p.x - p.ux * TAIL_OFFSET;
+        const dy = p.y - p.uy * TAIL_OFFSET;
+        dot.style.cssText = `width:13px;height:13px;transform:translate(calc(${dx}px - 50%),calc(${dy}px - 50%));background:oklch(0.88 0.32 145);box-shadow:0 0 14px 4px oklch(0.78 0.28 145/0.75),0 0 6px 2px oklch(0.92 0.34 145/0.9);`;
+        dotsRef.current.appendChild(dot);
+        activeDots.push({ el: dot, born: now });
+        // remove expired dots
+        while (activeDots.length > 0 && (now - activeDots[0].born > DOT_LIFETIME || activeDots.length > DOT_MAX)) {
+          const old = activeDots.shift()!;
+          old.el.remove();
+        }
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      activeDots.forEach(d => d.el.remove());
+    };
   }, [reduce]);
 
-  // ── occasional shooting stars ────────────────────────────────────────────
+  // ── occasional shooting stars — pure DOM ─────────────────────────────────
   useEffect(() => {
     if (reduce) return;
-    let uid = 0;
+    const container = shootsRef.current;
+    if (!container) return;
     const fire = () => {
-      const id = ++uid;
-      setShoots(p => [...p, {
-        id,
-        x: 10 + Math.random() * 70,
-        y: 5  + Math.random() * 40,
-        angle: 28 + Math.random() * 18,
-      }]);
-      setTimeout(() => setShoots(p => p.filter(s => s.id !== id)), 900);
+      const star = document.createElement("span");
+      star.className = "shooting-star absolute block";
+      const x = 10 + Math.random() * 70;
+      const y = 5 + Math.random() * 40;
+      const angle = 28 + Math.random() * 18;
+      star.style.cssText = `left:0;top:0;width:80px;height:1.5px;border-radius:2px;transform:translate(${x}vw,${y}vh) rotate(${angle}deg);background:linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,0.85) 50%,rgba(255,255,255,0));box-shadow:0 0 6px rgba(255,255,255,0.4);`;
+      container.appendChild(star);
+      setTimeout(() => star.remove(), 900);
     };
-    // fire once early, then every 5-9 s
     const t0 = setTimeout(fire, 1800);
     const interval = setInterval(fire, 5000 + Math.random() * 4000);
     return () => { clearTimeout(t0); clearInterval(interval); };
@@ -132,7 +141,7 @@ export function HeroScene() {
     <>
       {/* Background layer: stars, nebula, trail — clipped, stays behind card (z-10) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <Starfield />
+        <MemoStarfield />
 
         {/* ── nebula aurora blobs ── */}
         <div
@@ -141,6 +150,7 @@ export function HeroScene() {
             background: "radial-gradient(ellipse at 40% 50%, oklch(0.55 0.25 295 / 0.5), transparent 68%)",
             filter: "blur(48px)",
             animation: "nebula-drift 22s ease-in-out infinite",
+            contain: "strict",
           }}
         />
         <div
@@ -149,6 +159,7 @@ export function HeroScene() {
             background: "radial-gradient(ellipse at 55% 45%, oklch(0.65 0.22 145 / 0.45), transparent 65%)",
             filter: "blur(40px)",
             animation: "nebula-drift 30s ease-in-out infinite reverse",
+            contain: "strict",
           }}
         />
 
@@ -175,52 +186,27 @@ export function HeroScene() {
         </svg>
 
         {/* ── moon glow ── */}
-        <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)" }} />
-        <div className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.08), transparent 70%)", filter: "blur(12px)" }} />
+        <div className="absolute left-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.55 0.18 295 / 0.14), transparent 70%)", filter: "blur(32px)", contain: "strict" }} />
+        <div className="absolute left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ top: MOON_ANCHOR, background: "radial-gradient(closest-side, oklch(0.72 0.18 295 / 0.08), transparent 70%)", filter: "blur(12px)", contain: "strict" }} />
 
-        {/* ── commit dots (rocket exhaust trail) ── */}
-        <div className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }}>
-          {dots.map(dot => (
-            <span key={dot.id} className="commit-dot absolute block rounded-full"
-              style={{
-                width: 13, height: 13,
-                transform: `translate(calc(${dot.x}px - 50%), calc(${dot.y}px - 50%))`,
-                willChange: "transform, opacity",
-                background: "oklch(0.88 0.32 145)",
-                boxShadow: "0 0 14px 4px oklch(0.78 0.28 145 / 0.75), 0 0 6px 2px oklch(0.92 0.34 145 / 0.9)" }} />
-          ))}
-        </div>
+        {/* ── commit dots container (managed via DOM) ── */}
+        <div ref={dotsRef} className="absolute left-1/2 z-10" style={{ top: MOON_ANCHOR }} />
 
-        {/* ── shooting stars ── */}
-        {shoots.map(s => (
-          <span key={s.id} className="shooting-star absolute block"
-            style={{
-              left: 0, top: 0,
-              width: 80, height: 1.5,
-              borderRadius: 2,
-              transform: `translate(${s.x}vw, ${s.y}vh) rotate(${s.angle}deg)`,
-              willChange: "transform, opacity",
-              background: "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.85) 50%, rgba(255,255,255,0))",
-              boxShadow: "0 0 6px rgba(255,255,255,0.4)",
-            }}
-          />
-        ))}
+        {/* ── shooting stars container (managed via DOM) ── */}
+        <div ref={shootsRef} />
       </div>
 
       {/* Foreground layer: planet + rocket at z-[51], above nav (z-50) and card (z-10), pointer-events-none keeps everything clickable */}
       <div className="pointer-events-none absolute inset-0 z-[51]">
         {/* ── moon ── */}
-        <motion.div className="absolute left-1/2 z-20 -translate-x-1/2 -translate-y-1/2" style={{ top: MOON_ANCHOR }}
-          animate={reduce ? undefined : { rotate: 360 }}
-          transition={{ duration: 240, repeat: Infinity, ease: "linear" }}
-        >
+        <div className="absolute left-1/2 z-20 moon-rotate" style={{ top: MOON_ANCHOR }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/moon.png" alt="" width={620} height={620}
             className="h-[clamp(240px,32vw,460px)] w-[clamp(240px,32vw,460px)] select-none opacity-92"
-            style={{ filter: "drop-shadow(0 0 80px rgba(160,120,255,0.32)) drop-shadow(0 0 140px rgba(120,80,220,0.18))" }}
+            style={{ filter: "drop-shadow(0 0 80px rgba(160,120,255,0.32)) drop-shadow(0 0 140px rgba(120,80,220,0.18))", transform: "translateZ(0)" }}
             draggable={false}
           />
-        </motion.div>
+        </div>
 
         {/* ── cat rocket ── */}
         {reduce ? (
@@ -297,7 +283,7 @@ function Rocket() {
   );
 }
 
-function Starfield() {
+const MemoStarfield = memo(function Starfield() {
   return (
     <div className="absolute inset-0">
       <div className="absolute inset-0" style={{
@@ -333,4 +319,4 @@ function Starfield() {
       ))}
     </div>
   );
-}
+});
