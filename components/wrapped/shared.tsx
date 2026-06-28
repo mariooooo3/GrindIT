@@ -273,6 +273,7 @@ export function SlideShell({
   overlay,
   mobileHeader,
   mobileFooter,
+  mobileBg,
 }: {
   leftContent?: ReactNode;
   center: ReactNode;
@@ -280,9 +281,13 @@ export function SlideShell({
   overlay?: ReactNode;
   mobileHeader?: ReactNode;
   mobileFooter?: ReactNode;
+  mobileBg?: ReactNode;
 }) {
   return (
     <div className="relative h-full lg:h-auto lg:min-h-full w-full overflow-hidden text-white" style={{ background: "var(--slide-bg, #080612)" }}>
+      {mobileBg && (
+        <div className="pointer-events-none absolute inset-0 z-0 lg:hidden">{mobileBg}</div>
+      )}
       <div className="slide-stars-bg"><Stars /></div>
       {overlay}
       {/* violet nebula glow behind right column */}
