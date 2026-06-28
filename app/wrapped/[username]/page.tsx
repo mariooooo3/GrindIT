@@ -186,26 +186,6 @@ export default function WrappedPage() {
   const slideAreaRef = useRef<HTMLDivElement>(null);
   const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
-  // Portrait phone detection — scale landscape slides to fit portrait width
-  const [portraitScale, setPortraitScale] = useState(1);
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      if (w < h && w < 768) {
-        setPortraitScale(w / h);
-      } else {
-        setPortraitScale(1);
-      }
-    };
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("orientationchange", update);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", update);
-    };
-  }, []);
 
   const fetchNarrative = useCallback(async (p: WrappedProfile, wc: boolean) => {
     setNarrativeLoading(true);
@@ -410,14 +390,6 @@ export default function WrappedPage() {
       {/* slide */}
       {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
       <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
-        style={portraitScale !== 1 ? {
-          transformOrigin: "center center",
-          transform: `scale(${portraitScale})`,
-          width: `${100 / portraitScale}%`,
-          height: `${100 / portraitScale}%`,
-          top: `${-(100 / portraitScale - 100) / 2}%`,
-          left: `${-(100 / portraitScale - 100) / 2}%`,
-        } : undefined}
         onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={e => {
           const d = e.changedTouches[0].clientX - touchStartX.current;
@@ -437,11 +409,11 @@ export default function WrappedPage() {
               variants={slideVariants} initial="enter" animate="center" exit="exit"
               className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:h-auto lg:overflow-hidden">
               <SlideErrorBoundary>
-              {/* on mobile: relative w-full so height comes from content; on desktop: h-full for absolute overlay system */}
-              <div className="relative w-full overflow-hidden lg:h-full">
-                {/* space theme — relative on mobile (gives height), absolute inset-0 on desktop */}
+              {/* h-full propagates the constrained height through to slide <main>/SlideShell so they fill the screen */}
+              <div className="relative h-full w-full overflow-hidden">
+                {/* space theme — h-full on mobile fills the container; absolute inset-0 on desktop */}
                 <div
-                  className={`relative w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
+                  className={`relative h-full w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
                     ready && worldCup ? "pointer-events-none opacity-0" : "opacity-100"
                   }`}
                 >
