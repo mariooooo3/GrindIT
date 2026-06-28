@@ -247,7 +247,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
     <main className="relative h-full w-full overflow-hidden" style={{ background: "#080612", color: "white" }}>
       <Stars />
       <ChapterHeadingAnchor n={3} title="Dodging Bugs" />
-      <div className="relative z-10 flex h-full flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
+      <div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-10 lg:px-12 lg:py-12">
         {/* LEFT */}
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
@@ -257,12 +257,12 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
 
         {/* CENTER */}
         <div className="order-1 flex flex-1 min-h-0 flex-col items-center w-full lg:order-2 lg:justify-center">
-          <div className="w-[92%] lg:hidden">
+          <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={3} title="Dodging Bugs" />
           </div>
 
           <motion.div variants={stagger} initial="hidden" animate="show"
-            className="flex flex-col flex-1 min-h-0 w-[92%]">
+            className="flex flex-col flex-1 min-h-0 w-[min(380px,92vw)]">
             <SlideCard accentColor={ACCENT} compact className="text-white">
               <div className="absolute top-4 right-4 z-20 pointer-events-none">
                 <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>

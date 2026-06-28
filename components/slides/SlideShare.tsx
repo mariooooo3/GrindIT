@@ -732,7 +732,7 @@ export default function SlideShare({
       <Stars />
       <ChapterHeadingAnchor n={8} title="Your Planet" />
 
-<div className="relative z-10 flex h-full flex-col px-4 pt-4 lg:grid lg:min-h-screen lg:grid-cols-3 lg:items-center lg:gap-4 lg:px-8 lg:py-16">
+<div className="relative z-10 flex h-full flex-col px-4 pt-4 pb-14 lg:pb-0 lg:grid lg:min-h-screen lg:grid-cols-3 lg:items-center lg:gap-4 lg:px-8 lg:py-16">
         {/* LEFT — cat rocket bobbing */}
         <motion.div className="hidden h-[420px] items-center justify-center lg:flex lg:h-full lg:justify-end" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, delay: 0.2 }}>
           <motion.div className="relative" animate={{ y: [0, -12, 0], rotate: [-2, 2, -2] }}
@@ -752,10 +752,10 @@ export default function SlideShare({
           transition={{ duration: 0.9, delay: 0.5 }}
           className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center"
         >
-          <div className="w-[92%] lg:hidden">
+          <div className="w-[min(380px,92vw)] lg:hidden">
             <ChapterHeadingMobile n={8} title="Your Planet" />
           </div>
-          <SlideCard ref={cardRef} accentColor={palette.a} compact sizeStyle={{ width: "92%" }}>
+          <SlideCard ref={cardRef} accentColor={palette.a} compact sizeStyle={{ width: "min(405px, 92vw)" }}>
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
               <span className="text-[20px] font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.85)" }}>
                 <span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>G</span>rind<span style={{ color: palette.a, textShadow: `0 0 14px ${palette.a}aa` }}>IT</span>
@@ -832,7 +832,7 @@ export default function SlideShare({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.2 }}
-            className="flex-none mt-3 w-[92%] lg:hidden"
+            className="flex-none mt-3 w-[min(405px,92vw)] lg:hidden"
           >
             <div className="rounded-[1.5rem] p-[2px]" style={{
               background: `${palette.a}80`,

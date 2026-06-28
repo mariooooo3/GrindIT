@@ -261,13 +261,10 @@ export default function WrappedPage() {
   useEffect(() => {
     const update = () => {
       const h = window.innerHeight;
-      const refH = 844;
-      const zoom = Math.min(1, h / refH);
-      const effectiveH = Math.max(h, refH);
       document.documentElement.style.setProperty("--app-h", `${h}px`);
-      document.documentElement.style.setProperty("--slide-zoom", zoom.toFixed(4));
-      document.documentElement.style.setProperty("--card-max-h", `${Math.floor(effectiveH * 0.65)}px`);
-      document.documentElement.style.setProperty("--card-max-h-compact", `${Math.floor(effectiveH * 0.60)}px`);
+      // percentage-based card heights so the card proportion is consistent on any phone
+      document.documentElement.style.setProperty("--card-max-h", `${Math.floor(h * 0.62)}px`);
+      document.documentElement.style.setProperty("--card-max-h-compact", `${Math.floor(h * 0.56)}px`);
     };
     update();
     window.addEventListener("resize", update);
@@ -432,14 +429,7 @@ export default function WrappedPage() {
               className="h-full w-full overflow-x-hidden overflow-y-auto overscroll-contain lg:absolute lg:inset-0 lg:h-auto lg:overflow-hidden">
               <SlideErrorBoundary>
               {/* h-full propagates the constrained height through to slide <main>/SlideShell so they fill the screen */}
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  zoom: 'var(--slide-zoom, 1)',
-                  width: 'calc(100% / var(--slide-zoom, 1))',
-                  height: 'calc(100% / var(--slide-zoom, 1))',
-                }}
-              >
+              <div className="relative h-full w-full overflow-hidden">
                 {/* space theme — h-full on mobile fills the container; absolute inset-0 on desktop */}
                 <div
                   className={`relative h-full w-full lg:absolute lg:inset-0 will-change-[opacity] ${animate ? "transition-opacity duration-[520ms] ease-out" : ""} ${
@@ -477,7 +467,7 @@ export default function WrappedPage() {
         <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
           style={{
             paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
-            background: "linear-gradient(to bottom, transparent, #080612 70%)",
+            background: "linear-gradient(to bottom, transparent, #080612 38%)",
           }}>
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
