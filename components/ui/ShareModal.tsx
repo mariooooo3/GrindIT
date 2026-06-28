@@ -49,11 +49,9 @@ const RENDER_MESSAGES = [
 ] as const;
 
 function ScanLoader() {
-  const [idx, setIdx] = useState(() => Math.floor(Math.random() * RENDER_MESSAGES.length));
-  useEffect(() => {
-    const id = setInterval(() => setIdx((i) => (i + 1) % RENDER_MESSAGES.length), 1600);
-    return () => clearInterval(id);
-  }, []);
+  // One random message per render — ScanLoader remounts each time a capture starts,
+  // so a fresh line is picked without rotating mid-render.
+  const [msg] = useState(() => RENDER_MESSAGES[Math.floor(Math.random() * RENDER_MESSAGES.length)]);
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden"
          style={{ background: "rgba(3,1,14,.9)" }}>
@@ -66,21 +64,15 @@ function ScanLoader() {
                style={{ background: "#7c3aed", animation: `sm-dot 1.5s ease-in-out ${i*0.18}s infinite` }} />
         ))}
       </div>
-      <div className="h-4 overflow-hidden px-6 text-center">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={idx}
-            className="block"
-            style={{ fontSize:11, fontWeight:500, color:"rgba(196,181,253,.72)" }}
-            initial={{ opacity: 0, y: 7 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -7 }}
-            transition={{ duration: 0.26, ease: SP }}
-          >
-            {RENDER_MESSAGES[idx]}
-          </motion.span>
-        </AnimatePresence>
-      </div>
+      <motion.span
+        className="block px-6 text-center"
+        style={{ fontSize:11, fontWeight:500, color:"rgba(196,181,253,.72)" }}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: SP }}
+      >
+        {msg}
+      </motion.span>
     </div>
   );
 }
@@ -99,7 +91,16 @@ export default function ShareModal({
   const [failed,     setFailed]     = useState(false);
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [captureKey, setCaptureKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const blobRef = useRef<Blob | null>(null);
+
+  // Track viewport so the action grid and share handlers can branch on mobile.
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // inject CSS once
   useEffect(() => {
@@ -214,14 +215,19 @@ export default function ShareModal({
     try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); flash("Copied."); }
     catch { dl(blob); flash("Saved instead."); }
   };
-  const onX = () => {
+  const onX = async () => {
+    // Desktop: auto-download the image first so it's ready to attach in the composer.
+    // Mobile: X handles the deep link well, no download needed.
+    if (!isMobile) { const b = await getBlob(); if (b) dl(b); }
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
-  const onLinkedIn = () => {
-    // LinkedIn dropped prefilled-text sharing; share-offsite reliably opens the
-    // composer with the grindit.dev link preview (the feed/?shareActive route
-    // silently fails to create a post on mobile).
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://www.grindit.dev")}`, "_blank", "noopener");
+  const onLinkedIn = async () => {
+    // Same format as X: open the composer with the prefilled caption (no image).
+    // The linkedin.com universal link opens the app directly when installed, so the
+    // user posts from their logged-in account instead of a fresh Chrome tab.
+    // Desktop also downloads the image first so it can be attached manually.
+    if (!isMobile) { const b = await getBlob(); if (b) dl(b); }
+    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(captionText)}`, "_blank", "noopener");
   };
   const handlers: Record<string, () => void> = { download: onDownload, copy: onCopy, x: onX, linkedin: onLinkedIn };
 
@@ -376,8 +382,10 @@ export default function ShareModal({
             )}
 
             {/* ── action grid ── */}
+            {/* Mobile: drop the Save button (web can't write to the gallery); the
+                native Share… button above handles saving to Photos. */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-3">
-              {ACTIONS.map(({ id, label, icon, accent }, i) => (
+              {ACTIONS.filter((a) => !(isMobile && a.id === "download")).map(({ id, label, icon, accent }, i) => (
                 <motion.button key={id} onClick={handlers[id]} disabled={busy}
                   className="group flex flex-col cursor-pointer items-center gap-[9px] rounded-[13px] py-3.5 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-25"
                   style={{ background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)" }}
