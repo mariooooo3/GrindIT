@@ -25,13 +25,11 @@ export const SlideCard = React.forwardRef<HTMLDivElement, SlideCardProps>(
         ref={ref}
         data-share-card
         data-accent={accentColor}
-        className={`relative flex flex-col overflow-hidden rounded-2xl lg:rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(300px,84vw)] h-auto min-h-[65dvh] max-h-[76dvh] lg:min-h-0 lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none select-none cursor-default ${className}`}
+        className={`slide-card-glass relative flex flex-col overflow-hidden rounded-2xl lg:rounded-3xl [&::-webkit-scrollbar]:hidden mx-auto w-[min(300px,84vw)] h-auto min-h-[65dvh] max-h-[76dvh] lg:min-h-0 lg:max-h-none lg:w-[min(380px,92vw)] lg:h-[min(580px,84vh)] lg:flex-none select-none cursor-default ${className}`}
         style={{
           ...(sizeStyle?.width  && { width:  sizeStyle.width }),
           ...(sizeStyle?.height && { height: sizeStyle.height }),
           background: "rgba(7, 4, 22, 0.95)",
-          backdropFilter: "blur(28px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.8)",
           border: `1px solid ${accentColor}2e`,
           boxShadow: `0 28px 70px -16px ${accentColor}4a, 0 0 0 1px ${accentColor}26, inset 0 1px 0 rgba(255,255,255,0.06)`,
         }}

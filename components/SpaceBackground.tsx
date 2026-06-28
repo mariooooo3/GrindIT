@@ -107,7 +107,6 @@ export default function SpaceBackground({ accent = "#8b5cf6" }: { accent?: strin
             opacity: star.opacity,
             boxShadow: star.size > 1 ? "0 0 4px rgba(196,181,253,0.7)" : undefined,
             animation: `sb-twinkle ${star.duration} ease-in-out ${star.delay} infinite`,
-            willChange: "opacity",
           }}
         />
       ))}
