@@ -259,10 +259,16 @@ export default function WrappedPage() {
   useEffect(() => { profileRef.current = profile; }, [profile]);
 
   useEffect(() => {
-    const setAppH = () => document.documentElement.style.setProperty("--app-h", `${window.innerHeight}px`);
-    setAppH();
-    window.addEventListener("resize", setAppH);
-    return () => window.removeEventListener("resize", setAppH);
+    const update = () => {
+      const h = window.innerHeight;
+      document.documentElement.style.setProperty("--app-h", `${h}px`);
+      // percentage-based card heights so the card proportion is consistent on any phone
+      document.documentElement.style.setProperty("--card-max-h", `${Math.floor(h * 0.62)}px`);
+      document.documentElement.style.setProperty("--card-max-h-compact", `${Math.floor(h * 0.56)}px`);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
   const didInitTheme = useRef(false);
   useEffect(() => {
