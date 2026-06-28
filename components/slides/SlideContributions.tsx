@@ -250,7 +250,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
 
         {/* CENTER */}
         <div className="flex flex-1 min-h-0 flex-col items-center w-full lg:justify-center">
-          <div className="w-[min(400px,92vw)] lg:hidden">
+          <div className="w-[92%] lg:hidden">
             <ChapterHeadingMobile n={2} title="The Chase" />
           </div>
 
