@@ -445,7 +445,7 @@ export default function WrappedPage() {
         </div>
 
         {/* mobile progress bar — flex-none, flows naturally below slide content */}
-        <div className="pointer-events-auto flex-none lg:hidden px-4 py-2.5">
+        <div className="pointer-events-auto flex-none lg:hidden px-4 py-2.5 bg-[#080612]">
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
       </div>
