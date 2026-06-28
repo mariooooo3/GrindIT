@@ -395,7 +395,7 @@ export default function WrappedPage() {
 
       {/* slide */}
       {/* mobile: h-[100dvh] pins the area to exactly the viewport so bg fills edge-to-edge and the progress bar stays anchored at the bottom; desktop: lg:inset-0 lg:block restores full-screen absolute stacking */}
-      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 flex flex-col bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
+      <div ref={slideAreaRef} className="absolute inset-x-0 top-0 h-[100dvh] z-10 bg-[#080612] lg:bg-transparent lg:h-auto lg:inset-0 lg:block"
         onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
         onTouchEnd={e => {
           const d = e.changedTouches[0].clientX - touchStartX.current;
@@ -408,8 +408,8 @@ export default function WrappedPage() {
           className="pointer-events-none absolute left-2 top-3 sm:left-4 sm:top-4 z-20 w-12 h-12 rounded-full hidden lg:block"
           style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
         <SlideWatermark />
-        {/* slide content — flex-1 min-h-0 on mobile so it fills the remaining space after the progress bar; absolute inset-0 on desktop */}
-        <div className="flex-1 min-h-0 overflow-hidden lg:absolute lg:inset-0">
+        {/* slide content — absolute inset-0 so slide bg fills the full 100dvh including the progress bar zone */}
+        <div className="absolute inset-0 overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div key={normalizedSlideState.current} custom={direction}
               variants={slideVariants} initial="enter" animate="center" exit="exit"
@@ -450,14 +450,15 @@ export default function WrappedPage() {
           </AnimatePresence>
         </div>
 
-        {/* mobile progress bar — flex-none, flows naturally below slide content */}
-        <div className="pointer-events-auto flex-none lg:hidden px-4 py-2.5 bg-[#080612]">
+        {/* mobile progress bar — absolute at bottom, gradient bg blends seamlessly into slide */}
+        <div className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
+          style={{
+            paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
+            background: "linear-gradient(to bottom, transparent, #080612 38%)",
+          }}>
           <PlanetProgress total={activeTotal} current={normalizedSlideState.index} colors={planetColors(profile)} onNavigate={goTo} />
         </div>
       </div>
-
-      {/* safe-area fill — covers the gap below 100dvh on iOS (home indicator zone) */}
-      <div className="fixed bottom-0 inset-x-0 z-50 lg:hidden" style={{ height: "env(safe-area-inset-bottom, 0px)", background: "#080612" }} />
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
       <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2">
