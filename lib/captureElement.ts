@@ -409,12 +409,18 @@ type Opts = {
    * text re-wrap. Animations are still frozen to a deterministic frame.
    */
   faithful?: boolean;
+  /**
+   * Clone-into-wrapper only: expand the clone to its natural content height by
+   * removing max-height / overflow constraints. Fixes mobile cards whose content
+   * overflows the viewport-relative max-h.
+   */
+  autoHeight?: boolean;
 };
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
   const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40,
           noCardDeco, addLogoTopLeft, addSlideWatermark, removeFromClone, revealInClone,
-          skipLayer, lightFixes, skipElements, minCaptureWidth, faithful } = opts;
+          skipLayer, lightFixes, skipElements, minCaptureWidth, faithful, autoHeight } = opts;
 
   // Clone-into-wrapper mode: captures the element on a styled background without
   // touching the live DOM (safe with React). Used for both card and full-slide.
@@ -440,7 +446,32 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       addStarDots(wrap, accent);
     }
 
+    // Commit WAAPI-animated values (opacity, transform) to inline styles before
+    // cloning. framer-motion v11+ drives animations via WAAPI — the animated state
+    // lives in the WAAPI layer, not in element.style. cloneNode only copies inline
+    // styles, so without this step the clone inherits the `initial` prop values
+    // (e.g. opacity:0) and animated elements appear invisible.
+    const origElems = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+    const wapiRestores: Array<() => void> = [];
+    for (const el of origElems) {
+      if (el.style.opacity === "" && el.style.transform === "") continue;
+      const cs = getComputedStyle(el);
+      if (el.style.opacity !== "" && el.style.opacity !== cs.opacity) {
+        const prev = el.style.opacity;
+        el.style.opacity = cs.opacity;
+        wapiRestores.push(() => { el.style.opacity = prev; });
+      }
+      if (el.style.transform !== "" && el.style.transform !== cs.transform) {
+        const prev = el.style.transform;
+        el.style.transform = cs.transform;
+        wapiRestores.push(() => { el.style.transform = prev; });
+      }
+    }
+
     const clone = root.cloneNode(true) as HTMLElement;
+
+    // Restore original element styles immediately (synchronous — no repaint).
+    wapiRestores.forEach((fn) => fn());
     clone.style.width     = `${W}px`;
     clone.style.height    = `${H}px`;
     clone.style.minWidth  = `${W}px`;
@@ -485,6 +516,25 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     wrap.appendChild(clone);
     document.body.appendChild(wrap);
     try {
+      if (autoHeight) {
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
+        clone.style.height = 'auto';
+        clone.style.minHeight = '0';
+        for (const el of Array.from(clone.querySelectorAll<HTMLElement>('*'))) {
+          const cs = getComputedStyle(el);
+          if (cs.overflowY === 'auto' || cs.overflowY === 'scroll') {
+            el.style.overflow = 'visible';
+            el.style.maxHeight = 'none';
+            el.style.height = 'auto';
+            el.style.flex = 'none';
+          }
+        }
+        const expandedH = clone.offsetHeight || H;
+        clone.style.height = `${expandedH}px`;
+        clone.style.minHeight = `${expandedH}px`;
+        wrap.style.height = `${expandedH + wrapperPad * 2}px`;
+      }
       for (const el of cloneNodes) {
         const cs = getComputedStyle(el);
         applyNodeFixes(el, cs, (elem, props) => {
