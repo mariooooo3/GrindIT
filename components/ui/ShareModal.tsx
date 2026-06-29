@@ -164,31 +164,10 @@ export default function ShareModal({
         : document.querySelector<HTMLElement>("[data-share-card]");
       if (!card) return null;
 
-      if (mobile) {
-        // Mobile: live-DOM path (no cloning) + canvas padding with blurred backdrop.
-        // Captures the card exactly as rendered, then places it on a larger canvas
-        // where the background is a stretched+blurred copy of the card itself.
-        const cardBlob = await captureElement(card, { scale: 2 });
-        if (!cardBlob) return null;
-        const img = await createImageBitmap(cardBlob);
-        const PAD = 96; // pixels of extra space around the card
-        const canvas = document.createElement("canvas");
-        canvas.width  = img.width  + PAD * 2;
-        canvas.height = img.height + PAD * 2;
-        const ctx = canvas.getContext("2d")!;
-        // Stretched + blurred card as background
-        ctx.filter = "blur(28px)";
-        ctx.drawImage(img, -32, -32, canvas.width + 64, canvas.height + 64);
-        ctx.filter = "none";
-        // Dark overlay so the card pops
-        ctx.fillStyle = "rgba(8,6,18,0.65)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Card centred
-        ctx.drawImage(img, PAD, PAD);
-        return new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
-      }
-
-      // Desktop: clone-into-wrapper for the gradient background and star-dot overlay.
+      // Mobile + desktop: same clone-into-wrapper path — a simple theme-matched
+      // radial gradient background (no blurred-card backdrop) plus star-dot overlay.
+      // The clone path freezes animations to a final frame, so the card never shows
+      // a pulsing glow / mid-animation artifact like the old mobile live-DOM path did.
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`

@@ -547,6 +547,18 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     if (skipSet.has(el)) continue;
     if (el !== root && el.hasAttribute("data-share-ignore")) continue;
 
+    // Freeze CSS animations at a deterministic far-future frame (same trick the clone
+    // path uses) so the live-DOM capture never catches a pulsing glow or a floating
+    // element mid-animation — the "extra glow" artifact in mobile share renders.
+    const prevAnimDelay = el.style.animationDelay;
+    const prevAnimPlay  = el.style.animationPlayState;
+    el.style.animationDelay = "-99s";
+    el.style.animationPlayState = "paused";
+    restores.push(() => {
+      el.style.animationDelay = prevAnimDelay;
+      el.style.animationPlayState = prevAnimPlay;
+    });
+
     if (lightFixes) {
       // Light path: only lock flex/grid widths (prevents foreignObject reflow).
       // backdrop-filter already handled by CSS injection; text fixes skipped for speed.
