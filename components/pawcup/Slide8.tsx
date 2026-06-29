@@ -265,7 +265,8 @@ function FlagColumn({ items, side }: { items: readonly (readonly [string, string
           >
             <div className="flag-wave aspect-[4/3] w-full overflow-hidden rounded-sm ring-1 ring-white/15 shadow-[0_1px_4px_rgba(0,0,0,0.5)]" style={{ animationDelay: `${(i % 6) * 0.2}s` }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`https://flagcdn.com/w160/${code}.png`} alt={`${name} flag`} className="h-full w-full object-cover" loading="lazy" draggable={false} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`https://flagcdn.com/w80/${code}.png`} alt={`${name} flag`} className="h-full w-full object-cover" loading="eager" crossOrigin="anonymous" draggable={false} />
             </div>
             <div className="w-full truncate text-center text-[7px] font-semibold leading-none tracking-wide text-white/85">
               {name}

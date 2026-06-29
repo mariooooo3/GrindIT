@@ -6,8 +6,10 @@
 
 import logoAsset from "@/components/pawcup/assets/logo3.asset.json";
 
-// Per-session cache: external img src → data URL (avoids re-fetching on every capture)
-const imgDataCache = new Map<string, string>();
+// Per-session cache: external img src → Promise<data URL>.
+// Storing the Promise (not the resolved string) means concurrent callers for the
+// same URL all await the same in-flight fetch instead of each starting a new one.
+const imgDataCache = new Map<string, Promise<string | null>>();
 
 /**
  * Call once when the share modal opens.
@@ -31,25 +33,35 @@ export async function prewarmCapture(): Promise<void> {
       }
     }
   }
+  // Pre-fetch <img crossOrigin="anonymous"> elements (e.g. flag images in WC bonus slide)
+  // so they're in imgDataCache before inlineExternalImages runs during capture.
+  for (const img of Array.from(document.querySelectorAll<HTMLImageElement>("img[crossorigin]"))) {
+    const src = img.getAttribute("src") ?? "";
+    if (src && !src.startsWith("data:") && !src.startsWith("/") && !src.startsWith("blob:")) {
+      toDataUrl(src).catch(() => {});
+    }
+  }
 }
 
-async function toDataUrl(src: string): Promise<string | null> {
+function toDataUrl(src: string): Promise<string | null> {
   if (imgDataCache.has(src)) return imgDataCache.get(src)!;
-  try {
-    const res = await fetch(src, { mode: "cors" });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.onerror = reject;
-      r.readAsDataURL(blob);
-    });
-    imgDataCache.set(src, dataUrl);
-    return dataUrl;
-  } catch {
-    return null;
-  }
+  const p = (async () => {
+    try {
+      const res = await fetch(src, { mode: "cors" });
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
+  })();
+  imgDataCache.set(src, p);
+  return p;
 }
 
 // Replace all external <img> src AND inline background-image URLs with cached
@@ -382,17 +394,27 @@ type Opts = {
   skipElements?: HTMLElement[];
   /** Light fix mode for the live-DOM path (CSS injection + class-heuristic flex only). */
   lightFixes?: boolean;
+  /**
+   * Minimum capture width in px. When the element is narrower than this (e.g. a card
+   * on a very small phone), the clone is forced to this width so the browser reflows
+   * the content at the intended design width instead of the squeezed viewport width.
+   * max-width is cleared on the clone so vw-based constraints don't fight the override.
+   */
+  minCaptureWidth?: number;
 };
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
   const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40,
           noCardDeco, addLogoTopLeft, addSlideWatermark, removeFromClone, revealInClone,
-          skipLayer, lightFixes, skipElements } = opts;
+          skipLayer, lightFixes, skipElements, minCaptureWidth } = opts;
 
   // Clone-into-wrapper mode: captures the element on a styled background without
   // touching the live DOM (safe with React). Used for both card and full-slide.
   if (wrapperBg && !cropTo) {
-    const W = root.offsetWidth || 380;
+    // minCaptureWidth: if the element is narrower than the design width (e.g. a card
+    // on a very small phone), force the clone wider so the browser reflows content at
+    // the intended width instead of the squeezed viewport width.
+    const W = Math.max(root.offsetWidth || 380, minCaptureWidth ?? 0);
     const H = root.offsetHeight || 580;
     const totalW = W + wrapperPad * 2;
     const totalH = H + wrapperPad * 2;
@@ -415,6 +437,11 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     clone.style.height    = `${H}px`;
     clone.style.minWidth  = `${W}px`;
     clone.style.minHeight = `${H}px`;
+    // When we're overriding to a wider width, remove any vw-based max-width so the
+    // clone can actually expand to W (e.g. max-w-[82vw] would fight the override).
+    if (minCaptureWidth && root.offsetWidth < minCaptureWidth) {
+      clone.style.maxWidth = "none";
+    }
 
     // Remove unwanted subtrees from the clone (e.g. display:none desktop scenes
     // that CSS hides on mobile but that still exist in the DOM).
@@ -434,10 +461,22 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       }
     }
 
+    // Freeze all CSS animations at their final state BEFORE the clone enters the DOM.
+    // cloneNode(true) resets animation timelines to t=0 — elements with animation-delay
+    // (e.g. flag-in on Slide8 flags, delays up to 460 ms) would be at opacity:0 when
+    // the snapshot fires. Setting animationDelay=-99s on every clone node places every
+    // animation 99 s in the past → past completion → fill-mode:forwards/both holds the
+    // final state. Inline styles on the clone (not document.head) keep live-page
+    // animations (ScanLoader, etc.) running normally.
+    const cloneNodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];
+    for (const el of cloneNodes) {
+      el.style.animationDelay = "-99s";
+      el.style.animationPlayState = "paused";
+    }
+
     wrap.appendChild(clone);
     document.body.appendChild(wrap);
     try {
-      const cloneNodes = [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))];
       for (const el of cloneNodes) {
         const cs = getComputedStyle(el);
         applyNodeFixes(el, cs, (elem, props) => {

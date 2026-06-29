@@ -125,9 +125,11 @@ export default function ShareModal({
     document.head.appendChild(s);
   }, []);
 
-  // clear preview after modal exit animation completes
+  // Reset to card mode on every open; clear preview after modal exit animation completes
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setScope("card");
+    } else {
       const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); }, 320);
       return () => clearTimeout(t);
     }
@@ -162,7 +164,16 @@ export default function ShareModal({
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
+      const mobileCard = window.innerWidth < 1024;
+      return await captureElement(card, {
+        scale,
+        wrapperBg,
+        wrapperPad: 72,
+        // On small phones the card is constrained by vw (e.g. w-[min(300px,84vw)]).
+        // Force a minimum of 300px so the browser reflows content at the intended
+        // design width instead of the squeezed viewport width. Desktop unaffected.
+        ...(mobileCard ? { minCaptureWidth: 300 } : {}),
+      });
     }
     // Full slide — same clone-into-wrapper approach as card mode, just bigger:
     // capture only the VISIBLE layer div (not the full slide container with both
@@ -191,7 +202,7 @@ export default function ShareModal({
     }
 
     return await captureElement(layer, {
-      scale: mobile ? 1.5 : 2,
+      scale: 2,
       wrapperBg: "#080612",
       wrapperPad: 0,
       noCardDeco: true,
