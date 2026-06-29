@@ -165,50 +165,20 @@ export default function ShareModal({
       if (!card) return null;
 
       if (mobile) {
-        // Mobile card — dead simple: take ONE faithful screenshot of the live slide
-        // (the card exactly as it looks on screen), then crop a region a bit larger
-        // than the card so nothing is truncated, and blur the slide background behind it.
-        const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
-        const layerEl = slide.querySelector<HTMLElement>(layerSel) ?? slide;
-        const skipEls: HTMLElement[] = [];
-        if (worldCup) {
-          const pawcup = layerEl.querySelector<HTMLElement>(".wc-pawcup-scene");
-          if (pawcup) skipEls.push(pawcup);
-        }
-        const S = 2; // capture scale
-        const slideBlob = await captureElement(layerEl, {
-          scale: S, faithful: true,
-          ...(skipEls.length ? { skipElements: skipEls } : {}),
+        // Clone-into-wrapper (same approach as desktop) with autoHeight to expand
+        // the card to its natural content height — fixes truncation from max-h on
+        // small viewports.
+        const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
+        const wrapperBg = worldCup
+          ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
+          : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
+        return await captureElement(card, {
+          scale: 2,
+          wrapperBg,
+          wrapperPad: 48,
+          minCaptureWidth: 300,
+          autoHeight: true,
         });
-        if (!slideBlob) return null;
-        const img = await createImageBitmap(slideBlob);
-
-        // Card position inside the captured layer (scaled to the screenshot pixels).
-        const lr = layerEl.getBoundingClientRect();
-        const cr = card.getBoundingClientRect();
-        const cardX = (cr.left - lr.left) * S;
-        const cardY = (cr.top  - lr.top)  * S;
-        const cardW = cr.width  * S;
-        const cardH = cr.height * S;
-        const PAD = 26 * S; // margin around the card so it's never cut off
-
-        const outW = cardW + PAD * 2;
-        const outH = cardH + PAD * 2;
-        const canvas = document.createElement("canvas");
-        canvas.width = outW; canvas.height = outH;
-        const ctx = canvas.getContext("2d")!;
-        // 1. blurred background = the real slide around the card (clamped to the image).
-        const sx = Math.max(0, cardX - PAD);
-        const sy = Math.max(0, cardY - PAD);
-        ctx.filter = "blur(16px)";
-        ctx.drawImage(img, sx, sy, outW, outH, 0, 0, outW, outH);
-        ctx.filter = "none";
-        // 2. subtle darken so the card pops off the background.
-        ctx.fillStyle = "rgba(8,6,18,0.32)";
-        ctx.fillRect(0, 0, outW, outH);
-        // 3. the card itself, sharp and centred.
-        ctx.drawImage(img, cardX, cardY, cardW, cardH, PAD, PAD, cardW, cardH);
-        return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
       }
 
       // Desktop: clone-into-wrapper with a theme-matched radial gradient + star-dots.
