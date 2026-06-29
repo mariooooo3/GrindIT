@@ -402,20 +402,19 @@ type Opts = {
    */
   minCaptureWidth?: number;
   /**
-   * Mobile-card clone capture. The on-screen card is squeezed into a narrow width via
-   * CSS zoom, which leaves the desktop-tuned applyNodeFixes (nowrap + max-content) no
-   * horizontal slack — text and pills get pushed past the card edge (clipping/overlap).
-   * This mode pairs with a wider minCaptureWidth (gives that slack) and additionally
-   * lets the card grow to its content height, so the render fills the card like the
-   * desktop one instead of leaving a tall empty gap below short content.
+   * Faithful live-DOM capture (mobile card): screenshot the element exactly as it is on
+   * screen. Skips all applyNodeFixes width/flex/text rewriting (only backdrop-filter is
+   * stripped, since foreignObject can't render it) — the on-screen layout already fits,
+   * so reproducing it verbatim avoids both the max-content overflow and the foreignObject
+   * text re-wrap. Animations are still frozen to a deterministic frame.
    */
-  mobileCard?: boolean;
+  faithful?: boolean;
 };
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
   const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40,
           noCardDeco, addLogoTopLeft, addSlideWatermark, removeFromClone, revealInClone,
-          skipLayer, lightFixes, skipElements, minCaptureWidth, mobileCard } = opts;
+          skipLayer, lightFixes, skipElements, minCaptureWidth, faithful } = opts;
 
   // Clone-into-wrapper mode: captures the element on a styled background without
   // touching the live DOM (safe with React). Used for both card and full-slide.
@@ -450,22 +449,6 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     // clone can actually expand to W (e.g. max-w-[82vw] would fight the override).
     if (minCaptureWidth && root.offsetWidth < minCaptureWidth) {
       clone.style.maxWidth = "none";
-    }
-
-    // Mobile card: let the card grow to its content height (drop the min-/max-height
-    // dvh constraints + the inner scroll area) so short slides don't leave a tall empty
-    // gap and tall ones aren't scroll-clipped. The wrapper height is recomputed below.
-    if (mobileCard) {
-      clone.style.height = "auto";
-      clone.style.minHeight = "0";
-      clone.style.maxHeight = "none";
-      const content = clone.querySelector<HTMLElement>(".slide-card-content");
-      if (content) {
-        content.style.flex = "none";
-        content.style.height = "auto";
-        content.style.maxHeight = "none";
-        content.style.overflow = "visible";
-      }
     }
 
     // Remove unwanted subtrees from the clone (e.g. display:none desktop scenes
@@ -513,13 +496,6 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         addLogoTopLeft  ? addLogoTopLeftEl(wrap)  : Promise.resolve(),
         (!noCardDeco || addSlideWatermark) ? addCardWatermark(wrap) : Promise.resolve(),
       ]);
-      // Mobile card grew to fit its content (height:auto) — resize the wrapper to the
-      // laid-out card height so the gradient frame hugs the card instead of leaving a
-      // fixed-height gap (and so star-dots / watermark sit in the real padding band).
-      if (mobileCard) {
-        const cardH = clone.offsetHeight;
-        wrap.style.height = `${cardH + wrapperPad * 2}px`;
-      }
       const { domToCanvas } = await import("modern-screenshot");
       const canvas = await domToCanvas(wrap, { backgroundColor: background, scale });
       return await new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
@@ -553,7 +529,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   const FLEX_TOKEN_RE = /(?:^| )(flex|grid|inline-flex|inline-grid)(?= |$)/;
 
   let bfStyleEl: HTMLStyleElement | null = null;
-  if (lightFixes) {
+  if (lightFixes || faithful) {
     bfStyleEl = document.createElement("style");
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
@@ -590,6 +566,10 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       el.style.animationDelay = prevAnimDelay;
       el.style.animationPlayState = prevAnimPlay;
     });
+
+    // Faithful screenshot: no width/flex/text rewriting — render exactly as on screen.
+    // (backdrop-filter already neutralised by the injected CSS rule above.)
+    if (faithful) continue;
 
     if (lightFixes) {
       // Light path: only lock flex/grid widths (prevents foreignObject reflow).
