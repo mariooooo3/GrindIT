@@ -227,7 +227,7 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
                         onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                         aria-haspopup="dialog"
                         aria-label={`${b.label} badge — show what it means`}
-                        className="flex flex-col cursor-pointer items-center gap-1.5 rounded-xl p-2 text-left transition-colors duration-150 hover:brightness-110"
+                        className="flex flex-col cursor-pointer items-center gap-1.5 rounded-xl p-3 lg:p-2 text-left transition-colors duration-150 hover:brightness-110"
                         style={{
                           background: `${b.color}10`,
                           border: `1px solid ${b.color}${isTop ? "55" : "28"}`,
