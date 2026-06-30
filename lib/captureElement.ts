@@ -544,7 +544,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       if (matchLiveLayout) {
         for (const el of cloneNodes) {
           el.style.backdropFilter = "none";
-          el.style.webkitBackdropFilter = "none";
+          el.style.setProperty("-webkit-backdrop-filter", "none");
         }
       } else {
         for (const el of cloneNodes) {
