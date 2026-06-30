@@ -129,7 +129,9 @@ export default function ShareModal({
 
   // Reset to card mode on every open; clear preview after modal exit animation completes
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setScope("card");
+    } else {
       const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); }, 320);
       return () => clearTimeout(t);
     }
