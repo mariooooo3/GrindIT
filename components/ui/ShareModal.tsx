@@ -228,7 +228,7 @@ export default function ShareModal({
   }, [effectiveScope, slideRef, worldCup]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
     let alive = true;
     blobRef.current = null;
     hiPromiseRef.current = null;
@@ -260,7 +260,7 @@ export default function ShareModal({
       setBusy(false);
     }, 80);
     return () => { alive = false; clearTimeout(t); };
-  }, [open, scope, capture, captureKey]);
+  }, [open, scope, capture, captureKey, isMobile]);
 
   useEffect(() => {
     if (!open) return;
@@ -323,6 +323,61 @@ export default function ShareModal({
     : [...shareLead, ...ACTIONS];
 
   if (!mounted) return null;
+
+  if (isMobile) {
+    return createPortal(
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-end justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            onClick={onClose}
+          >
+            <div className="absolute inset-0 bg-black/72" />
+            <motion.div
+              className="relative w-full max-w-[420px] overflow-hidden rounded-[24px] border border-white/10 bg-[#0b071a]/95 p-5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+              initial={{ y: 32, opacity: 0, scale: 0.96 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 20, opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 340, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/75">Screenshot Mode</p>
+              <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Folosește screenshot-ul telefonului</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/65">
+                După ce închizi acest panou, slide-ul rămâne exact ca acum, pe fullscreen, cu aceleași elemente live.
+                Fă screenshot nativ din telefon și share-uiește imaginea rezultată.
+              </p>
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[12px] leading-relaxed text-white/60">
+                Pe mobile nu mai generăm un render separat. Folosești direct varianta live, 1:1.
+              </div>
+              <div className="mt-5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 cursor-pointer rounded-full bg-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
+                >
+                  Continue to screenshot
+                </button>
+                <button
+                  type="button"
+                  onClick={onX}
+                  className="flex-1 cursor-pointer rounded-full border border-white/12 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white/80 transition-colors duration-150 hover:bg-white/[0.06]"
+                >
+                  Post on X
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body,
+    );
+  }
 
   return createPortal(
     <AnimatePresence>

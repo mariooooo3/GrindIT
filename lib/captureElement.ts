@@ -545,6 +545,23 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         for (const el of cloneNodes) {
           el.style.backdropFilter = "none";
           el.style.setProperty("-webkit-backdrop-filter", "none");
+          // modern-screenshot's foreignObject path does not reliably honor CSS zoom.
+          // The live mobile slides shrink card contents via `.slide-card-content { zoom: .82 }`.
+          // Without emulation here, the exported mobile card content renders at 100%
+          // size and spills out of the card.
+          if (el.classList.contains("slide-card-content")) {
+            const zoom = parseFloat(getComputedStyle(el).zoom || "1");
+            if (Number.isFinite(zoom) && Math.abs(zoom - 1) > 0.001) {
+              const prior = el.style.transform;
+              el.style.zoom = "1";
+              el.style.transformOrigin = "top left";
+              el.style.transform = prior && prior !== "none"
+                ? `${prior} scale(${zoom})`
+                : `scale(${zoom})`;
+              el.style.width = `${100 / zoom}%`;
+              el.style.maxWidth = `${100 / zoom}%`;
+            }
+          }
         }
       } else {
         for (const el of cloneNodes) {
