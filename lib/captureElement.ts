@@ -628,18 +628,31 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     // (backdrop-filter already neutralised by the injected CSS rule above.)
     if (faithful) {
       const cls = typeof el.className === "string" ? el.className : "";
+      const cs  = getComputedStyle(el);
 
-      // Lock the card's scroll container to its measured height — foreignObject
-      // doesn't enforce overflow:auto so content would paint over siblings below.
-      if (cls.includes("slide-card-content")) {
-        const h = el.getBoundingClientRect().height;
-        if (h > 0) setStyle(el, { "max-height": `${h}px`, "overflow": "hidden" });
+      // Lock ALL scroll/auto-overflow containers to their measured height.
+      // foreignObject ignores overflow:auto/scroll — content paints past the boundary
+      // and overlaps siblings below. Use computed style so we catch any element.
+      const ov = cs.overflow, ovy = cs.overflowY, ovx = cs.overflowX;
+      if (
+        ov === "auto"  || ov === "scroll"  ||
+        ovy === "auto" || ovy === "scroll" ||
+        ovx === "auto" || ovx === "scroll"
+      ) {
+        const rect = el.getBoundingClientRect();
+        if (rect.height > 0) {
+          setStyle(el, {
+            overflow:     "hidden",
+            height:       `${rect.height}px`,
+            "max-height": `${rect.height}px`,
+          });
+        }
       }
 
       // Prevent inline-flex chips/pills from wrapping — foreignObject font metrics
       // are slightly wider, causing single-line chips to break to a second line.
       if (FLEX_TOKEN_RE.test(cls)) {
-        const d = getComputedStyle(el).display;
+        const d = cs.display;
         if (d === "inline-flex") {
           setStyle(el, { "white-space": "nowrap", "flex-wrap": "nowrap", "width": "max-content" });
           for (const child of Array.from(el.childNodes)) {
