@@ -179,10 +179,10 @@ export default function ShareModal({
           if (pawcup) skipEls.push(pawcup);
         }
 
-        // Pass 1 — background
+        // Pass 1 — background (card excluded so it doesn't appear under the clone)
         const slideBlob = await captureElement(layerEl, {
           scale: S, faithful: true,
-          ...(skipEls.length ? { skipElements: skipEls } : {}),
+          skipElements: [...skipEls, card],
         });
         if (!slideBlob) return null;
         const slideImg = await createImageBitmap(slideBlob);
