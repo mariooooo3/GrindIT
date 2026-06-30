@@ -586,7 +586,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     // creating doubled bars, harsh badge glows, and rectangular halos on
     // circular planet decorations (box-shadow ignores border-radius in foreignObject).
     const extraRules = faithful
-      ? "\n* { box-shadow: none !important; }\nhtml { font-size: 88% !important; }"
+      ? "\n* { box-shadow: none !important; }"
       : "";
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
@@ -606,6 +606,17 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
       }
     });
   };
+
+  // Pre-collect computed font sizes before any DOM mutations — faithful mode only.
+  // Must run before the loop so parent mutations don't compound into child reads.
+  const origFontSizeMap = faithful
+    ? new Map<HTMLElement, number>(
+        [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))].map((el) => {
+          const fs = parseFloat(getComputedStyle(el).fontSize);
+          return [el, isNaN(fs) || fs <= 0 ? 0 : fs] as [HTMLElement, number];
+        })
+      )
+    : null;
 
   const nodes: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
   for (const el of nodes) {
@@ -647,6 +658,14 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
             "max-height": `${rect.height}px`,
           });
         }
+      }
+
+      // Scale every element's font-size to 60% of its pre-mutation computed value.
+      // Using absolute px (not %) avoids cascading: each element is scaled from its
+      // true original size, not from an already-scaled parent.
+      const origFs = origFontSizeMap?.get(el) ?? 0;
+      if (origFs > 0) {
+        setStyle(el, { "font-size": `${(origFs * 0.6).toFixed(2)}px` });
       }
 
       // Prevent inline-flex chips/pills from wrapping — foreignObject font metrics
