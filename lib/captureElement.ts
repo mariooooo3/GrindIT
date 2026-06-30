@@ -581,8 +581,13 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   let bfStyleEl: HTMLStyleElement | null = null;
   if (lightFixes || faithful) {
     bfStyleEl = document.createElement("style");
+    // Faithful mode: also strip box-shadow on badge buttons — without backdrop-filter
+    // on parent elements the raw glow looks harsher than on the live screen.
+    const extraRules = faithful
+      ? "\n[data-share-card] button { box-shadow: none !important; }"
+      : "";
     bfStyleEl.textContent =
-      "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }";
+      "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
     document.head.appendChild(bfStyleEl);
   }
 
