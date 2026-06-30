@@ -165,20 +165,50 @@ export default function ShareModal({
       if (!card) return null;
 
       if (mobile) {
-        // Clone-into-wrapper (same approach as desktop) with autoHeight to expand
-        // the card to its natural content height — fixes truncation from max-h on
-        // small viewports.
-        const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
-        const wrapperBg = worldCup
-          ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
-          : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-        return await captureElement(card, {
-          scale: 2,
-          wrapperBg,
-          wrapperPad: 48,
-          minCaptureWidth: 300,
-          autoHeight: true,
+        // Mobile card — two-pass composite:
+        //   Pass 1: faithful fullscreen screenshot of the live slide → background
+        //   Pass 2: clone card at fixed width (desktop path) → sharp, consistent card
+        //   Composite: draw slide, draw card centred on top. No blur, no gradient.
+        const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
+        const layerEl = slide.querySelector<HTMLElement>(layerSel) ?? slide;
+        const skipEls: HTMLElement[] = [];
+        if (worldCup) {
+          const pawcup = layerEl.querySelector<HTMLElement>(".wc-pawcup-scene");
+          if (pawcup) skipEls.push(pawcup);
+        }
+        const S = 2;
+
+        // Pass 1 — real slide background
+        const slideBlob = await captureElement(layerEl, {
+          scale: S, faithful: true,
+          ...(skipEls.length ? { skipElements: skipEls } : {}),
         });
+        if (!slideBlob) return null;
+        const slideImg = await createImageBitmap(slideBlob);
+
+        // Pass 2 — card cloned at fixed width (cap at 92vw so it fits on any phone)
+        const targetCardW = Math.min(380, Math.round(window.innerWidth * 0.92));
+        const cardBlob = await captureElement(card, {
+          scale: S,
+          wrapperBg: "#080612",
+          wrapperPad: 20,
+          noCardDeco: true,
+          minCaptureWidth: targetCardW,
+        });
+        if (!cardBlob) return null;
+        const cardImg = await createImageBitmap(cardBlob);
+
+        // Composite: slide full-size, card centred
+        const outW = slideImg.width;
+        const outH = slideImg.height;
+        const canvas = document.createElement("canvas");
+        canvas.width = outW; canvas.height = outH;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(slideImg, 0, 0);
+        const cx = Math.round((outW - cardImg.width) / 2);
+        const cy = Math.round((outH - cardImg.height) / 2);
+        ctx.drawImage(cardImg, cx, cy);
+        return new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
       }
 
       // Desktop: clone-into-wrapper with a theme-matched radial gradient + star-dots.
