@@ -165,7 +165,12 @@ export default function ShareModal({
       if (!card) return null;
 
       if (mobile) {
-        // Mobile: screenshot the slide exactly as it looks on screen — nothing more.
+        // Mobile: two-pass hybrid.
+        //   Pass 1 — faithful screenshot of the live slide → real background (stars, decorations).
+        //   Pass 2 — card cloned via desktop path (wrapperBg + applyNodeFixes) → pixel-perfect
+        //            card at fixed width, same quality as desktop share.
+        //   Composite: draw slide, clip card to its border-radius, draw card centred on top.
+        const S = 2;
         const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
         const layerEl = slide.querySelector<HTMLElement>(layerSel) ?? slide;
         const skipEls: HTMLElement[] = [];
@@ -173,11 +178,56 @@ export default function ShareModal({
           const pawcup = layerEl.querySelector<HTMLElement>(".wc-pawcup-scene");
           if (pawcup) skipEls.push(pawcup);
         }
-        return await captureElement(layerEl, {
-          scale: 2,
-          faithful: true,
+
+        // Pass 1 — background
+        const slideBlob = await captureElement(layerEl, {
+          scale: S, faithful: true,
           ...(skipEls.length ? { skipElements: skipEls } : {}),
         });
+        if (!slideBlob) return null;
+        const slideImg = await createImageBitmap(slideBlob);
+
+        // Pass 2 — card (same desktop clone path, capped to fit any phone)
+        const targetCardW = Math.min(380, Math.round(window.innerWidth * 0.92));
+        const cardBlob = await captureElement(card, {
+          scale: S,
+          wrapperBg: "#080612",
+          wrapperPad: 0,
+          noCardDeco: true,
+          minCaptureWidth: targetCardW,
+        });
+        if (!cardBlob) return null;
+        const cardImg = await createImageBitmap(cardBlob);
+
+        // Composite — slide as background, card clipped to rounded corners and centred
+        const canvas = document.createElement("canvas");
+        canvas.width  = slideImg.width;
+        canvas.height = slideImg.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(slideImg, 0, 0);
+
+        const cx = Math.round((slideImg.width  - cardImg.width)  / 2);
+        const cy = Math.round((slideImg.height - cardImg.height) / 2);
+        const r  = 16 * S; // rounded-2xl = 16px CSS × scale
+
+        // Clip to card border-radius so slide background shows through the corners.
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx + r, cy);
+        ctx.lineTo(cx + cardImg.width - r, cy);
+        ctx.quadraticCurveTo(cx + cardImg.width, cy, cx + cardImg.width, cy + r);
+        ctx.lineTo(cx + cardImg.width, cy + cardImg.height - r);
+        ctx.quadraticCurveTo(cx + cardImg.width, cy + cardImg.height, cx + cardImg.width - r, cy + cardImg.height);
+        ctx.lineTo(cx + r, cy + cardImg.height);
+        ctx.quadraticCurveTo(cx, cy + cardImg.height, cx, cy + cardImg.height - r);
+        ctx.lineTo(cx, cy + r);
+        ctx.quadraticCurveTo(cx, cy, cx + r, cy);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(cardImg, cx, cy);
+        ctx.restore();
+
+        return new Promise<Blob | null>((res) => canvas.toBlob((b) => res(b), "image/png"));
       }
 
       // Desktop: clone-into-wrapper with a theme-matched radial gradient + star-dots.
