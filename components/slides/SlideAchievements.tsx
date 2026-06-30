@@ -126,9 +126,9 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
             </motion.div>
 
             {rarityCounts.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }} className="mt-2 flex flex-wrap gap-1.5">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }} className="mt-2 flex flex-wrap gap-1">
                 {rarityCounts.map((rc) => (
-                  <span key={rc.rarity} className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider"
+                  <span key={rc.rarity} className="rounded-full px-1.5 py-0.5 text-[8px] lg:text-[9px] font-semibold uppercase tracking-wider"
                     style={{ color: RARITY_HEX[rc.rarity], border: `1px solid ${RARITY_HEX[rc.rarity]}55`, background: `${RARITY_HEX[rc.rarity]}14` }}>
                     {rc.n} {rc.rarity}
                   </span>
@@ -138,7 +138,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
 
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }} className="mt-3">
               {hasUnlocked ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {topTrophies.map((t, i) => (
                     <motion.button key={t.label} type="button"
                       initial={{ opacity: 0, x: -12, scale: 0.97 }} animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -146,17 +146,17 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
                       onClick={(e) => setOpenBadge({ badge: { id: t.label, label: t.label, icon: t.icon, color: t.color, explanation: t.reason }, rect: e.currentTarget.getBoundingClientRect() })}
                       aria-haspopup="dialog"
                       aria-label={`${t.label} trophy — show details`}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-1.5 text-left transition-colors duration-150 hover:brightness-110"
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors duration-150 hover:brightness-110"
                       style={{ borderColor: `${t.color}40`, background: `${t.color}10`, touchAction: "manipulation" }}>
                       <span style={{ color: t.color, filter: `drop-shadow(0 0 6px ${t.color}88)` }}>
-                        <Glyph name={t.icon as GlyphName} size={26} />
+                        <Glyph name={t.icon as GlyphName} size={20} />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-sm font-semibold text-white">{t.label}</span>
-                          <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wider" style={{ color: t.color, border: `1px solid ${t.color}55` }}>{t.rarity}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-xs lg:text-sm font-semibold text-white">{t.label}</span>
+                          <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[7px] lg:text-[8px] font-semibold uppercase tracking-wider" style={{ color: t.color, border: `1px solid ${t.color}55` }}>{t.rarity}</span>
                         </div>
-                        <div className="truncate text-[11px] text-white/55">{t.reason}</div>
+                        <div className="truncate text-[10px] lg:text-[11px] text-white/55">{t.reason}</div>
                       </div>
                     </motion.button>
                   ))}
