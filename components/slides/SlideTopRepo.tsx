@@ -209,7 +209,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                       { l: "Age", v: ageStr },
                     ].map((s) => (
                       <div key={s.l} className="rounded-xl border bg-white/[0.03] px-3 py-2" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                        <div className="text-sm font-bold tabular-nums text-white">{s.v}</div>
+                        <div className="text-xs lg:text-sm font-bold tabular-nums text-white">{s.v}</div>
                         <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/45">{s.l}</div>
                       </div>
                     ))}
@@ -222,7 +222,7 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                   )}
                   {top.topics.length > 0 && (
                     <motion.div {...fadeUp} transition={{ delay: 0.6 }} className="mt-2 flex flex-wrap gap-1.5">
-                      {top.topics.slice(0, 5).map(t => (<span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-2 py-0.5 text-[10px] text-emerald-200">{t}</span>))}
+                      {top.topics.slice(0, 5).map(t => (<span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-1.5 py-0.5 text-[9px] lg:text-[10px] text-emerald-200">{t}</span>))}
                     </motion.div>
                   )}
                 </>
@@ -236,15 +236,15 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 <motion.div {...fadeUp} transition={{ delay: 0.65 }} className="mt-3 flex items-center justify-between rounded-xl border bg-white/[0.03] px-3 py-2.5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-wider text-white/45">Most starred</div>
-                    <div className="truncate font-mono text-sm text-white/85">{starred.name}</div>
+                    <div className="truncate font-mono text-xs lg:text-sm text-white/85">{starred.name}</div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm font-bold text-amber-300">★ {starred.stars.toLocaleString()}</div>
+                  <div className="flex items-center gap-1 text-xs lg:text-sm font-bold text-amber-300">★ {starred.stars.toLocaleString()}</div>
                 </motion.div>
               ) : flat.graveyardRepo ? (
                 <motion.div {...fadeUp} transition={{ delay: 0.65 }} className="mt-3 flex items-center justify-between rounded-xl border bg-white/[0.03] px-3 py-2.5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-wider text-white/45">Abandoned in {flat.graveyardRepo.year}</div>
-                    <div className="truncate font-mono text-sm text-white/60 line-through">{flat.graveyardRepo.name}</div>
+                    <div className="truncate font-mono text-xs lg:text-sm text-white/60 line-through">{flat.graveyardRepo.name}</div>
                   </div>
                   <div className="text-xs text-white/30">RIP</div>
                 </motion.div>

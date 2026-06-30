@@ -202,9 +202,9 @@ export default function SlideArchetype({ profile, sparse = false }: { profile: W
                 .filter((x) => x.n > 0);
               return (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
-                  className="mt-2 flex flex-wrap gap-1.5">
+                  className="mt-2 flex flex-wrap gap-1">
                   {counts.map((rc) => (
-                    <span key={rc.rarity} className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider"
+                    <span key={rc.rarity} className="rounded-full px-1.5 py-0.5 text-[8px] lg:text-[9px] font-semibold uppercase tracking-wider"
                       style={{ color: BADGE_RARITY_HEX[rc.rarity], border: `1px solid ${BADGE_RARITY_HEX[rc.rarity]}55`, background: `${BADGE_RARITY_HEX[rc.rarity]}14` }}>
                       {rc.n} {rc.rarity}
                     </span>
