@@ -415,12 +415,18 @@ type Opts = {
    * overflows the viewport-relative max-h.
    */
   autoHeight?: boolean;
+  /**
+   * Clone-into-wrapper only: preserve the cloned scene as-is, matching the live
+   * DOM layout instead of running text/flex normalization passes.
+   */
+  matchLiveLayout?: boolean;
 };
 
 export async function captureElement(root: HTMLElement, opts: Opts = {}): Promise<Blob | null> {
   const { scale = 2.5, background = "#080612", cropTo = null, wrapperBg, wrapperPad = 40,
           noCardDeco, addLogoTopLeft, addSlideWatermark, removeFromClone, revealInClone,
-          skipLayer, lightFixes, skipElements, minCaptureWidth, faithful, autoHeight } = opts;
+          skipLayer, lightFixes, skipElements, minCaptureWidth, faithful, autoHeight,
+          matchLiveLayout } = opts;
 
   // Clone-into-wrapper mode: captures the element on a styled background without
   // touching the live DOM (safe with React). Used for both card and full-slide.
@@ -535,11 +541,18 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         clone.style.minHeight = `${expandedH}px`;
         wrap.style.height = `${expandedH + wrapperPad * 2}px`;
       }
-      for (const el of cloneNodes) {
-        const cs = getComputedStyle(el);
-        applyNodeFixes(el, cs, (elem, props) => {
-          for (const k of Object.keys(props)) elem.style.setProperty(k, props[k]);
-        }, () => {});
+      if (matchLiveLayout) {
+        for (const el of cloneNodes) {
+          el.style.backdropFilter = "none";
+          el.style.webkitBackdropFilter = "none";
+        }
+      } else {
+        for (const el of cloneNodes) {
+          const cs = getComputedStyle(el);
+          applyNodeFixes(el, cs, (elem, props) => {
+            for (const k of Object.keys(props)) elem.style.setProperty(k, props[k]);
+          }, () => {});
+        }
       }
       await inlineExternalImages(clone);
       await Promise.all([

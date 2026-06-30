@@ -108,6 +108,8 @@ export default function ShareModal({
   // await the same render instead of kicking off a second (slow) one.
   const hiPromiseRef = useRef<Promise<Blob | null> | null>(null);
 
+  const effectiveScope: Scope = isMobile ? "slide" : scope;
+
   // Track viewport so the action grid and share handlers can branch on mobile.
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
@@ -127,9 +129,7 @@ export default function ShareModal({
 
   // Reset to card mode on every open; clear preview after modal exit animation completes
   useEffect(() => {
-    if (open) {
-      setScope("card");
-    } else {
+    if (!open) {
       const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); }, 320);
       return () => clearTimeout(t);
     }
@@ -144,14 +144,14 @@ export default function ShareModal({
   const captionNative = worldCup
     ? `@${username} at the World Cup ⚽🐾\n\n#WorldCup #GrindIT`
     : `My GitHub Wrapped — @${username} · ${slideTitle} 🚀🐱\n\n#GrindIT`;
-  const filename = `github-wrapped-${username}-${scope}.png`;
+  const filename = `github-wrapped-${username}-${effectiveScope}.png`;
 
   const capture = useCallback(async (scale = 2.5): Promise<Blob | null> => {
     const slide = slideRef.current;
     if (!slide) return null;
     const mobile = window.innerWidth < 1024;
 
-    if (scope === "card") {
+    if (effectiveScope === "card") {
       // On mobile, wc-pawcup-scene is display:none (globals.css hides it) — the award
       // card from Slide8 lives there and must NOT be captured when hidden.
       // Always use wc-original-card-layer on mobile (it shows the visible card).
@@ -193,24 +193,27 @@ export default function ShareModal({
     const layer = slide.querySelector<HTMLElement>(layerSel) ?? slide;
 
     if (mobile) {
-      // Mobile: live-DOM path — capture the visible layer in-place.
-      // modern-screenshot's filter callback excludes data-share-ignore elements and
-      // skipElements, so no fixed-position overlays or hidden WC nodes bleed through.
+      // Mobile: off-screen 1:1 scene clone.
+      // This preserves the exact live fullscreen composition without the old
+      // faithful-mode mutations (font scaling, shadow stripping, overflow rewrites).
       const skipEls: HTMLElement[] = [];
       if (worldCup) {
-        // Skip wc-pawcup-scene: display:none on mobile by globals.css, but skipping it
-        // explicitly avoids serializing 500+ hidden nodes (performance).
         const pawcup = layer.querySelector<HTMLElement>(".wc-pawcup-scene");
         if (pawcup) skipEls.push(pawcup);
       }
       return await captureElement(layer, {
         scale: 2,
-        ...(skipEls.length ? { skipElements: skipEls } : {}),
+        wrapperBg: "#080612",
+        wrapperPad: 0,
+        noCardDeco: true,
+        matchLiveLayout: true,
+        ...(skipEls.length ? { removeFromClone: [".wc-pawcup-scene"] } : {}),
       });
     }
 
-    // Desktop: clone-into-wrapper with logo and watermark (unchanged).
-    // Keep wc-pawcup-scene in the clone — it provides WC scene decorations on desktop.
+    // Desktop: clone-into-wrapper with logo and watermark.
+    // matchLiveLayout: skip applyNodeFixes — its min-width/max-content rewrites
+    // break absolute-positioned cards and centered text in the clone.
     return await captureElement(layer, {
       scale: 2,
       wrapperBg: "#080612",
@@ -218,8 +221,9 @@ export default function ShareModal({
       noCardDeco: true,
       addLogoTopLeft: true,
       addSlideWatermark: true,
+      matchLiveLayout: true,
     });
-  }, [scope, slideRef, worldCup]);
+  }, [effectiveScope, slideRef, worldCup]);
 
   useEffect(() => {
     if (!open) return;
@@ -424,9 +428,8 @@ export default function ShareModal({
               </div>
             </div>
 
-            {/* ── scope toggle — desktop only. On mobile we keep it simple: card only
-                (the full-slide capture of the squeezed responsive layout is unreliable
-                on phones), so the toggle is hidden and scope stays "card". ── */}
+            {/* ── scope toggle — desktop only. On mobile the new fullscreen capture
+                path is the single canonical render mode, so the toggle stays hidden. ── */}
             {!isMobile && (
             <div className="mt-4 px-4">
               <div className="relative flex items-center rounded-full py-[3px]"
