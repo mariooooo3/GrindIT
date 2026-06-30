@@ -90,10 +90,10 @@ function ScanLoader() {
 
 
 export default function ShareModal({
-  open, onClose, slideRef, username, slideTitle, worldCup = false,
+  open, onClose, slideRef, username, slideTitle, worldCup = false, onEnterScreenshotMode,
 }: {
   open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
-  username: string; slideTitle: string; worldCup?: boolean;
+  username: string; slideTitle: string; worldCup?: boolean; onEnterScreenshotMode?: () => void;
 }) {
   const [scope,      setScope]      = useState<Scope>("card");
   const [busy,       setBusy]       = useState(false);
@@ -358,7 +358,10 @@ export default function ShareModal({
               <div className="mt-5 flex gap-3">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onEnterScreenshotMode?.();
+                    onClose();
+                  }}
                   className="flex-1 cursor-pointer rounded-full bg-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
                 >
                   Continue to screenshot

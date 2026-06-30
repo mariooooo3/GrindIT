@@ -234,11 +234,14 @@ export default function WrappedPage() {
   const [error,            setError]            = useState<string | null>(null);
   const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [shareOpen,        setShareOpen]        = useState(false);
+  const [mobileScreenshotMode, setMobileScreenshotMode] = useState(false);
+  const [screenshotControlsVisible, setScreenshotControlsVisible] = useState(false);
   const [wcSpeech,         setWcSpeech]         = useState<string | null>(null);
   const [wcSpeechLoading,  setWcSpeechLoading]  = useState(false);
   const wcSpeechFetched = useRef(false);
   const touchStartX = useRef(0);
   const slideAreaRef = useRef<HTMLDivElement>(null);
+  const screenshotControlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const normalizedSlideState = normalizeSlideState(slideState, activeSlides);
 
 
@@ -363,6 +366,12 @@ export default function WrappedPage() {
     return () => { document.body.style.background = prev; };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (screenshotControlsTimer.current) clearTimeout(screenshotControlsTimer.current);
+    };
+  }, []);
+
   const goNext = useCallback(() => {
     setSlideState(prev => {
       const currentState = normalizeSlideState(prev, activeSlides);
@@ -427,6 +436,29 @@ export default function WrappedPage() {
   );
 
   const CurrentSlide = SLIDE_COMPONENTS[normalizedSlideState.current];
+  const showScreenshotControls = () => {
+    if (!mobileScreenshotMode) return;
+    setScreenshotControlsVisible(true);
+    if (screenshotControlsTimer.current) clearTimeout(screenshotControlsTimer.current);
+    screenshotControlsTimer.current = setTimeout(() => {
+      setScreenshotControlsVisible(false);
+      screenshotControlsTimer.current = null;
+    }, 2400);
+  };
+
+  const enterMobileScreenshotMode = () => {
+    setMobileScreenshotMode(true);
+    setScreenshotControlsVisible(false);
+  };
+
+  const exitMobileScreenshotMode = () => {
+    setMobileScreenshotMode(false);
+    setScreenshotControlsVisible(false);
+    if (screenshotControlsTimer.current) {
+      clearTimeout(screenshotControlsTimer.current);
+      screenshotControlsTimer.current = null;
+    }
+  };
 
   return (
     <div className="relative h-[var(--app-h)] w-screen overflow-hidden"
@@ -441,7 +473,7 @@ export default function WrappedPage() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "200px" }} />
 
       {/* â"€â"€ top bar â"€â"€ */}
-      <div className="fixed inset-x-0 top-0 z-40 px-3 pt-3 pb-2 sm:px-5 sm:pt-4 sm:pb-3">
+      <div className={`fixed inset-x-0 top-0 z-40 px-3 pt-3 pb-2 transition-opacity duration-200 sm:px-5 sm:pt-4 sm:pb-3 ${mobileScreenshotMode ? "pointer-events-none opacity-0" : "opacity-100"}`}>
         <div className="flex items-center gap-1.5 sm:gap-3">
           {/* prev button — desktop only */}
           <button onClick={goPrev}
@@ -510,6 +542,7 @@ export default function WrappedPage() {
           const d = e.changedTouches[0].clientX - touchStartX.current;
           if (d > 50) goPrev(); else if (d < -50) goNext();
         }}
+        onClick={() => showScreenshotControls()}
       >
         {/* capture-only logo — desktop only; on mobile the real top-bar logo is used */}
         {/* No boxShadow here — the interactive logo (z-40 top bar) already provides the ring glow on screen. */}
@@ -579,7 +612,7 @@ export default function WrappedPage() {
             data-share-ignore: excluded from the full-slide share capture (the live
             slide root is captured directly on mobile now) so the shared image stays
             clean — matching desktop, where the progress bar lives in the fixed top bar. */}
-        <div data-share-ignore className="pointer-events-auto absolute bottom-0 left-0 right-0 z-20 lg:hidden px-4 pt-2.5"
+        <div data-share-ignore className={`absolute bottom-0 left-0 right-0 z-20 px-4 pt-2.5 transition-opacity duration-200 lg:hidden ${mobileScreenshotMode ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"}`}
           style={{
             paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))",
             background: "linear-gradient(to bottom, transparent, #080612 38%)",
@@ -589,7 +622,7 @@ export default function WrappedPage() {
       </div>
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
-      <div className="pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2">
+      <div className={`pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 transition-opacity duration-200 ${mobileScreenshotMode ? "opacity-0 lg:opacity-100" : "opacity-100"}`}>
         <div className={`group relative pointer-events-auto ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
           <motion.button onClick={goPrev} aria-label="Previous slide"
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm"
@@ -632,7 +665,39 @@ export default function WrappedPage() {
         username={profile.user.login}
         slideTitle={SLIDE_TITLES[normalizedSlideState.current]}
         worldCup={worldCup}
+        onEnterScreenshotMode={enterMobileScreenshotMode}
       />
+      <AnimatePresence>
+        {mobileScreenshotMode && screenshotControlsVisible && (
+          <motion.div
+            className="fixed inset-x-0 bottom-5 z-[90] flex justify-center px-4 lg:hidden"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <div className="flex items-center gap-2 rounded-full border border-white/12 bg-black/72 px-2 py-2 shadow-[0_10px_32px_rgba(0,0,0,0.45)] backdrop-blur-md">
+              <button
+                type="button"
+                onClick={exitMobileScreenshotMode}
+                className="cursor-pointer rounded-full px-3 py-2 text-[12px] font-semibold text-white/82 transition-colors duration-150 hover:bg-white/[0.08]"
+              >
+                Done
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  exitMobileScreenshotMode();
+                  setShareOpen(true);
+                }}
+                className="cursor-pointer rounded-full bg-violet-500 px-3 py-2 text-[12px] font-semibold text-white shadow-[0_8px_20px_rgba(109,40,217,0.35)] transition-transform duration-150 active:scale-[0.98]"
+              >
+                Share
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
