@@ -75,7 +75,18 @@ export function useWrappedHome() {
       });
       if (!analyzeRes.ok) throw new Error("Analysis failed");
       const profile = await analyzeRes.json();
-      sessionStorage.setItem("wrappedProfile", JSON.stringify({ ...profile, tone }));
+      const safeProfile = {
+        ...profile,
+        tone,
+        raw: {
+          ...profile.raw,
+          repos: profile.raw.repos.map((r: { isPrivate?: boolean; description?: string; [k: string]: unknown }) => ({
+            ...r,
+            description: r.isPrivate ? "" : r.description,
+          })),
+        },
+      };
+      sessionStorage.setItem("wrappedProfile", JSON.stringify(safeProfile));
       // Clear cached narratives so the new wrapped session gets fresh LLM output.
       sessionStorage.removeItem("narrative:space");
       sessionStorage.removeItem("narrative:worldcup");
