@@ -234,6 +234,7 @@ export default function WrappedPage() {
   const [error,            setError]            = useState<string | null>(null);
   const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [shareOpen,        setShareOpen]        = useState(false);
+  const [shareDirectMode,  setShareDirectMode]  = useState(false);
   const [mobileScreenshotMode, setMobileScreenshotMode] = useState(false);
   const [screenshotControlsVisible, setScreenshotControlsVisible] = useState(false);
   const [wcSpeech,         setWcSpeech]         = useState<string | null>(null);
@@ -660,12 +661,13 @@ export default function WrappedPage() {
 
       <ShareModal
         open={shareOpen}
-        onClose={() => setShareOpen(false)}
+        onClose={() => { setShareOpen(false); setShareDirectMode(false); }}
         slideRef={slideAreaRef}
         username={profile.user.login}
         slideTitle={SLIDE_TITLES[normalizedSlideState.current]}
         worldCup={worldCup}
         onEnterScreenshotMode={enterMobileScreenshotMode}
+        directShare={shareDirectMode}
       />
       <AnimatePresence>
         {mobileScreenshotMode && screenshotControlsVisible && (
@@ -688,6 +690,7 @@ export default function WrappedPage() {
                 type="button"
                 onClick={() => {
                   exitMobileScreenshotMode();
+                  setShareDirectMode(true);
                   setShareOpen(true);
                 }}
                 className="cursor-pointer rounded-full bg-violet-500 px-3 py-2 text-[12px] font-semibold text-white shadow-[0_8px_20px_rgba(109,40,217,0.35)] transition-transform duration-150 active:scale-[0.98]"

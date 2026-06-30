@@ -507,24 +507,36 @@ type CalData = {
 };
 
 // GitHub's contributionsCollection API only supports up to 1 year per query.
-// This helper splits a date range into ≤1-year chunks.
+// This helper splits a date range into ≤1-year chunks using clean day boundaries.
+// Each chunk uses from=YYYY-MM-DDT00:00:00Z and to=YYYY-MM-DDT23:59:59Z so no
+// day falls into a gap between chunks (the old +1ms offset could cause GitHub to
+// exclude the boundary day entirely, silently dropping those contributions).
 function buildYearChunks(startDate: string, endDate: string): Array<{ from: string; to: string }> {
   const chunks: Array<{ from: string; to: string }> = [];
-  let cursor = new Date(`${startDate}T00:00:00Z`);
-  const end = new Date(`${endDate}T23:59:59Z`);
+  let cursorDate = startDate; // YYYY-MM-DD
 
-  while (cursor < end) {
-    const chunkEnd = new Date(cursor);
-    chunkEnd.setFullYear(chunkEnd.getFullYear() + 1);
-    if (chunkEnd > end) chunkEnd.setTime(end.getTime());
+  while (cursorDate <= endDate) {
+    // End of this chunk = same calendar date next year, minus 1 day.
+    // This guarantees each chunk is ≤365 days, always under GitHub's 366-day limit.
+    const startDt = new Date(`${cursorDate}T00:00:00Z`);
+    const chunkEndDt = new Date(startDt);
+    chunkEndDt.setFullYear(chunkEndDt.getFullYear() + 1);
+    chunkEndDt.setDate(chunkEndDt.getDate() - 1);
+
+    const chunkEndDate = chunkEndDt.toISOString().slice(0, 10);
+    const actualEnd = chunkEndDate > endDate ? endDate : chunkEndDate;
 
     chunks.push({
-      from: cursor.toISOString(),
-      to: chunkEnd.toISOString(),
+      from: `${cursorDate}T00:00:00Z`,
+      to: `${actualEnd}T23:59:59Z`,
     });
 
-    cursor = new Date(chunkEnd);
-    cursor.setMilliseconds(cursor.getMilliseconds() + 1);
+    if (actualEnd >= endDate) break;
+
+    // Next chunk starts the day after this chunk ends — no gap, no overlap.
+    const nextDay = new Date(`${actualEnd}T00:00:00Z`);
+    nextDay.setDate(nextDay.getDate() + 1);
+    cursorDate = nextDay.toISOString().slice(0, 10);
   }
 
   return chunks;

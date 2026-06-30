@@ -90,10 +90,10 @@ function ScanLoader() {
 
 
 export default function ShareModal({
-  open, onClose, slideRef, username, slideTitle, worldCup = false, onEnterScreenshotMode,
+  open, onClose, slideRef, username, slideTitle, worldCup = false, onEnterScreenshotMode, directShare = false,
 }: {
   open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
-  username: string; slideTitle: string; worldCup?: boolean; onEnterScreenshotMode?: () => void;
+  username: string; slideTitle: string; worldCup?: boolean; onEnterScreenshotMode?: () => void; directShare?: boolean;
 }) {
   const [scope,      setScope]      = useState<Scope>("card");
   const [busy,       setBusy]       = useState(false);
@@ -228,7 +228,7 @@ export default function ShareModal({
   }, [effectiveScope, slideRef, worldCup]);
 
   useEffect(() => {
-    if (!open || isMobile) return;
+    if (!open || (isMobile && !directShare)) return;
     let alive = true;
     blobRef.current = null;
     hiPromiseRef.current = null;
@@ -260,7 +260,7 @@ export default function ShareModal({
       setBusy(false);
     }, 80);
     return () => { alive = false; clearTimeout(t); };
-  }, [open, scope, capture, captureKey, isMobile]);
+  }, [open, scope, capture, captureKey, isMobile, directShare]);
 
   useEffect(() => {
     if (!open) return;
@@ -318,13 +318,13 @@ export default function ShareModal({
   // deep-links without posting, and the web can't save to the gallery so no Save).
   // Desktop shows Share, Save, X, LinkedIn.
   const shareLead = canNativeShare ? [SHARE_ACTION] : [];
-  const gridActions = isMobile
+  const gridActions = (isMobile && !directShare)
     ? [...shareLead, ...ACTIONS.filter((a) => a.id === "x")]
     : [...shareLead, ...ACTIONS];
 
   if (!mounted) return null;
 
-  if (isMobile) {
+  if (isMobile && !directShare) {
     return createPortal(
       <AnimatePresence>
         {open && (
@@ -349,12 +349,12 @@ export default function ShareModal({
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/75">Screenshot Mode</p>
               <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Share your slide</h2>
               <p className="mt-2 text-sm leading-relaxed text-white/65">
-                Apasă <span className="font-semibold text-white/85">Continue</span> și interfața dispare — rămâne doar slide-ul tău, curat, pe tot ecranul.
-                Atinge ecranul oricând pentru a vedea butoanele <span className="font-semibold text-white/85">Done</span> și <span className="font-semibold text-white/85">Share</span>.
+                Tap <span className="font-semibold text-white/85">Continue</span> and the UI disappears — only your slide remains, fullscreen and clean.
+                Tap the screen at any time to reveal the <span className="font-semibold text-white/85">Done</span> and <span className="font-semibold text-white/85">Share</span> buttons.
               </p>
               <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[12px] leading-relaxed text-white/55">
-                <span className="font-semibold text-white/75">Share</span> deschide opțiunile native ale telefonului — poți posta direct pe{" "}
-                <span className="text-white/75">X, LinkedIn, Instagram, WhatsApp, Messenger</span> sau orice altă aplicație instalată.
+                <span className="font-semibold text-white/75">Share</span> opens your phone&apos;s native share sheet — post directly to{" "}
+                <span className="text-white/75">X, LinkedIn, Instagram, WhatsApp, Messenger</span>, or any other app installed on your phone.
               </div>
               <div className="mt-5">
                 <button
