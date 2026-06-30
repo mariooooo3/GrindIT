@@ -95,11 +95,12 @@ export default function ShareModal({
   open: boolean; onClose: () => void; slideRef: RefObject<HTMLDivElement | null>;
   username: string; slideTitle: string; worldCup?: boolean; onEnterScreenshotMode?: () => void; directShare?: boolean;
 }) {
-  const [scope,      setScope]      = useState<Scope>("card");
-  const [busy,       setBusy]       = useState(false);
-  const [preview,    setPreview]    = useState<string | null>(null);
-  const [toast,      setToast]      = useState<string | null>(null);
-  const [failed,     setFailed]     = useState(false);
+  const [scope,          setScope]         = useState<Scope>("card");
+  const [busy,           setBusy]          = useState(false);
+  const [preview,        setPreview]       = useState<string | null>(null);
+  const [toast,          setToast]         = useState<string | null>(null);
+  const [failed,         setFailed]        = useState(false);
+  const [showRenderFlow, setShowRenderFlow] = useState(false);
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [captureKey, setCaptureKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -131,8 +132,9 @@ export default function ShareModal({
   useEffect(() => {
     if (open) {
       setScope("card");
+      setShowRenderFlow(false);
     } else {
-      const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); }, 320);
+      const t = setTimeout(() => { setPreview(null); setFailed(false); setBusy(false); setShowRenderFlow(false); }, 320);
       return () => clearTimeout(t);
     }
   }, [open]);
@@ -228,7 +230,7 @@ export default function ShareModal({
   }, [effectiveScope, slideRef, worldCup]);
 
   useEffect(() => {
-    if (!open || (isMobile && !directShare)) return;
+    if (!open || (isMobile && !directShare && !showRenderFlow)) return;
     let alive = true;
     blobRef.current = null;
     hiPromiseRef.current = null;
@@ -260,7 +262,7 @@ export default function ShareModal({
       setBusy(false);
     }, 80);
     return () => { alive = false; clearTimeout(t); };
-  }, [open, scope, capture, captureKey, isMobile, directShare]);
+  }, [open, scope, capture, captureKey, isMobile, directShare, showRenderFlow]);
 
   useEffect(() => {
     if (!open) return;
@@ -324,7 +326,7 @@ export default function ShareModal({
 
   if (!mounted) return null;
 
-  if (isMobile && !directShare) {
+  if (isMobile && !directShare && !showRenderFlow) {
     return createPortal(
       <AnimatePresence>
         {open && (
@@ -346,26 +348,50 @@ export default function ShareModal({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/75">Screenshot Mode</p>
-              <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Share your slide</h2>
-              <p className="mt-2 text-sm leading-relaxed text-white/65">
-                Tap <span className="font-semibold text-white/85">Continue</span> and the UI disappears — only your slide remains, fullscreen and clean.
-                Tap the screen at any time to reveal the <span className="font-semibold text-white/85">Done</span> and <span className="font-semibold text-white/85">Share</span> buttons.
-              </p>
-              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[12px] leading-relaxed text-white/55">
-                <span className="font-semibold text-white/75">Share</span> opens your phone&apos;s native share sheet — post directly to{" "}
-                <span className="text-white/75">X, LinkedIn, Instagram, WhatsApp, Messenger</span>, or any other app installed on your phone.
-              </div>
-              <div className="mt-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/75">Share your slide</p>
+              <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Choose how to share</h2>
+
+              {/* Screenshot mode option */}
+              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-violet-300">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-white/90">Screenshot Mode</div>
+                    <p className="mt-1 text-[12px] leading-relaxed text-white/55">
+                      UI disappears — only your slide, fullscreen and clean. Tap the screen to reveal <span className="text-white/75">Done</span> and <span className="text-white/75">Share</span> buttons. Share opens X, LinkedIn, Instagram, WhatsApp and more.
+                    </p>
+                  </div>
+                </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    onEnterScreenshotMode?.();
-                    onClose();
-                  }}
-                  className="w-full cursor-pointer rounded-full bg-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
+                  onClick={() => { onEnterScreenshotMode?.(); onClose(); }}
+                  className="mt-3 w-full cursor-pointer rounded-full bg-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
                 >
                   Continue to screenshot mode
+                </button>
+              </div>
+
+              {/* Render mode option */}
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-white/90">Render Mode</div>
+                    <p className="mt-1 text-[12px] leading-relaxed text-white/55">
+                      App renders a high-quality image of your slide. Post directly to <span className="text-white/75">X, LinkedIn</span>, download, or share via your phone&apos;s native share sheet.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRenderFlow(true)}
+                  className="mt-3 w-full cursor-pointer rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-all duration-150 active:scale-[0.98] hover:bg-emerald-500/20"
+                >
+                  Continue to render mode
                 </button>
               </div>
             </motion.div>

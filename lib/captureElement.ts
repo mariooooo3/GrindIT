@@ -545,6 +545,29 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
         for (const el of cloneNodes) {
           el.style.backdropFilter = "none";
           el.style.setProperty("-webkit-backdrop-filter", "none");
+          // CSS mask-image is unreliable in SVG foreignObject rendering.
+          // Elements using it (e.g. planet with radial fade) fall back to their
+          // overflow:hidden + border-radius for clipping in the captured image.
+          el.style.setProperty("mask-image", "none");
+          el.style.setProperty("-webkit-mask-image", "none");
+
+          const cs = getComputedStyle(el);
+
+          // Decorative background blur blobs (no children, pointer-events:none, absolute):
+          // large filter:blur() values can look heavier/overlapping in static renders than
+          // in live compositing. Strip the blur and reduce opacity so they read as subtle
+          // ambient colour rather than heavy overlapping glows.
+          if (!el.childElementCount && cs.pointerEvents === "none" && cs.position === "absolute") {
+            const f = cs.filter;
+            if (f && f !== "none" && /blur\(\s*([0-9.]+)px/.test(f)) {
+              const blurPx = parseFloat(RegExp.$1);
+              if (blurPx > 30) {
+                el.style.filter = "none";
+                el.style.opacity = String(Math.min(1, (parseFloat(cs.opacity) || 1) * 0.55));
+              }
+            }
+          }
+
           // modern-screenshot's foreignObject path does not reliably honor CSS zoom.
           // The live mobile slides shrink card contents via `.slide-card-content { zoom: .82 }`.
           // Without emulation here, the exported mobile card content renders at 100%

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useMotionValue, useTransform, animate, type MotionValue } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import type { WrappedProfile } from "@/types/wrapped";
@@ -304,14 +303,12 @@ export default function SlideTopRepo({ profile }: { profile: WrappedProfile }) {
                 maskImage: "radial-gradient(circle at 50% 50%, black 0 55%, transparent 61%)",
               }}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/wrapped/slide4-planet.png"
                 alt="Alien green planet"
-                fill
-                sizes="520px"
-                className="block h-full w-full select-none object-cover"
+                className="absolute inset-0 block h-full w-full select-none object-cover"
                 draggable={false}
-                unoptimized
               />
             </motion.div>
           </div>

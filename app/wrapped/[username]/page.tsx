@@ -518,21 +518,21 @@ export default function WrappedPage() {
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Logo fixed below back arrow — pt-3(12px)+h-9(36px)+gap(6px)=54px; sm:pt-4(16px)+h-9(36px)+gap(6px)=58px */}
-        <div className="group absolute left-2 top-3 sm:left-4 sm:top-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logo.url} alt="GrindIT"
-            role="button" aria-label="Back to home" tabIndex={0}
-            onClick={() => router.push("/")}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
-            width={48} height={48}
-            className="block w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 bg-[#080612]"
-            style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
-          <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
-            GrindIT
-          </span>
-        </div>
+      {/* Logo — fixed independently so it stays visible in screenshot mode (top-bar above goes opacity-0) */}
+      <div className={`group fixed left-2 top-3 sm:left-4 sm:top-4 z-[41] transition-opacity duration-200 ${mobileScreenshotMode ? "pointer-events-none" : ""}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logo.url} alt="GrindIT"
+          role="button" aria-label="Back to home" tabIndex={0}
+          onClick={() => router.push("/")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/"); } }}
+          width={48} height={48}
+          className="block w-12 h-12 rounded-full cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 bg-[#080612]"
+          style={{ boxShadow: "0 0 0 2px oklch(0.72 0.18 295 / 0.7), 0 0 14px oklch(0.72 0.18 295 / 0.55), 0 0 28px oklch(0.72 0.18 295 / 0.25)" }} />
+        <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-2.5 py-0.5 text-[10px] font-medium text-white/55 opacity-0 whitespace-nowrap transition-opacity duration-150 group-hover:opacity-100" style={{ backdropFilter: "blur(8px)" }}>
+          GrindIT
+        </span>
       </div>
 
       {/* slide */}
