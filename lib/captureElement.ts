@@ -581,10 +581,13 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   let bfStyleEl: HTMLStyleElement | null = null;
   if (lightFixes || faithful) {
     bfStyleEl = document.createElement("style");
-    // Faithful mode: also strip box-shadow on badge buttons — without backdrop-filter
-    // on parent elements the raw glow looks harsher than on the live screen.
+    // Faithful mode: extra fixes for foreignObject rendering differences.
+    // 1. Strip badge box-shadows — without backdrop-filter they look harsher.
+    // 2. Force overflow:hidden on the card's scroll container — foreignObject doesn't
+    //    enforce overflow:auto, causing text to paint over sibling elements below it.
     const extraRules = faithful
-      ? "\n[data-share-card] button { box-shadow: none !important; }"
+      ? "\n[data-share-card] button { box-shadow: none !important; }" +
+        "\n[data-share-card] .overflow-y-auto, [data-share-card] .overflow-auto { overflow: hidden !important; }"
       : "";
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
