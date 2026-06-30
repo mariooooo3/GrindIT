@@ -274,23 +274,23 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                 </div>
               </motion.div>
 
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-2">
                 {hasPRs ? (
                   <>
                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-xs lg:text-sm text-white/60">Pull requests merged</span>
-                        <div className="text-right">
-                          <span className="text-base lg:text-xl font-bold text-white">{prsMerged}</span>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="whitespace-nowrap text-[10px] lg:text-sm text-white/60">Pull requests merged</span>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-sm lg:text-xl font-bold text-white">{prsMerged}</span>
                           {prsOpened > 100 && (
-                            <span className="ml-1.5 text-[11px] text-white/35">of {prsOpened} opened</span>
+                            <span className="ml-1 text-[9px] lg:text-[11px] text-white/35">of {prsOpened} opened</span>
                           )}
                         </div>
                       </div>
                       {issuesOpened > 0 && (
-                        <div className="mt-1 flex items-baseline justify-between">
-                          <span className="text-xs lg:text-sm text-white/60">Issues opened</span>
-                          <span className="text-sm lg:text-base font-semibold text-white/85">{issuesOpened}</span>
+                        <div className="mt-1 flex items-baseline justify-between gap-2">
+                          <span className="whitespace-nowrap text-[10px] lg:text-sm text-white/60">Issues opened</span>
+                          <span className="text-xs lg:text-base font-semibold text-white/85 flex-shrink-0">{issuesOpened}</span>
                         </div>
                       )}
                     </motion.div>
@@ -321,7 +321,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
                     className="rounded-xl px-4 py-3" style={{ border: `1px solid ${ACCENT}22`, background: `${ACCENT}08` }}>
                     <div className="text-xs uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Most active repository</div>
-                    <div className="mt-1 font-mono text-base" style={{ color: ACCENT }}>{topRepo}</div>
+                    <div className="mt-1 font-mono text-sm lg:text-base" style={{ color: ACCENT }}>{topRepo}</div>
                     {issuesOpened > 0 ? (
                       <div className="mt-2 text-[11px] leading-relaxed text-white/60">
                         {issuesOpened} issue{issuesOpened !== 1 ? "s" : ""} opened — the thinking happens before the PR.
@@ -366,7 +366,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}
                     className="rounded-xl px-4 py-3" style={{ border: `1px solid ${ACCENT}22`, background: `${ACCENT}08` }}>
                     <div className="text-xs uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Most active repository</div>
-                    <div className="mt-1 font-mono text-base" style={{ color: ACCENT }}>{topRepo}</div>
+                    <div className="mt-1 font-mono text-sm lg:text-base" style={{ color: ACCENT }}>{topRepo}</div>
                   </motion.div>
                 )}
               </div>

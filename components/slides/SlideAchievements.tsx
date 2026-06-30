@@ -146,7 +146,7 @@ export default function SlideAchievements({ profile }: { profile: WrappedProfile
                       onClick={(e) => setOpenBadge({ badge: { id: t.label, label: t.label, icon: t.icon, color: t.color, explanation: t.reason }, rect: e.currentTarget.getBoundingClientRect() })}
                       aria-haspopup="dialog"
                       aria-label={`${t.label} trophy — show details`}
-                      className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors duration-150 hover:brightness-110"
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 lg:py-2 text-left transition-colors duration-150 hover:brightness-110"
                       style={{ borderColor: `${t.color}40`, background: `${t.color}10`, touchAction: "manipulation" }}>
                       <span style={{ color: t.color, filter: `drop-shadow(0 0 6px ${t.color}88)` }}>
                         <Glyph name={t.icon as GlyphName} size={20} />

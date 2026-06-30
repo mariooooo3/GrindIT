@@ -841,20 +841,20 @@ export default function SlideShare({
               </div>
             </div>
             <div className="mt-3 flex items-center justify-start gap-10">
-              <h1 className="font-extrabold leading-tight text-[18px] lg:text-[28px]"
+              <h1 className="font-extrabold leading-tight text-[13px] lg:text-[28px]"
                 style={{ background: `linear-gradient(90deg, ${palette.b}, ${palette.a})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", letterSpacing: "-0.02em" }}>
                 {archetype}
               </h1>
               <div className="flex flex-col items-center gap-1 flex-shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
+                  <span className="rounded-full px-2 py-0.5 text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
                     style={{ color: palette.a, border: `1px solid ${palette.a}55`, background: `${palette.a}14`, boxShadow: `0 0 10px ${palette.glow}` }}>
                     {grade} grade
                   </span>
                 </div>
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className="text-[13px] leading-none"
+                    <span key={i} className="text-[11px] lg:text-[13px] leading-none"
                       style={{ color: i < stars ? palette.a : "rgba(255,255,255,0.18)", textShadow: i < stars ? `0 0 6px ${palette.glow}` : undefined }}>★</span>
                   ))}
                 </div>
@@ -870,7 +870,7 @@ export default function SlideShare({
                   onClick={(e) => setOpenBadge({ badge: b, rect: e.currentTarget.getBoundingClientRect() })}
                   aria-haspopup="dialog"
                   aria-label={`${b.label} badge — show what it means`}
-                  className="inline-flex cursor-pointer items-center gap-0.5 lg:gap-1.5 rounded-full border px-2 py-0.5 lg:px-3.5 lg:py-1.5 text-[10px] lg:text-sm text-zinc-100 whitespace-nowrap transition-colors duration-150 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="inline-flex cursor-pointer items-center gap-0.5 lg:gap-1.5 rounded-full border px-1.5 py-0.5 lg:px-3.5 lg:py-1.5 text-[9px] lg:text-sm text-zinc-100 whitespace-nowrap transition-colors duration-150 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                   style={{ borderColor: `${b.color}55`, background: `${b.color}14`, boxShadow: `0 0 12px ${b.color}44`, touchAction: "manipulation" }}>
                   <span style={{ color: b.color }}><Glyph name={b.icon as GlyphName} size={14} /></span>
                   {b.label}
