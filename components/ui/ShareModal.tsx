@@ -347,31 +347,25 @@ export default function ShareModal({
             >
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-300/75">Screenshot Mode</p>
-              <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Folosește screenshot-ul telefonului</h2>
+              <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">Share your slide</h2>
               <p className="mt-2 text-sm leading-relaxed text-white/65">
-                După ce închizi acest panou, slide-ul rămâne exact ca acum, pe fullscreen, cu aceleași elemente live.
-                Fă screenshot nativ din telefon și share-uiește imaginea rezultată.
+                Apasă <span className="font-semibold text-white/85">Continue</span> și interfața dispare — rămâne doar slide-ul tău, curat, pe tot ecranul.
+                Atinge ecranul oricând pentru a vedea butoanele <span className="font-semibold text-white/85">Done</span> și <span className="font-semibold text-white/85">Share</span>.
               </p>
-              <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[12px] leading-relaxed text-white/60">
-                Pe mobile nu mai generăm un render separat. Folosești direct varianta live, 1:1.
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[12px] leading-relaxed text-white/55">
+                <span className="font-semibold text-white/75">Share</span> deschide opțiunile native ale telefonului — poți posta direct pe{" "}
+                <span className="text-white/75">X, LinkedIn, Instagram, WhatsApp, Messenger</span> sau orice altă aplicație instalată.
               </div>
-              <div className="mt-5 flex gap-3">
+              <div className="mt-5">
                 <button
                   type="button"
                   onClick={() => {
                     onEnterScreenshotMode?.();
                     onClose();
                   }}
-                  className="flex-1 cursor-pointer rounded-full bg-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
+                  className="w-full cursor-pointer rounded-full bg-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(109,40,217,0.38)] transition-transform duration-150 active:scale-[0.98]"
                 >
-                  Continue to screenshot
-                </button>
-                <button
-                  type="button"
-                  onClick={onX}
-                  className="flex-1 cursor-pointer rounded-full border border-white/12 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white/80 transition-colors duration-150 hover:bg-white/[0.06]"
-                >
-                  Post on X
+                  Continue to screenshot mode
                 </button>
               </div>
             </motion.div>
