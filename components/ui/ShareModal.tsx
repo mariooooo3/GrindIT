@@ -373,8 +373,8 @@ export default function ShareModal({
                 </button>
               </div>
 
-              {/* Render mode option */}
-              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+              {/* Render mode option — hidden until fully implemented */}
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4 hidden">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>

@@ -686,6 +686,8 @@ export default function WrappedPage() {
               >
                 Done
               </button>
+              {/* Share button — hidden until fully implemented */}
+              {false && (
               <button
                 type="button"
                 onClick={() => {
@@ -697,6 +699,7 @@ export default function WrappedPage() {
               >
                 Share
               </button>
+              )}
             </div>
           </motion.div>
         )}
