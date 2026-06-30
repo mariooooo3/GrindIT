@@ -333,7 +333,7 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
                   { label: "Diversity", value: `${flat.languageEntropyPct}%` },
                 ].map((s, i) => (
                   <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? `1px solid ${ACCENT}18` : undefined }}>
-                    <div className="truncate text-sm font-semibold text-white">{s.value}</div>
+                    <div className="truncate text-xs lg:text-sm font-semibold text-white">{s.value}</div>
                     <div className="mt-0.5 text-[9px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
                   </div>
                 ))}
@@ -342,9 +342,9 @@ export default function SlideLanguages({ profile }: { profile: WrappedProfile })
               {flat.topics.length > 0 && (
                 <motion.div variants={item} className="mt-3">
                   <div className="mb-1.5 text-[10px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Tech &amp; topics</div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {flat.topics.slice(0, 6).map((t) => (
-                      <span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-2 py-0.5 text-[10px] text-emerald-200">{t}</span>
+                      <span key={t} className="rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-1.5 py-0.5 text-[9px] lg:text-[10px] text-emerald-200">{t}</span>
                     ))}
                   </div>
                 </motion.div>

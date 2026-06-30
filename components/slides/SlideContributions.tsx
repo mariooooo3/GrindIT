@@ -289,8 +289,8 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                       </div>
                       {issuesOpened > 0 && (
                         <div className="mt-1 flex items-baseline justify-between">
-                          <span className="text-sm text-white/60">Issues opened</span>
-                          <span className="text-base font-semibold text-white/85">{issuesOpened}</span>
+                          <span className="text-xs lg:text-sm text-white/60">Issues opened</span>
+                          <span className="text-sm lg:text-base font-semibold text-white/85">{issuesOpened}</span>
                         </div>
                       )}
                     </motion.div>
@@ -300,9 +300,9 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                         <div className="mb-1.5 text-xs uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>
                           Landed in {flat.prRepos.length} repo{flat.prRepos.length > 1 ? "s" : ""}
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1">
                           {flat.prRepos.slice(0, 4).map(r => (
-                            <span key={r} className="rounded-full border px-2 py-0.5 text-[11px] font-mono text-orange-200"
+                            <span key={r} className="rounded-full border px-1.5 py-0.5 text-[10px] lg:text-[11px] font-mono text-orange-200"
                               style={{ borderColor: `${ACCENT}35`, background: `${ACCENT}10` }}>{r}</span>
                           ))}
                         </div>
@@ -313,7 +313,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}
                         className="rounded-xl px-3 py-2" style={{ border: `1px solid ${ACCENT}20`, background: `${ACCENT}08` }}>
                         <div className="text-[10px] uppercase tracking-wider" style={{ color: `${ACCENT}65` }}>Notable PR</div>
-                        <div className="mt-0.5 line-clamp-2 text-sm text-white/85">&ldquo;{flat.prTitles[0]}&rdquo;</div>
+                        <div className="mt-0.5 line-clamp-2 text-xs lg:text-sm text-white/85">&ldquo;{flat.prTitles[0]}&rdquo;</div>
                       </motion.div>
                     )}
                   </>
@@ -342,7 +342,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                       { label: "Active days", value: flat.activeDayCount },
                     ].map((s, i) => (
                       <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? `1px solid ${ACCENT}18` : undefined }}>
-                        <div className="text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                        <div className="text-xs lg:text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
                         <div className="mt-0.5 text-[8px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
                       </div>
                     ))}
@@ -355,7 +355,7 @@ export default function SlideContributions({ profile }: { profile: WrappedProfil
                     style={{ border: `1px solid ${ACCENT}18`, background: `${ACCENT}06` }}>
                     {impactItems.map((s, i) => (
                       <div key={s.label} className="text-center" style={{ borderLeft: i > 0 ? `1px solid ${ACCENT}18` : undefined }}>
-                        <div className="text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
+                        <div className="text-xs lg:text-sm font-bold tabular-nums text-white">{s.value.toLocaleString()}</div>
                         <div className="mt-0.5 text-[8px] uppercase tracking-wider" style={{ color: `${ACCENT}60` }}>{s.label}</div>
                       </div>
                     ))}
