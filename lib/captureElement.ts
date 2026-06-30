@@ -581,11 +581,12 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   let bfStyleEl: HTMLStyleElement | null = null;
   if (lightFixes || faithful) {
     bfStyleEl = document.createElement("style");
-    // Faithful mode: strip all box-shadows inside the card content area —
-    // foreignObject renders them as a blurred duplicate layer (not a real blur),
-    // creating "doubled" bars, harsh badge glows, and other visual artifacts.
+    // Faithful mode: strip ALL box-shadows from the entire capture —
+    // foreignObject renders them as blurred duplicate layers (not real blurs),
+    // creating doubled bars, harsh badge glows, and rectangular halos on
+    // circular planet decorations (box-shadow ignores border-radius in foreignObject).
     const extraRules = faithful
-      ? "\n[data-share-card] .slide-card-content * { box-shadow: none !important; }"
+      ? "\n* { box-shadow: none !important; }"
       : "";
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
@@ -626,14 +627,33 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     // Faithful screenshot: no width/flex/text rewriting — render exactly as on screen.
     // (backdrop-filter already neutralised by the injected CSS rule above.)
     if (faithful) {
-      // Lock the card's scrollable content container to its measured on-screen height
-      // via inline style — foreignObject ignores overflow:auto clipping so content
-      // paints over siblings. Inline max-height has higher priority than any class rule.
       const cls = typeof el.className === "string" ? el.className : "";
+
+      // Lock the card's scroll container to its measured height — foreignObject
+      // doesn't enforce overflow:auto so content would paint over siblings below.
       if (cls.includes("slide-card-content")) {
         const h = el.getBoundingClientRect().height;
         if (h > 0) setStyle(el, { "max-height": `${h}px`, "overflow": "hidden" });
       }
+
+      // Prevent inline-flex chips/pills from wrapping — foreignObject font metrics
+      // are slightly wider, causing single-line chips to break to a second line.
+      if (FLEX_TOKEN_RE.test(cls)) {
+        const d = getComputedStyle(el).display;
+        if (d === "inline-flex") {
+          setStyle(el, { "white-space": "nowrap", "flex-wrap": "nowrap", "width": "max-content" });
+          for (const child of Array.from(el.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE) {
+              const orig = child.textContent ?? "";
+              if (orig.includes(" ")) {
+                child.textContent = orig.replace(/ /g, " ");
+                restores.push(() => { child.textContent = orig; });
+              }
+            }
+          }
+        }
+      }
+
       continue;
     }
 
