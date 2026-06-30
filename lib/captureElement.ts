@@ -586,7 +586,7 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
     // creating doubled bars, harsh badge glows, and rectangular halos on
     // circular planet decorations (box-shadow ignores border-radius in foreignObject).
     const extraRules = faithful
-      ? "\n* { box-shadow: none !important; }\nhtml { font-size: 94% !important; }"
+      ? "\n* { box-shadow: none !important; }\nhtml { font-size: 88% !important; }"
       : "";
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
