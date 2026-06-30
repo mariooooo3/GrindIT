@@ -164,28 +164,17 @@ export default function ShareModal({
         : document.querySelector<HTMLElement>("[data-share-card]");
       if (!card) return null;
 
-      if (mobile) {
-        // Mobile: faithful screenshot of the slide as-is.
-        const layerSel = worldCup ? "[data-share-layer='worldcup']" : "[data-share-layer='space']";
-        const layerEl = slide.querySelector<HTMLElement>(layerSel) ?? slide;
-        const skipEls: HTMLElement[] = [];
-        if (worldCup) {
-          const pawcup = layerEl.querySelector<HTMLElement>(".wc-pawcup-scene");
-          if (pawcup) skipEls.push(pawcup);
-        }
-        return await captureElement(layerEl, {
-          scale: 2,
-          faithful: true,
-          ...(skipEls.length ? { skipElements: skipEls } : {}),
-        });
-      }
-
-      // Desktop: clone-into-wrapper with a theme-matched radial gradient + star-dots.
+      // Mobile + Desktop: clone card at 380px with gradient background — same quality everywhere.
       const accent = card.dataset.accent ?? (worldCup ? "#facc15" : "#a78bfa");
       const wrapperBg = worldCup
         ? `radial-gradient(ellipse at 50% -20%, #facc1550 0%, #facc1514 40%, #080612 70%)`
         : `radial-gradient(ellipse at 50% -20%, ${accent}50 0%, ${accent}12 40%, #080612 70%)`;
-      return await captureElement(card, { scale, wrapperBg, wrapperPad: 72 });
+      return await captureElement(card, {
+        scale,
+        wrapperBg,
+        wrapperPad: mobile ? 48 : 72,
+        minCaptureWidth: 380,
+      });
     }
 
     // Full slide
