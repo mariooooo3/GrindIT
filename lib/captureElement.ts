@@ -581,13 +581,11 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
   let bfStyleEl: HTMLStyleElement | null = null;
   if (lightFixes || faithful) {
     bfStyleEl = document.createElement("style");
-    // Faithful mode: extra fixes for foreignObject rendering differences.
-    // 1. Strip badge box-shadows — without backdrop-filter they look harsher.
-    // 2. Force overflow:hidden on the card's scroll container — foreignObject doesn't
-    //    enforce overflow:auto, causing text to paint over sibling elements below it.
+    // Faithful mode: strip all box-shadows inside the card content area —
+    // foreignObject renders them as a blurred duplicate layer (not a real blur),
+    // creating "doubled" bars, harsh badge glows, and other visual artifacts.
     const extraRules = faithful
-      ? "\n[data-share-card] button { box-shadow: none !important; }" +
-        "\n[data-share-card] .overflow-y-auto, [data-share-card] .overflow-auto { overflow: hidden !important; }"
+      ? "\n[data-share-card] .slide-card-content * { box-shadow: none !important; }"
       : "";
     bfStyleEl.textContent =
       "* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }" + extraRules;
@@ -627,7 +625,17 @@ export async function captureElement(root: HTMLElement, opts: Opts = {}): Promis
 
     // Faithful screenshot: no width/flex/text rewriting — render exactly as on screen.
     // (backdrop-filter already neutralised by the injected CSS rule above.)
-    if (faithful) continue;
+    if (faithful) {
+      // Lock the card's scrollable content container to its measured on-screen height
+      // via inline style — foreignObject ignores overflow:auto clipping so content
+      // paints over siblings. Inline max-height has higher priority than any class rule.
+      const cls = typeof el.className === "string" ? el.className : "";
+      if (cls.includes("slide-card-content")) {
+        const h = el.getBoundingClientRect().height;
+        if (h > 0) setStyle(el, { "max-height": `${h}px`, "overflow": "hidden" });
+      }
+      continue;
+    }
 
     if (lightFixes) {
       // Light path: only lock flex/grid widths (prevents foreignObject reflow).
