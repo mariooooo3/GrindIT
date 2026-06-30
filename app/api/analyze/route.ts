@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { calculateMetrics, calculateAchievements } from "@/lib/analyzer";
 import { calculateArchetypeBlend } from "@/lib/archetypes";
 import { selectInsights } from "@/lib/insights";
 import { deriveTheme } from "@/lib/themes";
+import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 import type { GitHubRawData, AiTone, WrappedProfile } from "@/types/wrapped";
 
 const VALID_TONES: AiTone[] = ["funny", "brutal", "motivational"];
@@ -21,8 +22,8 @@ function isGitHubRawData(body: unknown): body is GitHubRawData {
   const languages = body.languages;
   const pullRequests = body.pullRequests;
 
-  return (
-    isObjectRecord(user) &&
+  if (
+    !(isObjectRecord(user) &&
     typeof user.login === "string" &&
     typeof user.accountCreatedAt === "string" &&
     isObjectRecord(period) &&
@@ -31,15 +32,27 @@ function isGitHubRawData(body: unknown): body is GitHubRawData {
     Array.isArray(contributions) &&
     Array.isArray(repos) &&
     Array.isArray(languages) &&
-    Array.isArray(pullRequests)
-  );
+    Array.isArray(pullRequests))
+  ) return false;
+
+  if (contributions.length > 5000) return false;
+  if (repos.length > 2000) return false;
+  if (languages.length > 200) return false;
+  if (pullRequests.length > 5000) return false;
+
+  return true;
 }
 
 function parseTone(value: unknown): AiTone {
   return VALID_TONES.includes(value as AiTone) ? (value as AiTone) : "funny";
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const rlKey = `analyze:ip:${getClientIp(request)}`;
+  if (isRateLimited(rlKey, 20, 60_000)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
