@@ -417,12 +417,22 @@ export default function WrappedPage() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileScreenshotMode) {
+        setMobileScreenshotMode(false);
+        setScreenshotControlsVisible(false);
+        if (screenshotControlsTimer.current) {
+          clearTimeout(screenshotControlsTimer.current);
+          screenshotControlsTimer.current = null;
+        }
+        return;
+      }
+      if (mobileScreenshotMode) return;
       if (e.key === "ArrowRight" || e.key === " ") goNext();
       else if (e.key === "ArrowLeft") goPrev();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, mobileScreenshotMode]);
 
   if (loading) return <LoadingScreen />;
 
@@ -521,7 +531,7 @@ export default function WrappedPage() {
       </div>
 
       {/* Logo — fixed independently so it stays visible in screenshot mode (top-bar above goes opacity-0) */}
-      <div className={`group fixed left-2 top-3 sm:left-4 sm:top-4 z-[41] transition-opacity duration-200 ${mobileScreenshotMode ? "pointer-events-none" : ""}`}>
+      <div className={`group fixed left-2 top-3 sm:left-4 sm:top-4 z-[41] transition-opacity duration-200 ${mobileScreenshotMode ? "pointer-events-none lg:opacity-0" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo.url} alt="GrindIT"
           role="button" aria-label="Back to home" tabIndex={0}
@@ -623,7 +633,7 @@ export default function WrappedPage() {
       </div>
 
       {/* ─── nav arrows (arrow buttons + swipe on mobile) ─── */}
-      <div className={`pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 transition-opacity duration-200 ${mobileScreenshotMode ? "opacity-0 lg:opacity-100" : "opacity-100"}`}>
+      <div className={`pointer-events-none fixed inset-x-0 top-1/2 z-40 flex -translate-y-1/2 justify-between px-2 transition-opacity duration-200 ${mobileScreenshotMode ? "opacity-0" : "opacity-100"}`}>
         <div className={`group relative pointer-events-auto ${normalizedSlideState.index === 0 ? "invisible" : ""}`}>
           <motion.button onClick={goPrev} aria-label="Previous slide"
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/45 text-white/70 backdrop-blur-sm"
@@ -672,7 +682,7 @@ export default function WrappedPage() {
       <AnimatePresence>
         {mobileScreenshotMode && screenshotControlsVisible && (
           <motion.div
-            className="fixed inset-x-0 bottom-5 z-[90] flex justify-center px-4 lg:hidden"
+            className="fixed inset-x-0 bottom-5 z-[90] flex justify-center px-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}

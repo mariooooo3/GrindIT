@@ -230,7 +230,7 @@ export default function ShareModal({
   }, [effectiveScope, slideRef, worldCup]);
 
   useEffect(() => {
-    if (!open || (isMobile && !directShare && !showRenderFlow)) return;
+    if (!open || (!directShare && !showRenderFlow)) return;
     let alive = true;
     blobRef.current = null;
     hiPromiseRef.current = null;
@@ -326,12 +326,12 @@ export default function ShareModal({
 
   if (!mounted) return null;
 
-  if (isMobile && !directShare && !showRenderFlow) {
+  if (!directShare && !showRenderFlow) {
     return createPortal(
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-[100] flex items-end justify-center p-4"
+            className="fixed inset-0 z-[100] flex items-end lg:items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -360,7 +360,7 @@ export default function ShareModal({
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold text-white/90">Screenshot Mode</div>
                     <p className="mt-1 text-[12px] leading-relaxed text-white/55">
-                      UI disappears — only your slide, fullscreen and clean. Tap the screen to reveal <span className="text-white/75">Done</span> and <span className="text-white/75">Share</span> buttons. Share opens X, LinkedIn, Instagram, WhatsApp and more.
+                      UI disappears — only your slide, fullscreen and clean. Click anywhere on the screen to reveal the <span className="text-white/75">Done</span> button and exit.
                     </p>
                   </div>
                 </div>
@@ -373,8 +373,8 @@ export default function ShareModal({
                 </button>
               </div>
 
-              {/* Render mode option — hidden until fully implemented */}
-              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4 hidden">
+              {/* Render mode option — desktop only */}
+              <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-4 hidden lg:block">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -382,7 +382,7 @@ export default function ShareModal({
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold text-white/90">Render Mode</div>
                     <p className="mt-1 text-[12px] leading-relaxed text-white/55">
-                      App renders a high-quality image of your slide. Post directly to <span className="text-white/75">X, LinkedIn</span>, download, or share via your phone&apos;s native share sheet.
+                      App renders a high-quality image of your slide. From there you can download it or post it directly.
                     </p>
                   </div>
                 </div>
